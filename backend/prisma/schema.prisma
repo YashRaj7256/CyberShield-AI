@@ -1,0 +1,212 @@
+// Cyber Threat Intelligence Platform - Prisma Schema
+// PostgreSQL database schema for structured data
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// Enums
+// ============================================================
+
+enum Role {
+  ADMIN
+  ANALYST
+  VIEWER
+}
+
+enum AlertType {
+  BRUTE_FORCE
+  SUSPICIOUS_LOGIN
+  PORT_SCAN
+  DDOS
+  MALWARE
+  CREDENTIAL_STUFFING
+  INSIDER_THREAT
+  UNAUTHORIZED_ACCESS
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AlertStatus {
+  NEW
+  INVESTIGATING
+  RESOLVED
+  FALSE_POSITIVE
+}
+
+enum ThreatEntityType {
+  IP
+  USER
+  SESSION
+}
+
+enum ThreatCategory {
+  SAFE
+  LOW_RISK
+  MEDIUM_RISK
+  HIGH_RISK
+  CRITICAL
+}
+
+enum ReportType {
+  DAILY
+  WEEKLY
+  MONTHLY
+  INCIDENT
+}
+
+enum ReportFormat {
+  PDF
+  CSV
+  EXCEL
+}
+
+enum ReportStatus {
+  PENDING
+  GENERATING
+  COMPLETED
+  FAILED
+}
+
+// ============================================================
+// Models
+// ============================================================
+
+/// Platform user account with role-based access control
+model User {
+  id          String    @id @default(uuid())
+  email       String    @unique
+  password    String
+  firstName   String
+  lastName    String
+  role        Role      @default(VIEWER)
+  isActive    Boolean   @default(true)
+  isVerified  Boolean   @default(false)
+  lastLoginAt DateTime?
+  lastLoginIp String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  assignedAlerts       Alert[]               @relation("AssignedAlerts")
+  blockedIps           BlockedIP[]           @relation("BlockedByUser")
+  auditLogs            AuditLog[]            @relation("UserAuditLogs")
+  generatedReports     Report[]              @relation("GeneratedByUser")
+  notificationSetting  NotificationSetting?  @relation("UserNotificationSetting")
+
+  @@index([email])
+  @@map("users")
+}
+
+/// Security alert generated from threat detection analysis
+model Alert {
+  id           String      @id @default(uuid())
+  type         AlertType
+  severity     Severity
+  status       AlertStatus @default(NEW)
+  title        String
+  description  String
+  sourceIp     String
+  threatScore  Float
+  reasons      Json
+  assignedToId String?
+  assignedTo   User?       @relation("AssignedAlerts", fields: [assignedToId], references: [id])
+  resolvedAt   DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([severity])
+  @@index([status])
+  @@index([createdAt])
+  @@map("alerts")
+}
+
+/// Computed threat score for an entity (IP, user, or session)
+model ThreatScore {
+  id          String           @id @default(uuid())
+  entityType  ThreatEntityType
+  entityValue String
+  score       Float
+  category    ThreatCategory
+  factors     Json
+  modelUsed   String
+  confidence  Float
+  createdAt   DateTime         @default(now())
+
+  @@index([entityValue])
+  @@index([createdAt])
+  @@map("threat_scores")
+}
+
+/// IP address blocked due to malicious activity
+model BlockedIP {
+  id          String    @id @default(uuid())
+  ipAddress   String    @unique
+  reason      String
+  blockedById String
+  blockedBy   User      @relation("BlockedByUser", fields: [blockedById], references: [id])
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  @@map("blocked_ips")
+}
+
+/// Immutable audit trail of user actions
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation("UserAuditLogs", fields: [userId], references: [id])
+  action     String
+  entityType String
+  entityId   String
+  details    Json
+  ipAddress  String
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+/// Generated report metadata and file reference
+model Report {
+  id             String       @id @default(uuid())
+  title          String
+  type           ReportType
+  format         ReportFormat
+  dateRangeStart DateTime
+  dateRangeEnd   DateTime
+  generatedById  String
+  generatedBy    User         @relation("GeneratedByUser", fields: [generatedById], references: [id])
+  filePath       String?
+  status         ReportStatus @default(PENDING)
+  createdAt      DateTime     @default(now())
+
+  @@map("reports")
+}
+
+/// Per-user notification preferences
+model NotificationSetting {
+  id                 String   @id @default(uuid())
+  userId             String   @unique
+  user               User     @relation("UserNotificationSetting", fields: [userId], references: [id])
+  emailAlerts        Boolean  @default(true)
+  dashboardAlerts    Boolean  @default(true)
+  severityThreshold  Severity @default(MEDIUM)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("notification_settings")
+}

@@ -1,0 +1,21 @@
+{
+  "name": "cyber-threat-intel",
+  "version": "1.0.0",
+  "description": "AI-Powered Cyber Threat Intelligence Platform",
+  "private": true,
+  "scripts": {
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:reset": "docker compose down -v && docker compose up -d",
+    "dev:backend": "cd backend && npm run start:dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "db:migrate": "cd backend && npx prisma migrate dev",
+    "db:seed": "cd backend && npx ts-node prisma/seed.ts",
+    "db:studio": "cd backend && npx prisma studio",
+    "setup": "npm run docker:up && cd backend && npm install && npx prisma migrate dev && npx ts-node prisma/seed.ts && cd ../frontend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}

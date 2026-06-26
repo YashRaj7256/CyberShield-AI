@@ -1,0 +1,95 @@
+
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cti-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: cti_admin
+      POSTGRES_PASSWORD: cti_secret_2024
+      POSTGRES_DB: cyber_threat_intel
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cti_admin -d cyber_threat_intel"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7
+    container_name: cti-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: cti_admin
+      MONGO_INITDB_ROOT_PASSWORD: cti_mongo_2024
+      MONGO_INITDB_DATABASE: cti_logs
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: cti-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass cti_redis_2024
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "cti_redis_2024", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: cti-mongo-express
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: cti_admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: cti_mongo_2024
+      ME_CONFIG_MONGODB_URL: mongodb://cti_admin:cti_mongo_2024@mongodb:27017/
+      ME_CONFIG_BASICAUTH: "false"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  ml-service:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile
+    container_name: cti-ml-service
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - MODEL_DIR=/app/models
+      - CONTAMINATION=0.05
+      - THREAT_THRESHOLD=60
+    volumes:
+      - ml_models:/app/models
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; r = httpx.get('http://localhost:8000/health'); assert r.status_code == 200"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  postgres_data:
+  mongo_data:
+  redis_data:
+  ml_models:
