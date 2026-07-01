@@ -743,9 +743,9 @@ SOFTWARE.
 
 **Yash Raj** — Project Author
 
-- 🐙 GitHub: [github.com/YOUR_USERNAME](https://github.com/YOUR_USERNAME)
-- 💼 LinkedIn: [linkedin.com/in/YOUR_PROFILE](https://linkedin.com/in/YOUR_PROFILE)
-- 📧 Email: your.email@example.com
+- 🐙 GitHub: [github.com/YashRaj7256](https://github.com/YashRaj7256)
+- 💼 LinkedIn: [linkedin.com/in/yash-raj-190b34413](https://linkedin.com/in/yash-raj-190b34413)
+- 📧 Email: Yashofficial7256@gmail.com
 
 ---
 
