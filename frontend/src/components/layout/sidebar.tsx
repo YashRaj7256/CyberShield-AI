@@ -51,7 +51,7 @@ export default function Sidebar() {
   }, []);
 
   const filteredItems = navItems.filter(
-    (item) => !item.adminOnly || user?.role === 'admin'
+    (item) => !item.adminOnly || user?.role === 'ADMIN'
   );
 
   if (!mounted) return null;
@@ -207,7 +207,7 @@ export default function Sidebar() {
                 {user?.firstName || 'Admin'} {user?.lastName || 'User'}
               </p>
               <p className="text-[10px] uppercase tracking-wider" style={{ color: '#06b6d4' }}>
-                {user?.role || 'admin'}
+                {user?.role || 'ADMIN'}
               </p>
             </div>
           )}

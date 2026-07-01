@@ -14,6 +14,7 @@ frontend/.next/
 
 __pycache__/
 *.pyc
+ml-service/venv/
 
 .vscode/
 .idea/

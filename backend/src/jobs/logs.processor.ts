@@ -11,6 +11,16 @@ import {
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AlertType, Severity, Prisma } from '@prisma/client';
 
+interface MlDetectResult {
+  anomaly_score?: number;
+  threat_score?: number;
+  reasons?: string[];
+}
+
+interface MlDetectResponse {
+  results?: MlDetectResult[];
+}
+
 /**
  * Background worker that processes security logs through the ML
  * anomaly-detection service and creates alerts when threats are found.
@@ -62,30 +72,46 @@ export class LogsProcessor extends WorkerHost {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              sourceIp: log.sourceIp,
-              destinationIp: log.destinationIp,
-              sourcePort: log.sourcePort,
-              destinationPort: log.destinationPort,
-              protocol: log.protocol,
-              action: log.action,
-              severity: log.severity,
-              eventType: log.eventType,
-              message: log.message,
-              country: log.country,
-              timestamp: log.timestamp,
+              logs: [
+                {
+                  sourceIp: log.sourceIp,
+                  destinationIp: log.destinationIp,
+                  sourcePort: log.sourcePort,
+                  destinationPort: log.destinationPort,
+                  protocol: log.protocol,
+                  action: log.action,
+                  severity: log.severity,
+                  source: log.source,
+                  eventType: log.eventType,
+                  message: log.message,
+                  country: log.country,
+                  city: log.city,
+                  latitude: log.latitude,
+                  longitude: log.longitude,
+                  userId: log.userId,
+                  userName: log.userName,
+                  deviceType: log.deviceType,
+                  browser: log.browser,
+                  os: log.os,
+                  timestamp: log.timestamp.toISOString(),
+                },
+              ],
             }),
           },
         );
 
         if (response.ok) {
-          const data = (await response.json()) as {
-            anomaly_score?: number;
-            threat_score?: number;
-            reasons?: string[];
-          };
-          anomalyScore = data.anomaly_score ?? 0;
-          threatScore = data.threat_score ?? 0;
-          reasons = data.reasons ?? [];
+          const data = (await response.json()) as MlDetectResponse;
+          const result = data.results?.[0];
+          if (result) {
+            anomalyScore = result.anomaly_score ?? 0;
+            threatScore = result.threat_score ?? 0;
+            reasons = result.reasons ?? [];
+          } else {
+            this.logger.warn(
+              `ML service returned no result for log ${logId}, using default scores`,
+            );
+          }
         } else {
           this.logger.warn(
             `ML service returned ${response.status} for log ${logId}, using default scores`,
@@ -153,7 +179,7 @@ export class LogsProcessor extends WorkerHost {
               category,
               factors: reasons as unknown as Prisma.InputJsonValue,
               modelUsed: 'anomaly-detection-v1',
-              confidence: anomalyScore / 100,
+              confidence: anomalyScore,
             },
           });
 

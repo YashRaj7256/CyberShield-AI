@@ -23,7 +23,7 @@ interface LogFiltersProps {
 }
 
 const severityOptions: LogSeverity[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
-const sourceOptions: LogSource[] = ['FIREWALL', 'IDS', 'WAF', 'ENDPOINT', 'EMAIL', 'DNS', 'PROXY', 'SIEM'];
+const sourceOptions: LogSource[] = ['FIREWALL', 'IDS', 'ANTIVIRUS', 'SERVER', 'APPLICATION', 'CLOUD', 'NETWORK', 'MANUAL'];
 
 const inputStyle = {
   background: '#1a1a24',

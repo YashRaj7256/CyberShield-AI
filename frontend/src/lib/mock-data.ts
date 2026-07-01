@@ -90,7 +90,7 @@ export const mockRecentActivity: RecentActivity[] = [
   {
     id: '3',
     timestamp: new Date(Date.now() - 300000).toISOString(),
-    type: 'ANOMALY',
+    type: 'SUSPICIOUS_LOGIN',
     severity: 'HIGH',
     message: 'Unusual data transfer volume detected from internal IP 10.0.5.42',
     sourceIp: '10.0.5.42',
@@ -98,7 +98,7 @@ export const mockRecentActivity: RecentActivity[] = [
   {
     id: '4',
     timestamp: new Date(Date.now() - 450000).toISOString(),
-    type: 'PHISHING',
+    type: 'SUSPICIOUS_LOGIN',
     severity: 'MEDIUM',
     message: 'Phishing email detected and quarantined — targeting finance team',
     sourceIp: '91.240.118.172',
@@ -106,7 +106,7 @@ export const mockRecentActivity: RecentActivity[] = [
   {
     id: '5',
     timestamp: new Date(Date.now() - 600000).toISOString(),
-    type: 'POLICY_VIOLATION',
+    type: 'UNAUTHORIZED_ACCESS',
     severity: 'LOW',
     message: 'User jsmith accessed restricted resource outside business hours',
     sourceIp: '10.0.2.15',
@@ -138,7 +138,7 @@ export const mockRecentActivity: RecentActivity[] = [
   {
     id: '9',
     timestamp: new Date(Date.now() - 1800000).toISOString(),
-    type: 'ANOMALY',
+    type: 'SUSPICIOUS_LOGIN',
     severity: 'LOW',
     message: 'DNS query spike detected — possible tunneling attempt',
     sourceIp: '10.0.3.27',
@@ -154,7 +154,7 @@ export const mockRecentActivity: RecentActivity[] = [
   {
     id: '11',
     timestamp: new Date(Date.now() - 3000000).toISOString(),
-    type: 'DATA_EXFILTRATION',
+    type: 'INSIDER_THREAT',
     severity: 'CRITICAL',
     message: 'Large data upload to cloud storage detected from restricted zone',
     sourceIp: '10.0.12.45',
@@ -162,7 +162,7 @@ export const mockRecentActivity: RecentActivity[] = [
   {
     id: '12',
     timestamp: new Date(Date.now() - 3600000).toISOString(),
-    type: 'PHISHING',
+    type: 'CREDENTIAL_STUFFING',
     severity: 'HIGH',
     message: 'Spear phishing campaign targeting C-suite executives detected',
     sourceIp: '178.128.220.21',
@@ -171,8 +171,8 @@ export const mockRecentActivity: RecentActivity[] = [
 
 // ==================== Security Logs ====================
 const logSeverities: Array<'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'> = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
-const logActions: Array<'ALLOW' | 'DENY' | 'DROP' | 'ALERT' | 'BLOCK'> = ['ALLOW', 'DENY', 'DROP', 'ALERT', 'BLOCK'];
-const logSources: Array<'FIREWALL' | 'IDS' | 'WAF' | 'ENDPOINT' | 'EMAIL' | 'DNS' | 'PROXY' | 'SIEM'> = ['FIREWALL', 'IDS', 'WAF', 'ENDPOINT', 'EMAIL', 'DNS', 'PROXY', 'SIEM'];
+const logActions: Array<'ALLOW' | 'DENY' | 'DROP' | 'ALERT'> = ['ALLOW', 'DENY', 'DROP', 'ALERT'];
+const logSources: Array<'FIREWALL' | 'IDS' | 'ANTIVIRUS' | 'SERVER' | 'APPLICATION' | 'CLOUD' | 'NETWORK' | 'MANUAL'> = ['FIREWALL', 'IDS', 'ANTIVIRUS', 'SERVER', 'APPLICATION', 'CLOUD', 'NETWORK', 'MANUAL'];
 const logProtocols: Array<'TCP' | 'UDP' | 'HTTP' | 'HTTPS' | 'DNS' | 'SSH'> = ['TCP', 'UDP', 'HTTP', 'HTTPS', 'DNS', 'SSH'];
 const countries = ['United States', 'China', 'Russia', 'Germany', 'Netherlands', 'Ukraine', 'Singapore', 'India', 'Brazil', 'Japan'];
 const eventTypes = ['Connection Attempt', 'Port Scan', 'Login Failure', 'Malware Detected', 'Policy Violation', 'Data Transfer', 'DNS Query', 'File Access'];
@@ -215,19 +215,19 @@ export const mockSecurityLogs: SecurityLog[] = Array.from({ length: 100 }, (_, i
 }).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
 // ==================== Alerts ====================
-const alertTypes: Array<'BRUTE_FORCE' | 'MALWARE' | 'PHISHING' | 'DATA_EXFILTRATION' | 'DDOS' | 'UNAUTHORIZED_ACCESS' | 'ANOMALY' | 'POLICY_VIOLATION'> = ['BRUTE_FORCE', 'MALWARE', 'PHISHING', 'DATA_EXFILTRATION', 'DDOS', 'UNAUTHORIZED_ACCESS', 'ANOMALY', 'POLICY_VIOLATION'];
+const alertTypes: Array<'BRUTE_FORCE' | 'SUSPICIOUS_LOGIN' | 'PORT_SCAN' | 'DDOS' | 'MALWARE' | 'CREDENTIAL_STUFFING' | 'INSIDER_THREAT' | 'UNAUTHORIZED_ACCESS'> = ['BRUTE_FORCE', 'SUSPICIOUS_LOGIN', 'PORT_SCAN', 'DDOS', 'MALWARE', 'CREDENTIAL_STUFFING', 'INSIDER_THREAT', 'UNAUTHORIZED_ACCESS'];
 const alertStatuses: Array<'NEW' | 'INVESTIGATING' | 'RESOLVED' | 'FALSE_POSITIVE'> = ['NEW', 'INVESTIGATING', 'RESOLVED', 'FALSE_POSITIVE'];
 const analysts = ['Sarah Chen', 'Mike Rodriguez', 'Alex Kim', 'Dr. Patel', null];
 
 const alertTitles: Record<string, string[]> = {
   BRUTE_FORCE: ['SSH Brute Force Attack Detected', 'RDP Brute Force from External IP', 'API Authentication Brute Force'],
   MALWARE: ['Ransomware Signature Detected', 'Trojan Communication Blocked', 'Cryptominer Activity on Server'],
-  PHISHING: ['Spear Phishing Campaign Detected', 'Credential Harvesting Page Blocked', 'CEO Fraud Email Intercepted'],
-  DATA_EXFILTRATION: ['Large Data Upload to External Cloud', 'USB Data Transfer from Restricted Host', 'Encrypted Tunnel Data Exfiltration'],
+  SUSPICIOUS_LOGIN: ['Suspicious Login from New Country', 'Impossible Travel Login Detected', 'Unusual Login Pattern Detected'],
+  PORT_SCAN: ['Sequential Port Scan Detected', 'Reconnaissance Sweep Blocked', 'Service Enumeration Attempt'],
   DDOS: ['Volumetric DDoS Attack Mitigated', 'Application Layer DDoS Detected', 'DNS Amplification Attack Blocked'],
   UNAUTHORIZED_ACCESS: ['Privilege Escalation Attempt', 'Unauthorized Admin Portal Access', 'Service Account Compromise'],
-  ANOMALY: ['Unusual Login Pattern Detected', 'Network Traffic Anomaly', 'Off-hours System Access'],
-  POLICY_VIOLATION: ['Data Classification Violation', 'Unauthorized Software Installation', 'VPN Policy Breach'],
+  CREDENTIAL_STUFFING: ['Credential Stuffing Attack Detected', 'Automated Login Replay Blocked', 'Known Breach Password Attempts'],
+  INSIDER_THREAT: ['Privileged User Data Access Spike', 'Off-hours Sensitive File Access', 'Unusual Internal Data Movement'],
 };
 
 export const mockAlerts: Alert[] = Array.from({ length: 40 }, (_, i) => {

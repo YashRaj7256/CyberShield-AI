@@ -1,5 +1,12 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
+interface ApiEnvelope<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+  timestamp?: string;
+}
+
 class ApiClient {
   private baseUrl: string;
 
@@ -39,7 +46,11 @@ class ApiClient {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        const envelope = (await response.json()) as ApiEnvelope<{
+          accessToken: string;
+          refreshToken: string;
+        }>;
+        const data = envelope.data;
         this.setTokens(data.accessToken, data.refreshToken);
         return true;
       }
@@ -91,10 +102,20 @@ class ApiClient {
       const error = await response.json().catch(() => ({
         message: 'An error occurred',
       }));
-      throw new Error(error.message || `HTTP ${response.status}`);
+      throw new Error(error.message || error.data?.message || `HTTP ${response.status}`);
     }
 
-    return response.json();
+    const envelope = (await response.json()) as ApiEnvelope<T> | T;
+    if (
+      envelope &&
+      typeof envelope === 'object' &&
+      'success' in envelope &&
+      'data' in envelope
+    ) {
+      return (envelope as ApiEnvelope<T>).data;
+    }
+
+    return envelope as T;
   }
 
   async get<T>(endpoint: string, params?: Record<string, string | number | boolean | undefined>): Promise<T> {

@@ -148,7 +148,7 @@ export default function Header() {
                 {user?.firstName || 'Admin'} {user?.lastName || 'User'}
               </p>
               <p className="text-[10px] uppercase tracking-wider" style={{ color: '#06b6d4' }}>
-                {user?.role || 'admin'}
+                {user?.role || 'ADMIN'}
               </p>
             </div>
             <ChevronDown className="w-4 h-4" style={{ color: '#71717a' }} />

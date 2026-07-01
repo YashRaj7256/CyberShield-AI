@@ -4,9 +4,11 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'admin' | 'analyst' | 'viewer';
+  role: 'ADMIN' | 'ANALYST' | 'VIEWER';
   isActive: boolean;
+  isVerified?: boolean;
   lastLoginAt: string | null;
+  lastLoginIp?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -30,8 +32,8 @@ export interface RegisterRequest {
 
 // ==================== Security Log Types ====================
 export type LogSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-export type LogAction = 'ALLOW' | 'DENY' | 'DROP' | 'ALERT' | 'BLOCK' | 'QUARANTINE';
-export type LogSource = 'FIREWALL' | 'IDS' | 'WAF' | 'ENDPOINT' | 'EMAIL' | 'DNS' | 'PROXY' | 'SIEM';
+export type LogAction = 'ALLOW' | 'DENY' | 'DROP' | 'ALERT';
+export type LogSource = 'FIREWALL' | 'IDS' | 'ANTIVIRUS' | 'SERVER' | 'APPLICATION' | 'CLOUD' | 'NETWORK' | 'MANUAL';
 export type LogProtocol = 'TCP' | 'UDP' | 'ICMP' | 'HTTP' | 'HTTPS' | 'DNS' | 'SSH' | 'FTP' | 'SMTP' | 'OTHER';
 
 export interface SecurityLog {
@@ -60,8 +62,8 @@ export interface SecurityLog {
 }
 
 // ==================== Alert Types ====================
-export type AlertStatus = 'NEW' | 'INVESTIGATING' | 'RESOLVED' | 'FALSE_POSITIVE' | 'ESCALATED';
-export type AlertType = 'BRUTE_FORCE' | 'MALWARE' | 'PHISHING' | 'DATA_EXFILTRATION' | 'DDOS' | 'UNAUTHORIZED_ACCESS' | 'ANOMALY' | 'POLICY_VIOLATION';
+export type AlertStatus = 'NEW' | 'INVESTIGATING' | 'RESOLVED' | 'FALSE_POSITIVE';
+export type AlertType = 'BRUTE_FORCE' | 'SUSPICIOUS_LOGIN' | 'PORT_SCAN' | 'DDOS' | 'MALWARE' | 'CREDENTIAL_STUFFING' | 'INSIDER_THREAT' | 'UNAUTHORIZED_ACCESS';
 
 export interface Alert {
   id: string;
