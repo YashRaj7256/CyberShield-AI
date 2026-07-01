@@ -396,14 +396,14 @@ All environment variables are stored in the root `.env` file:
 
 | Role | Email | Password | Permissions |
 |------|-------|----------|-------------|
-| **Admin** | `admin@cti.com` | `Admin@123` | Full access — manage users, alerts, reports |
+| **Admin** | `*******` | `******` | Full access — manage users, alerts, reports |
 | **Analyst** | `analyst@cti.com` | `Analyst@123` | View & investigate alerts, manage logs |
 | **Viewer** | `viewer@cti.com` | `Viewer@123` | Read-only dashboard access |
 
 ### Example Workflows
 
 #### 1. Monitor the SOC Dashboard
-1. Login with `admin@cti.com` / `Admin@123`
+1. Login with `*******` / `******`
 2. Navigate to **Overview** — see real-time stats, threat trends, severity distribution
 3. Check **Alerts** for any critical or high-severity alerts
 4. Click an alert to see AI-generated explanations (SHAP reasons)
@@ -475,7 +475,7 @@ All API routes are prefixed with `/api` and return responses in the format:
   "data": {
     "user": {
       "id": "uuid",
-      "email": "admin@cti.com",
+      "email": "*******",
       "firstName": "Admin",
       "lastName": "User",
       "role": "ADMIN"
