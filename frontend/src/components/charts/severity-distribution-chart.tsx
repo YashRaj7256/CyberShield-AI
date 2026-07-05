@@ -2,6 +2,12 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { mockSeverityDistribution } from '@/lib/mock-data';
+import type { SeverityDistribution } from '@/types';
+
+interface SeverityDistributionChartProps {
+  data?: SeverityDistribution[];
+  isLoading?: boolean;
+}
 
 function CustomTooltip({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number; payload: { color: string } }> }) {
   if (!active || !payload?.[0]) return null;
@@ -31,8 +37,9 @@ function CustomTooltip({ active, payload }: { active?: boolean; payload?: Array<
   );
 }
 
-export default function SeverityDistributionChart() {
-  const total = mockSeverityDistribution.reduce((sum, item) => sum + item.value, 0);
+export default function SeverityDistributionChart({ data, isLoading }: SeverityDistributionChartProps) {
+  const chartData = data ?? mockSeverityDistribution;
+  const total = chartData.reduce((sum, item) => sum + item.value, 0);
 
   return (
     <div className="glass-card-sm p-5">
@@ -43,55 +50,75 @@ export default function SeverityDistributionChart() {
         Active alerts by severity
       </p>
 
-      <div className="relative h-[200px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={mockSeverityDistribution}
-              cx="50%"
-              cy="50%"
-              innerRadius={55}
-              outerRadius={80}
-              paddingAngle={4}
-              dataKey="value"
-              stroke="none"
-            >
-              {mockSeverityDistribution.map((entry, index) => (
-                <Cell key={index} fill={entry.color} />
-              ))}
-            </Pie>
-            <Tooltip content={<CustomTooltip />} />
-          </PieChart>
-        </ResponsiveContainer>
-
-        {/* Center text */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="text-2xl font-bold" style={{ color: '#e4e4e7' }}>
-            {total.toLocaleString()}
-          </span>
-          <span className="text-xs" style={{ color: '#71717a' }}>
-            Total Alerts
-          </span>
-        </div>
-      </div>
-
-      {/* Legend */}
-      <div className="grid grid-cols-2 gap-2 mt-4">
-        {mockSeverityDistribution.map((item) => (
-          <div key={item.name} className="flex items-center gap-2">
-            <div
-              className="w-2.5 h-2.5 rounded-full shrink-0"
-              style={{ background: item.color }}
-            />
-            <span className="text-xs truncate" style={{ color: '#a1a1aa' }}>
-              {item.name}
-            </span>
-            <span className="text-xs font-semibold ml-auto" style={{ color: '#e4e4e7' }}>
-              {item.value}
-            </span>
+      {isLoading ? (
+        <>
+          <div
+            className="relative h-[200px] rounded-lg animate-pulse"
+            style={{ background: 'rgba(26, 26, 36, 0.6)' }}
+          />
+          <div className="grid grid-cols-2 gap-2 mt-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="h-4 rounded animate-pulse"
+                style={{ background: 'rgba(26, 26, 36, 0.6)' }}
+              />
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      ) : (
+        <>
+          <div className="relative h-[200px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={55}
+                  outerRadius={80}
+                  paddingAngle={4}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={index} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+              </PieChart>
+            </ResponsiveContainer>
+
+            {/* Center text */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span className="text-2xl font-bold" style={{ color: '#e4e4e7' }}>
+                {total.toLocaleString()}
+              </span>
+              <span className="text-xs" style={{ color: '#71717a' }}>
+                Total Alerts
+              </span>
+            </div>
+          </div>
+
+          {/* Legend */}
+          <div className="grid grid-cols-2 gap-2 mt-4">
+            {chartData.map((item) => (
+              <div key={item.name} className="flex items-center gap-2">
+                <div
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ background: item.color }}
+                />
+                <span className="text-xs truncate" style={{ color: '#a1a1aa' }}>
+                  {item.name}
+                </span>
+                <span className="text-xs font-semibold ml-auto" style={{ color: '#e4e4e7' }}>
+                  {item.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

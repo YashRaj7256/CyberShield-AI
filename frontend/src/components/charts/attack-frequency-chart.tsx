@@ -8,9 +8,14 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from 'recharts';
 import { mockAttackFrequency } from '@/lib/mock-data';
+import type { AttackFrequency } from '@/types';
+
+interface AttackFrequencyChartProps {
+  data?: AttackFrequency[];
+  isLoading?: boolean;
+}
 
 const attackColors: Record<string, string> = {
   bruteForce: '#ef4444',
@@ -58,7 +63,9 @@ function CustomTooltip({ active, payload, label }: { active?: boolean; payload?:
   );
 }
 
-export default function AttackFrequencyChart() {
+export default function AttackFrequencyChart({ data, isLoading }: AttackFrequencyChartProps) {
+  const chartData = data ?? mockAttackFrequency;
+
   return (
     <div className="glass-card-sm p-5">
       <div className="flex items-center justify-between mb-4">
@@ -73,38 +80,45 @@ export default function AttackFrequencyChart() {
       </div>
 
       <div className="h-[280px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={mockAttackFrequency} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3a" vertical={false} />
-            <XAxis
-              dataKey="date"
-              tick={{ fill: '#71717a', fontSize: 10 }}
-              tickLine={false}
-              axisLine={{ stroke: '#2a2a3a' }}
-              tickFormatter={(v: string) => {
-                const d = new Date(v);
-                return `${d.getMonth() + 1}/${d.getDate()}`;
-              }}
-            />
-            <YAxis
-              tick={{ fill: '#71717a', fontSize: 10 }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            {Object.keys(attackColors).map((key) => (
-              <Bar
-                key={key}
-                dataKey={key}
-                name={attackLabels[key]}
-                fill={attackColors[key]}
-                stackId="attacks"
-                radius={key === 'other' ? [2, 2, 0, 0] : [0, 0, 0, 0]}
-                maxBarSize={24}
+        {isLoading ? (
+          <div
+            className="w-full h-full rounded-lg animate-pulse"
+            style={{ background: 'rgba(26, 26, 36, 0.6)' }}
+          />
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3a" vertical={false} />
+              <XAxis
+                dataKey="date"
+                tick={{ fill: '#71717a', fontSize: 10 }}
+                tickLine={false}
+                axisLine={{ stroke: '#2a2a3a' }}
+                tickFormatter={(v: string) => {
+                  const d = new Date(v);
+                  return `${d.getMonth() + 1}/${d.getDate()}`;
+                }}
               />
-            ))}
-          </BarChart>
-        </ResponsiveContainer>
+              <YAxis
+                tick={{ fill: '#71717a', fontSize: 10 }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              {Object.keys(attackColors).map((key) => (
+                <Bar
+                  key={key}
+                  dataKey={key}
+                  name={attackLabels[key]}
+                  fill={attackColors[key]}
+                  stackId="attacks"
+                  radius={key === 'other' ? [2, 2, 0, 0] : [0, 0, 0, 0]}
+                  maxBarSize={24}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
 
       {/* Legend */}

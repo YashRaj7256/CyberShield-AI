@@ -12,7 +12,12 @@ import {
   Zap,
   FileWarning,
 } from 'lucide-react';
-import type { LogSeverity } from '@/types';
+import type { LogSeverity, RecentActivity as RecentActivityType } from '@/types';
+
+interface RecentActivityProps {
+  data?: RecentActivityType[];
+  isLoading?: boolean;
+}
 
 const typeIcons: Record<string, React.ReactNode> = {
   BRUTE_FORCE: <Lock className="w-3.5 h-3.5" />,
@@ -25,7 +30,9 @@ const typeIcons: Record<string, React.ReactNode> = {
   POLICY_VIOLATION: <FileWarning className="w-3.5 h-3.5" />,
 };
 
-export default function RecentActivity() {
+export default function RecentActivity({ data, isLoading }: RecentActivityProps) {
+  const activityData = data ?? mockRecentActivity;
+
   return (
     <div className="glass-card-sm p-5">
       <div className="flex items-center justify-between mb-4">
@@ -49,58 +56,93 @@ export default function RecentActivity() {
       </div>
 
       <div className="space-y-1 max-h-[420px] overflow-y-auto pr-1">
-        {mockRecentActivity.map((activity, index) => {
-          const color = getSeverityColor(activity.severity as LogSeverity);
-
-          return (
+        {isLoading ? (
+          Array.from({ length: 6 }).map((_, i) => (
             <div
-              key={activity.id}
-              className="flex items-start gap-3 p-3 rounded-lg transition-all duration-200"
-              style={{
-                background: index % 2 === 0 ? 'transparent' : 'rgba(26, 26, 36, 0.3)',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(26, 26, 36, 0.6)')}
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background =
-                  index % 2 === 0 ? 'transparent' : 'rgba(26, 26, 36, 0.3)')
-              }
+              key={i}
+              className="flex items-start gap-3 p-3 rounded-lg"
+              style={{ background: i % 2 === 0 ? 'transparent' : 'rgba(26, 26, 36, 0.3)' }}
             >
-              {/* Severity indicator */}
               <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                style={{
-                  background: `${color}15`,
-                  color: color,
-                }}
-              >
-                {typeIcons[activity.type] || <AlertTriangle className="w-3.5 h-3.5" />}
-              </div>
-
+                className="w-7 h-7 rounded-lg shrink-0 mt-0.5 animate-pulse"
+                style={{ background: 'rgba(26, 26, 36, 0.6)' }}
+              />
               <div className="flex-1 min-w-0">
-                <p className="text-xs leading-relaxed" style={{ color: '#e4e4e7' }}>
-                  {activity.message}
-                </p>
-                <div className="flex items-center gap-3 mt-1.5">
-                  <span
-                    className="text-[10px] px-1.5 py-0.5 rounded font-medium"
-                    style={{
-                      background: `${color}15`,
-                      color: color,
-                    }}
-                  >
-                    {activity.severity}
-                  </span>
-                  <span className="text-[10px] font-mono" style={{ color: '#71717a' }}>
-                    {activity.sourceIp}
-                  </span>
-                  <span className="text-[10px]" style={{ color: '#71717a' }}>
-                    {formatRelativeTime(activity.timestamp)}
-                  </span>
+                <div
+                  className="h-4 rounded animate-pulse mb-2"
+                  style={{ width: `${85 - i * 5}%`, background: 'rgba(26, 26, 36, 0.6)' }}
+                />
+                <div className="flex items-center gap-3">
+                  <div
+                    className="h-3 w-14 rounded animate-pulse"
+                    style={{ background: 'rgba(26, 26, 36, 0.6)' }}
+                  />
+                  <div
+                    className="h-3 w-20 rounded animate-pulse"
+                    style={{ background: 'rgba(26, 26, 36, 0.6)' }}
+                  />
+                  <div
+                    className="h-3 w-16 rounded animate-pulse"
+                    style={{ background: 'rgba(26, 26, 36, 0.6)' }}
+                  />
                 </div>
               </div>
             </div>
-          );
-        })}
+          ))
+        ) : (
+          activityData.map((activity, index) => {
+            const color = getSeverityColor(activity.severity as LogSeverity);
+
+            return (
+              <div
+                key={activity.id}
+                className="flex items-start gap-3 p-3 rounded-lg transition-all duration-200"
+                style={{
+                  background: index % 2 === 0 ? 'transparent' : 'rgba(26, 26, 36, 0.3)',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(26, 26, 36, 0.6)')}
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background =
+                    index % 2 === 0 ? 'transparent' : 'rgba(26, 26, 36, 0.3)')
+                }
+              >
+                {/* Severity indicator */}
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                  style={{
+                    background: `${color}15`,
+                    color: color,
+                  }}
+                >
+                  {typeIcons[activity.type] || <AlertTriangle className="w-3.5 h-3.5" />}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs leading-relaxed" style={{ color: '#e4e4e7' }}>
+                    {activity.message}
+                  </p>
+                  <div className="flex items-center gap-3 mt-1.5">
+                    <span
+                      className="text-[10px] px-1.5 py-0.5 rounded font-medium"
+                      style={{
+                        background: `${color}15`,
+                        color: color,
+                      }}
+                    >
+                      {activity.severity}
+                    </span>
+                    <span className="text-[10px] font-mono" style={{ color: '#71717a' }}>
+                      {activity.sourceIp}
+                    </span>
+                    <span className="text-[10px]" style={{ color: '#71717a' }}>
+                      {formatRelativeTime(activity.timestamp)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );
