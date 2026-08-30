@@ -11,6 +11,11 @@ import {
   Lock,
   Zap,
   FileWarning,
+  UserCheck,
+  Search,
+  KeyRound,
+  Eye,
+  Activity,
 } from 'lucide-react';
 import type { LogSeverity, RecentActivity as RecentActivityType } from '@/types';
 
@@ -28,6 +33,13 @@ const typeIcons: Record<string, React.ReactNode> = {
   UNAUTHORIZED_ACCESS: <ShieldAlert className="w-3.5 h-3.5" />,
   DATA_EXFILTRATION: <Zap className="w-3.5 h-3.5" />,
   POLICY_VIOLATION: <FileWarning className="w-3.5 h-3.5" />,
+  SUSPICIOUS_LOGIN: <Eye className="w-3.5 h-3.5" />,
+  PORT_SCAN: <Search className="w-3.5 h-3.5" />,
+  CREDENTIAL_STUFFING: <KeyRound className="w-3.5 h-3.5" />,
+  INSIDER_THREAT: <ShieldAlert className="w-3.5 h-3.5" />,
+  LOGIN_FAILURE: <Lock className="w-3.5 h-3.5" />,
+  LOGIN_SUCCESS: <UserCheck className="w-3.5 h-3.5" />,
+  CONNECTION_ATTEMPT: <Activity className="w-3.5 h-3.5" />,
 };
 
 export default function RecentActivity({ data, isLoading }: RecentActivityProps) {

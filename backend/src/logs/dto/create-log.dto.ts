@@ -7,16 +7,20 @@ import {
   IsBoolean,
   IsDateString,
   IsObject,
+  IsArray,
+  ArrayNotEmpty,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 /**
  * DTO for creating / ingesting a single security log entry.
  */
 export class CreateLogDto {
   /** Event timestamp (ISO 8601) */
+  @IsOptional()
   @IsDateString()
-  @IsNotEmpty()
-  timestamp!: string;
+  timestamp?: string;
 
   /** Source IP address */
   @IsString()
@@ -29,12 +33,14 @@ export class CreateLogDto {
   destinationIp!: string;
 
   /** Source port number */
+  @IsOptional()
   @IsNumber()
-  sourcePort!: number;
+  sourcePort?: number;
 
   /** Destination port number */
+  @IsOptional()
   @IsNumber()
-  destinationPort!: number;
+  destinationPort?: number;
 
   /** Network protocol (TCP, UDP, HTTP, etc.) */
   @IsString()
@@ -133,3 +139,16 @@ export class CreateLogDto {
   @IsObject()
   metadata?: Record<string, unknown>;
 }
+
+/**
+ * DTO for bulk log ingestion.
+ */
+export class BulkCreateLogsDto {
+  /** Array of security log entries */
+  @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => CreateLogDto)
+  logs!: CreateLogDto[];
+}
+

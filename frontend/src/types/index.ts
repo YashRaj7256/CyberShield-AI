@@ -37,7 +37,8 @@ export type LogSource = 'FIREWALL' | 'IDS' | 'ANTIVIRUS' | 'SERVER' | 'APPLICATI
 export type LogProtocol = 'TCP' | 'UDP' | 'ICMP' | 'HTTP' | 'HTTPS' | 'DNS' | 'SSH' | 'FTP' | 'SMTP' | 'OTHER';
 
 export interface SecurityLog {
-  id: string;
+  id?: string;
+  _id?: string;
   timestamp: string;
   sourceIp: string;
   destinationIp: string;
@@ -55,15 +56,22 @@ export interface SecurityLog {
   longitude: number | null;
   userId: string | null;
   userName: string | null;
-  rawData: Record<string, unknown>;
+  rawData?: Record<string, unknown>;
   threatScore: number | null;
-  isThreat: boolean;
-  createdAt: string;
+  isThreat?: boolean;
+  createdAt?: string;
 }
 
 // ==================== Alert Types ====================
 export type AlertStatus = 'NEW' | 'INVESTIGATING' | 'RESOLVED' | 'FALSE_POSITIVE';
 export type AlertType = 'BRUTE_FORCE' | 'SUSPICIOUS_LOGIN' | 'PORT_SCAN' | 'DDOS' | 'MALWARE' | 'CREDENTIAL_STUFFING' | 'INSIDER_THREAT' | 'UNAUTHORIZED_ACCESS';
+
+export interface AlertUserSummary {
+  id: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+}
 
 export interface Alert {
   id: string;
@@ -73,16 +81,17 @@ export interface Alert {
   severity: LogSeverity;
   status: AlertStatus;
   sourceIp: string;
-  destinationIp: string;
+  destinationIp?: string;
   threatScore: number;
-  assignedTo: string | null;
-  assignedAnalyst: string | null;
-  resolvedAt: string | null;
-  aiExplanation: string | null;
-  reasons: string[];
-  relatedLogIds: string[];
+  assignedToId?: string | null;
+  assignedTo?: AlertUserSummary | string | null;
+  assignedAnalyst?: string | null;
+  resolvedAt?: string | null;
+  aiExplanation?: string | null;
+  reasons?: string[] | unknown;
+  relatedLogIds?: string[];
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 // ==================== Threat Score Types ====================

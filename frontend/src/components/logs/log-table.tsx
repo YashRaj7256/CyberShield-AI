@@ -70,9 +70,11 @@ export default function LogTable({ logs, onRowClick, sortBy, sortOrder, onSort }
               const sevColor = getSeverityColor(log.severity);
               const actColor = getActionColor(log.action);
 
+              const logKey = log.id || log._id || `${log.timestamp}-${log.sourceIp}-${log.destinationIp}-${index}`;
+
               return (
                 <tr
-                  key={log.id}
+                  key={logKey}
                   onClick={() => onRowClick(log)}
                   className="cursor-pointer transition-all duration-150"
                   style={{
@@ -121,8 +123,8 @@ export default function LogTable({ logs, onRowClick, sortBy, sortOrder, onSort }
                   <td className="px-4 py-3 text-xs" style={{ color: '#a1a1aa' }}>
                     {log.source}
                   </td>
-                  <td className="px-4 py-3 text-xs" style={{ color: '#a1a1aa' }}>
-                    {log.country}
+                  <td className="px-4 py-3 text-xs font-mono" style={{ color: '#a1a1aa' }}>
+                    {log.country ?? '—'}
                   </td>
                 </tr>
               );

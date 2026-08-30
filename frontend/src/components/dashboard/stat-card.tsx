@@ -61,69 +61,78 @@ export default function StatCard({
 
   return (
     <div
-      className={`glass-card-sm p-5 stat-card-hover relative overflow-hidden ${pulse ? 'animate-border-glow' : ''}`}
+      className={`glass-card-sm p-4 sm:p-5 stat-card-hover relative overflow-hidden flex flex-col justify-between rounded-2xl border border-white/[0.08] transition-all min-w-0 ${
+        pulse ? 'animate-border-glow' : ''
+      }`}
       style={{
-        borderLeft: `3px solid ${accentColor}`,
+        borderLeft: `4px solid ${accentColor}`,
+        background: '#0d121f',
       }}
     >
-      {/* Subtle gradient overlay */}
+      {/* Subtle accent glow in top right */}
       <div
-        className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-[0.05] blur-[40px]"
+        className="absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-15 blur-2xl pointer-events-none"
         style={{ background: accentColor }}
       />
 
-      <div className="flex items-start justify-between relative">
-        <div className="flex-1">
-          <p className="text-xs font-medium uppercase tracking-wider mb-2" style={{ color: '#71717a' }}>
-            {label}
-          </p>
-          <div className="flex items-baseline gap-1">
-            <span
-              className={`text-2xl font-bold ${mounted ? 'animate-counter' : ''}`}
-              style={{ color: '#e4e4e7' }}
-            >
-              {formatValue(displayValue)}
-            </span>
-            {suffix && (
-              <span className="text-sm font-medium" style={{ color: '#71717a' }}>
-                {suffix}
-              </span>
-            )}
-          </div>
-
-          {/* Change indicator */}
-          {change !== undefined && (
-            <div className="flex items-center gap-1 mt-2">
-              {isPositiveChange ? (
-                <TrendingUp className="w-3 h-3" style={{ color: change > 0 ? '#ef4444' : '#71717a' }} />
-              ) : (
-                <TrendingDown className="w-3 h-3" style={{ color: '#22c55e' }} />
-              )}
-              <span
-                className="text-xs font-medium"
-                style={{ color: isPositiveChange ? (change > 0 ? '#ef4444' : '#71717a') : '#22c55e' }}
-              >
-                {isPositiveChange ? '+' : ''}
-                {change}%
-              </span>
-              <span className="text-xs" style={{ color: '#71717a' }}>
-                vs last week
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Icon */}
+      {/* Top Header: Label & Icon */}
+      <div className="flex items-center justify-between gap-2 mb-2.5">
+        <span
+          className="text-[11px] font-bold uppercase tracking-wider text-slate-400 truncate flex-1 min-w-0"
+          title={label}
+        >
+          {label}
+        </span>
         <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+          className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
           style={{
-            background: `${accentColor}15`,
+            background: `${accentColor}18`,
             color: accentColor,
+            border: `1px solid ${accentColor}30`,
           }}
         >
           {icon}
         </div>
       </div>
+
+      {/* Main Value */}
+      <div className="flex items-baseline gap-1.5 my-1">
+        <span
+          className={`text-2xl lg:text-3xl font-extrabold tracking-tight text-white ${
+            mounted ? 'animate-counter' : ''
+          }`}
+        >
+          {formatValue(displayValue)}
+        </span>
+        {suffix && (
+          <span className="text-xs font-semibold text-slate-400">
+            {suffix}
+          </span>
+        )}
+      </div>
+
+      {/* Bottom Trend indicator */}
+      {change !== undefined && (
+        <div className="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-white/[0.06] text-[11px]">
+          <span
+            className="inline-flex items-center gap-0.5 font-bold shrink-0"
+            style={{
+              color: isPositiveChange ? (change > 0 ? '#ef4444' : '#94a3b8') : '#22c55e',
+            }}
+          >
+            {isPositiveChange ? (
+              <TrendingUp className="w-3 h-3 shrink-0" />
+            ) : (
+              <TrendingDown className="w-3 h-3 shrink-0" />
+            )}
+            <span>
+              {isPositiveChange ? '+' : ''}
+              {change}%
+            </span>
+          </span>
+          <span className="text-slate-500 text-[10px] tracking-tight truncate">vs last week</span>
+        </div>
+      )}
     </div>
   );
 }

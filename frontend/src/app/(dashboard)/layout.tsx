@@ -39,15 +39,14 @@ export default function DashboardLayout({
     return () => observer.disconnect();
   }, [mounted]);
 
-  // For demo purposes, allow access even without auth
-  // In production, uncomment the redirect
-  // useEffect(() => {
-  //   if (mounted && !isAuthenticated) {
-  //     router.push('/login');
-  //   }
-  // }, [mounted, isAuthenticated, router]);
+  // Redirect unauthenticated users to login
+  useEffect(() => {
+    if (mounted && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [mounted, isAuthenticated, router]);
 
-  if (!mounted) {
+  if (!mounted || !isAuthenticated) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
@@ -72,12 +71,14 @@ export default function DashboardLayout({
     <div className="min-h-screen flex" style={{ background: '#0a0a0f' }}>
       <Sidebar />
       <div
-        className="flex-1 flex flex-col min-h-screen transition-all duration-300"
+        className="flex-1 flex flex-col min-h-screen transition-all duration-300 min-w-0 overflow-x-hidden"
         style={{ marginLeft: `${sidebarWidth}px` }}
       >
         <Header />
-        <main className="flex-1 p-6 overflow-y-auto cyber-grid-bg">
-          {children}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto cyber-grid-bg">
+          <div className="max-w-[1600px] mx-auto w-full">
+            {children}
+          </div>
         </main>
       </div>
     </div>

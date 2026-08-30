@@ -244,13 +244,10 @@ function UploadModal({ onClose, onSuccess, onToast }: UploadModalProps) {
     fontSize: 13,
     fontWeight: 600,
     cursor: 'pointer',
-    borderBottom: active ? '2px solid #06b6d4' : '2px solid transparent',
     color: active ? '#06b6d4' : '#71717a',
     background: 'transparent',
     border: 'none',
-    borderBottomWidth: 2,
-    borderBottomStyle: 'solid',
-    borderBottomColor: active ? '#06b6d4' : 'transparent',
+    borderBottom: active ? '2px solid #06b6d4' : '2px solid transparent',
     transition: 'all 0.2s',
   });
 
@@ -615,7 +612,11 @@ export default function LogsPage() {
     setError(null);
 
     try {
-      const result = await api.get<{ data: SecurityLog[]; total: number; page: number; limit: number }>(
+      // Backend returns { logs: [...], pagination: { total, page, limit, totalPages } }
+      const result = await api.get<{
+        logs: SecurityLog[];
+        pagination: { total: number; page: number; limit: number; totalPages: number };
+      }>(
         '/logs',
         {
           page,
@@ -632,7 +633,10 @@ export default function LogsPage() {
         },
       );
 
-      setData({ logs: result.data, total: result.total });
+      // Normalise: backend shape is { logs, pagination } — not { data, total }
+      const logs = Array.isArray(result.logs) ? result.logs : [];
+      const total = result.pagination?.total ?? 0;
+      setData({ logs, total });
       setIsDemo(false);
       hasEverFetchedRef.current = true;
     } catch (err) {

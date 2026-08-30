@@ -28,11 +28,14 @@ from app.schemas.models import (
     DetectResponse,
     DetectResult,
     HealthResponse,
+    PredictRequest,
+    PredictResponse,
     TrainRequest,
     TrainResponse,
 )
 from app.services.anomaly_detector import AnomalyDetector
 from app.services.explainer import ThreatExplainer
+from app.services.predictor import AttackPredictor
 from app.services.threat_scorer import ThreatScorer
 from app.utils.preprocessing import extract_features, generate_synthetic_normal_data
 
@@ -49,6 +52,7 @@ logger = logging.getLogger("cybershield.ml")
 detector: AnomalyDetector
 scorer: ThreatScorer
 explainer: ThreatExplainer
+predictor: AttackPredictor
 
 
 # ── Lifespan (startup / shutdown) ─────────────────────────────────────────
@@ -57,7 +61,7 @@ explainer: ThreatExplainer
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     """Initialise ML components on startup."""
-    global detector, scorer, explainer
+    global detector, scorer, explainer, predictor
 
     settings.ensure_dirs()
 
@@ -65,6 +69,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     detector = AnomalyDetector()
     scorer = ThreatScorer()
     explainer = ThreatExplainer(detector)
+    predictor = AttackPredictor()
 
     if not detector.is_loaded:
         logger.info(
@@ -81,6 +86,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     logger.info("CyberShield AI ML Service ready ✓")
     yield
     logger.info("Shutting down ML service …")
+
 
 
 # ── Application factory ───────────────────────────────────────────────────
@@ -260,3 +266,32 @@ async def train_models(request: TrainRequest) -> TrainResponse:
         samples_used=len(logs),
         model_metrics=metrics,
     )
+
+
+@app.post("/api/v1/predict", response_model=PredictResponse, tags=["Forecasting"])
+async def predict_attacks(request: PredictRequest) -> PredictResponse:
+    """Predict upcoming attack scenarios from recent logs."""
+    start = time.perf_counter()
+
+    logs = request.logs
+    if not logs:
+        logs = generate_synthetic_normal_data(n=100)
+
+    try:
+        predictions = predictor.predict(logs, window_hours=request.window_hours)
+    except Exception as exc:
+        logger.exception("Attack prediction failed")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Prediction error: {exc}",
+        ) from exc
+
+    elapsed_ms = (time.perf_counter() - start) * 1000
+
+    return PredictResponse(
+        predictions=predictions,
+        analysis_window_hours=request.window_hours,
+        total_logs_analyzed=len(logs),
+        processing_time_ms=round(elapsed_ms, 2),
+    )
+

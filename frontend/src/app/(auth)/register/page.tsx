@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Shield, Eye, EyeOff, Loader2, AlertCircle, Check } from 'lucide-react';
@@ -8,7 +8,7 @@ import { useAuthStore } from '@/stores/auth-store';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register, isLoading, error, clearError } = useAuthStore();
+  const { register, isLoading, error, clearError, isAuthenticated, loadFromStorage } = useAuthStore();
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -18,6 +18,17 @@ export default function RegisterPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState('');
+
+  useEffect(() => {
+    loadFromStorage();
+  }, [loadFromStorage]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/overview');
+    }
+  }, [isAuthenticated, router]);
+
 
   const passwordStrength = useMemo(() => {
     const p = form.password;
@@ -80,7 +91,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in w-full max-w-md mx-auto">
       {/* Logo */}
       <div className="text-center mb-6">
         <div

@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { LogsService } from './logs.service.js';
 import { QueryLogsDto } from './dto/query-logs.dto.js';
-import { CreateLogDto } from './dto/create-log.dto.js';
+import { CreateLogDto, BulkCreateLogsDto } from './dto/create-log.dto.js';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
 import { Roles } from '../common/decorators/roles.decorator.js';
@@ -69,12 +69,13 @@ export class LogsController {
   /**
    * Ingest multiple security log entries in bulk.
    *
-   * @param logs - Array of log data
+   * @param dto - Bulk logs container object
    * @returns Count of inserted documents
    */
   @Post('bulk')
   @Roles('ADMIN', 'ANALYST')
-  async createBulk(@Body() logs: CreateLogDto[]) {
+  async createBulk(@Body() dto: BulkCreateLogsDto) {
+    const logs = Array.isArray(dto) ? dto : dto?.logs;
     return this.logsService.createBulk(logs);
   }
 }

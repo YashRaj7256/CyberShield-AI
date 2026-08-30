@@ -121,11 +121,17 @@ export class LogsService {
   async create(dto: CreateLogDto) {
     const log = new this.securityLogModel({
       ...dto,
-      timestamp: new Date(dto.timestamp),
+      sourcePort: dto.sourcePort ?? 0,
+      destinationPort: dto.destinationPort ?? 0,
+      timestamp: dto.timestamp ? new Date(dto.timestamp) : new Date(),
     });
     const saved = await log.save();
     this.logger.log(`Log ingested: ${saved._id}`);
-    await this.logQueue.add('process-log', { logId: saved._id.toString() });
+    try {
+      await this.logQueue.add('process-log', { logId: saved._id.toString() });
+    } catch (queueErr) {
+      this.logger.warn(`Failed to enqueue log ${saved._id} for processing: ${queueErr}`);
+    }
     return saved.toObject();
   }
 
@@ -136,9 +142,15 @@ export class LogsService {
    * @returns Count of inserted documents
    */
   async createBulk(logs: CreateLogDto[]) {
+    if (!logs || !Array.isArray(logs) || logs.length === 0) {
+      return { inserted: 0 };
+    }
+
     const documents = logs.map((dto) => ({
       ...dto,
-      timestamp: new Date(dto.timestamp),
+      sourcePort: dto.sourcePort ?? 0,
+      destinationPort: dto.destinationPort ?? 0,
+      timestamp: dto.timestamp ? new Date(dto.timestamp) : new Date(),
     }));
 
     const result = await this.securityLogModel.insertMany(documents, {
@@ -146,7 +158,11 @@ export class LogsService {
     });
 
     for (const doc of result) {
-      await this.logQueue.add('process-log', { logId: doc._id.toString() });
+      try {
+        await this.logQueue.add('process-log', { logId: doc._id.toString() });
+      } catch (queueErr) {
+        this.logger.warn(`Failed to enqueue log ${doc._id} for processing: ${queueErr}`);
+      }
     }
 
     this.logger.log(`Bulk ingested ${result.length} logs`);

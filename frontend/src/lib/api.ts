@@ -11,7 +11,7 @@ class ApiClient {
   private baseUrl: string;
 
   constructor(baseUrl: string) {
-    this.baseUrl = baseUrl;
+    this.baseUrl = baseUrl.replace(/\/+$/, '');
   }
 
   private getToken(): string | null {
@@ -72,21 +72,29 @@ class ApiClient {
       ...((options.headers as Record<string, string>) || {}),
     };
 
-    if (token) {
+    const isAuthEndpoint =
+      endpoint.startsWith('/auth/login') ||
+      endpoint.startsWith('/auth/register') ||
+      endpoint.startsWith('/auth/refresh');
+
+    if (token && !isAuthEndpoint) {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    let response = await fetch(`${this.baseUrl}${endpoint}`, {
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const url = `${this.baseUrl}${cleanEndpoint}`;
+
+    let response = await fetch(url, {
       ...options,
       headers,
     });
 
     // Try refreshing token on 401
-    if (response.status === 401 && token) {
+    if (response.status === 401 && token && !isAuthEndpoint) {
       const refreshed = await this.refreshAccessToken();
       if (refreshed) {
         headers['Authorization'] = `Bearer ${this.getToken()}`;
-        response = await fetch(`${this.baseUrl}${endpoint}`, {
+        response = await fetch(url, {
           ...options,
           headers,
         });

@@ -161,39 +161,22 @@ export default function Sidebar() {
       </nav>
 
       {/* User Section */}
-      <div className="shrink-0 px-3 pb-4">
+      <div className="shrink-0 px-3 pb-6 pt-3 border-t border-[#2a2a3a]/70 bg-[#0e1320]/80 space-y-2">
         {/* Collapse Toggle */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium mb-3 transition-all duration-200"
-          style={{
-            background: '#1a1a24',
-            border: '1px solid #2a2a3a',
-            color: '#71717a',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = '#3a3a4a';
-            e.currentTarget.style.color = '#a1a1aa';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = '#2a2a3a';
-            e.currentTarget.style.color = '#71717a';
-          }}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 border border-white/5 bg-white/[0.02] hover:bg-white/[0.06] text-slate-400 hover:text-white cursor-pointer"
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-          {!collapsed && 'Collapse'}
+          {!collapsed && <span>Collapse Sidebar</span>}
         </button>
 
         {/* User Info */}
         <div
-          className="flex items-center gap-3 px-3 py-3 rounded-lg"
-          style={{
-            background: '#1a1a24',
-            border: '1px solid #2a2a3a',
-          }}
+          className="flex items-center gap-2.5 p-2 rounded-xl border border-white/5 bg-white/[0.02]"
         >
           <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm"
             style={{
               background: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
             }}
@@ -203,10 +186,10 @@ export default function Sidebar() {
           </div>
           {!collapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate" style={{ color: '#e4e4e7' }}>
+              <p className="text-xs font-semibold text-white truncate leading-tight">
                 {user?.firstName || 'Admin'} {user?.lastName || 'User'}
               </p>
-              <p className="text-[10px] uppercase tracking-wider" style={{ color: '#06b6d4' }}>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 leading-tight mt-0.5">
                 {user?.role || 'ADMIN'}
               </p>
             </div>
@@ -214,10 +197,7 @@ export default function Sidebar() {
           {!collapsed && (
             <button
               onClick={logout}
-              className="p-1.5 rounded-lg transition-colors"
-              style={{ color: '#71717a' }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#71717a')}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
               title="Logout"
             >
               <LogOut className="w-4 h-4" />

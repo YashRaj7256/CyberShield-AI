@@ -50,6 +50,33 @@ const typeIcons: Record<string, string> = {
   INSIDER_THREAT: '🕵️',
 };
 
+const alertTypeLabels: Record<string, string> = {
+  BRUTE_FORCE: 'Authentication Brute Force',
+  SUSPICIOUS_LOGIN: 'Suspicious Login',
+  PORT_SCAN: 'Port Scanning',
+  DDOS: 'DDoS',
+  MALWARE: 'Malware',
+  CREDENTIAL_STUFFING: 'Credential Stuffing',
+  INSIDER_THREAT: 'Insider Threat',
+  UNAUTHORIZED_ACCESS: 'Unauthorized Access',
+  ANOMALY: 'Anomaly Detection',
+  DATA_EXFILTRATION: 'Data Exfiltration',
+  POLICY_VIOLATION: 'Policy Violation',
+};
+
+function formatAlertType(type: string): string {
+  return alertTypeLabels[type] || type?.replace(/_/g, ' ') || 'Security Alert';
+}
+
+function formatAssignee(assignedTo: Alert['assignedTo']): string | null {
+  if (!assignedTo) return null;
+  if (typeof assignedTo === 'object') {
+    const fullName = `${assignedTo.firstName || ''} ${assignedTo.lastName || ''}`.trim();
+    return fullName || assignedTo.email || assignedTo.id || 'Assigned';
+  }
+  return String(assignedTo);
+}
+
 export default function AlertsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [severityFilter, setSeverityFilter] = useState<string>('ALL');
@@ -76,21 +103,36 @@ export default function AlertsPage() {
     setFetchError(null);
     try {
       const [alertsResult, statsResult] = await Promise.all([
-        api.get<{ data: Alert[]; total: number }>('/alerts', {
+        // Backend returns { alerts: [...], pagination: { total, page, limit, totalPages } }
+        api.get<{
+          alerts: Alert[];
+          pagination: { total: number; page: number; limit: number; totalPages: number };
+        }>('/alerts', {
           severity: severityFilter !== 'ALL' ? severityFilter : undefined,
           page: 1,
           limit: 50,
         }),
-        api.get<Record<string, number>>('/alerts/stats'),
+        // Backend returns { total, bySeverity, byStatus: [{status, count}], byType, recentAlerts, averageThreatScore }
+        api.get<{
+          total: number;
+          byStatus: { status: string; count: number }[];
+        }>('/alerts/stats'),
       ]);
 
-      // Handle both envelope shapes: { data: [...], total } or raw array
-      const alertData = Array.isArray(alertsResult) ? alertsResult : alertsResult.data;
+      // Normalise alerts list — backend uses { alerts, pagination }
+      const alertData = Array.isArray(alertsResult)
+        ? alertsResult
+        : Array.isArray((alertsResult as { alerts?: Alert[] }).alerts)
+          ? (alertsResult as { alerts: Alert[] }).alerts
+          : [];
       setAlerts(alertData);
 
-      // Handle stats: { statusCounts: {...} } or flat { NEW: n, ... }
-      const counts =
-        (statsResult as unknown as { statusCounts?: Record<string, number> }).statusCounts || statsResult;
+      // Normalise status counts — backend returns byStatus as an array of {status, count}
+      const byStatusArray = Array.isArray(statsResult.byStatus) ? statsResult.byStatus : [];
+      const counts: Record<string, number> = {};
+      for (const item of byStatusArray) {
+        counts[item.status] = item.count;
+      }
       setStatusCounts({
         NEW: counts.NEW ?? 0,
         INVESTIGATING: counts.INVESTIGATING ?? 0,
@@ -143,9 +185,10 @@ export default function AlertsPage() {
 
       // Refetch real stats from server
       try {
-        const stats = await api.get<Record<string, number>>('/alerts/stats');
-        const counts =
-          (stats as unknown as { statusCounts?: Record<string, number> }).statusCounts || stats;
+        const stats = await api.get<{ byStatus: { status: string; count: number }[] }>('/alerts/stats');
+        const byStatusArray = Array.isArray(stats.byStatus) ? stats.byStatus : [];
+        const counts: Record<string, number> = {};
+        for (const item of byStatusArray) counts[item.status] = item.count;
         setStatusCounts({
           NEW: counts.NEW ?? 0,
           INVESTIGATING: counts.INVESTIGATING ?? 0,
@@ -497,6 +540,12 @@ export default function AlertsPage() {
                             {alert.description}
                           </p>
                           <div className="flex items-center gap-3 mt-2 flex-wrap">
+                            <span
+                              className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium"
+                              style={{ background: 'rgba(139, 92, 246, 0.15)', color: '#a78bfa', border: '1px solid rgba(139, 92, 246, 0.25)' }}
+                            >
+                              {typeIcons[alert.type] || '⚠️'} {formatAlertType(alert.type)}
+                            </span>
                             <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: sev.bg, color: sev.color }}>
                               {alert.severity}
                             </span>
@@ -511,9 +560,9 @@ export default function AlertsPage() {
                             <span className="text-[10px]" style={{ color: '#71717a' }}>
                               {alert.sourceIp}
                             </span>
-                            {alert.assignedTo && (
+                            {formatAssignee(alert.assignedTo) && (
                               <span className="text-[10px]" style={{ color: '#06b6d4' }}>
-                                → {alert.assignedTo}
+                                → {formatAssignee(alert.assignedTo)}
                               </span>
                             )}
                           </div>
@@ -550,19 +599,22 @@ export default function AlertsPage() {
                         <div className="flex items-center gap-2 mb-3">
                           <Brain className="w-4 h-4" style={{ color: '#8b5cf6' }} />
                           <span className="text-xs font-semibold" style={{ color: '#8b5cf6' }}>
-                            AI Threat Analysis
+                            AI Threat Analysis & Classification
                           </span>
                         </div>
                         <p className="text-xs mb-3" style={{ color: '#a1a1aa' }}>
-                          {alert.aiExplanation}
+                          {alert.aiExplanation || `${formatAlertType(alert.type)} incident detected from ${alert.sourceIp}. ${alert.description}`}
                         </p>
                         <div className="space-y-1.5">
-                          {alert.reasons?.map((reason: string, idx: number) => (
-                            <div key={idx} className="flex items-start gap-2">
-                              <ArrowUpRight className="w-3 h-3 mt-0.5 shrink-0" style={{ color: '#f97316' }} />
-                              <span className="text-xs" style={{ color: '#a1a1aa' }}>{reason}</span>
-                            </div>
-                          ))}
+                          {Array.isArray(alert.reasons) &&
+                            alert.reasons.map((reason: unknown, idx: number) => (
+                              <div key={idx} className="flex items-start gap-2">
+                                <ArrowUpRight className="w-3 h-3 mt-0.5 shrink-0" style={{ color: '#f97316' }} />
+                                <span className="text-xs" style={{ color: '#a1a1aa' }}>
+                                  {typeof reason === 'string' ? reason : JSON.stringify(reason)}
+                                </span>
+                              </div>
+                            ))}
                         </div>
 
                         {/* Action Buttons */}

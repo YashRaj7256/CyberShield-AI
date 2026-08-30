@@ -128,3 +128,40 @@ class HealthResponse(BaseModel):
     status: str
     models_loaded: bool
     model_info: dict
+
+
+# ── Prediction Models ──────────────────────────────────────────────────────
+
+
+class PredictionResult(BaseModel):
+    """Attack forecasting result."""
+
+    attack_type: str
+    probability: float
+    confidence: float
+    timeframe: str
+    description: str
+    affected_assets: list[str]
+    countermeasures: list[str]
+    indicators: list[str]
+    severity: str
+
+
+class PredictRequest(BaseModel):
+    """Attack prediction request payload."""
+
+    logs: list[LogEntry] = Field(
+        default_factory=list,
+        description="Recent log window to analyze (leave empty to generate sample)",
+    )
+    window_hours: int = Field(24, description="Analysis window size in hours")
+
+
+class PredictResponse(BaseModel):
+    """Attack prediction response payload."""
+
+    predictions: list[PredictionResult]
+    analysis_window_hours: int
+    total_logs_analyzed: int
+    processing_time_ms: float
+

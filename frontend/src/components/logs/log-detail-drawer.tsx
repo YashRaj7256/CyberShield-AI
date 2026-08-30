@@ -63,7 +63,7 @@ export default function LogDetailDrawer({ log, onClose }: LogDetailDrawerProps) 
               Log Detail
             </h3>
             <p className="text-xs font-mono mt-0.5" style={{ color: '#71717a' }}>
-              {log.id}
+              {log.id || log._id || '—'}
             </p>
           </div>
           <button
@@ -183,12 +183,12 @@ export default function LogDetailDrawer({ log, onClose }: LogDetailDrawerProps) 
               <InfoField
                 icon={<Globe className="w-3.5 h-3.5" />}
                 label="Country"
-                value={log.country}
+                value={log.country ?? '—'}
               />
               <InfoField
                 icon={<Globe className="w-3.5 h-3.5" />}
                 label="City"
-                value={log.city}
+                value={log.city ?? '—'}
               />
             </div>
           </div>
@@ -266,7 +266,7 @@ function InfoField({
 }: {
   icon?: React.ReactNode;
   label: string;
-  value: string;
+  value: string | null | undefined;
   mono?: boolean;
 }) {
   return (
@@ -284,7 +284,7 @@ function InfoField({
         className={`text-sm font-medium ${mono ? 'font-mono' : ''}`}
         style={{ color: '#e4e4e7' }}
       >
-        {value}
+        {value ?? '—'}
       </p>
     </div>
   );
