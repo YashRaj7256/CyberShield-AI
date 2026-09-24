@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Shield,
   Eye,
   EyeOff,
   Loader2,
@@ -17,6 +16,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
+import CyberShieldLogo from '@/components/brand/CyberShieldLogo';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -158,18 +158,11 @@ export default function LoginPage() {
 
       {/* Top Branding */}
       <div className="relative z-10 mb-6 flex flex-col items-center text-center">
-        <Link href="/" className="flex items-center gap-2.5 group transition-transform hover:scale-105">
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center border border-cyan-500/30 bg-cyan-500/10 shadow-[0_0_15px_rgba(6,182,212,0.18)]"
-          >
-            <Shield className="w-5 h-5 text-cyan-400" />
-          </div>
-          <span className="text-xl font-bold tracking-tight text-white">
-            CyberShield <span className="text-cyan-400">AI</span>
-          </span>
+        <Link href="/" className="flex items-center group transition-transform hover:scale-105" aria-label="CyberShield AI home">
+          <CyberShieldLogo variant="full" width={240} />
         </Link>
-        <p className="text-[11px] font-mono uppercase tracking-widest text-slate-500 mt-1">
-          Threat Intelligence & Security Operations
+        <p className="text-[11px] font-mono uppercase tracking-widest text-slate-500 mt-2">
+          Threat Intelligence &amp; Security Operations
         </p>
       </div>
 

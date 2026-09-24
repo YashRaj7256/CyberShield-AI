@@ -13,12 +13,16 @@ import {
   FileText,
   Users,
   Settings,
-  ChevronLeft,
-  ChevronRight,
-  Shield,
+  PanelLeftClose,
+  PanelLeftOpen,
   LogOut,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
+import CyberShieldLogo from '@/components/brand/CyberShieldLogo';
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 interface NavItem {
   label: string;
@@ -28,17 +32,50 @@ interface NavItem {
   adminOnly?: boolean;
 }
 
-const navItems: NavItem[] = [
-  { label: 'Overview', href: '/overview', icon: <LayoutDashboard className="w-5 h-5" /> },
-  { label: 'Security Logs', href: '/logs', icon: <ScrollText className="w-5 h-5" /> },
-  { label: 'Alerts', href: '/alerts', icon: <Bell className="w-5 h-5" />, badge: 23 },
-  { label: 'Threat Analysis', href: '/threats', icon: <ShieldAlert className="w-5 h-5" /> },
-  { label: 'Predictions', href: '/predictions', icon: <TrendingUp className="w-5 h-5" /> },
-  { label: 'Geo Map', href: '/geo-map', icon: <Globe className="w-5 h-5" /> },
-  { label: 'Reports', href: '/reports', icon: <FileText className="w-5 h-5" /> },
-  { label: 'Users', href: '/users', icon: <Users className="w-5 h-5" />, adminOnly: true },
-  { label: 'Settings', href: '/settings', icon: <Settings className="w-5 h-5" /> },
+interface NavSection {
+  sectionLabel: string;
+  items: NavItem[];
+}
+
+// ---------------------------------------------------------------------------
+// Navigation structure — same hrefs as before, now grouped
+// ---------------------------------------------------------------------------
+
+const navSections: NavSection[] = [
+  {
+    sectionLabel: 'Overview',
+    items: [
+      { label: 'Dashboard', href: '/overview', icon: <LayoutDashboard className="w-[18px] h-[18px]" /> },
+    ],
+  },
+  {
+    sectionLabel: 'Monitoring',
+    items: [
+      { label: 'Security Logs', href: '/logs', icon: <ScrollText className="w-[18px] h-[18px]" /> },
+      { label: 'Alerts', href: '/alerts', icon: <Bell className="w-[18px] h-[18px]" />, badge: 23 },
+      { label: 'Threat Analysis', href: '/threats', icon: <ShieldAlert className="w-[18px] h-[18px]" /> },
+      { label: 'Predictions', href: '/predictions', icon: <TrendingUp className="w-[18px] h-[18px]" /> },
+    ],
+  },
+  {
+    sectionLabel: 'Intelligence',
+    items: [
+      { label: 'Geo Map', href: '/geo-map', icon: <Globe className="w-[18px] h-[18px]" /> },
+      { label: 'Reports', href: '/reports', icon: <FileText className="w-[18px] h-[18px]" /> },
+    ],
+  },
+  {
+    sectionLabel: 'System',
+    items: [
+      { label: 'Users', href: '/users', icon: <Users className="w-[18px] h-[18px]" />, adminOnly: true },
+      { label: 'Settings', href: '/settings', icon: <Settings className="w-[18px] h-[18px]" /> },
+    ],
+  },
 ];
+
+// ---------------------------------------------------------------------------
+// Sidebar component
+// ---------------------------------------------------------------------------
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -50,158 +87,270 @@ export default function Sidebar() {
     setMounted(true);
   }, []);
 
-  const filteredItems = navItems.filter(
-    (item) => !item.adminOnly || user?.role === 'ADMIN'
-  );
-
   if (!mounted) return null;
+
+  const userInitials =
+    (user?.firstName?.[0] ?? 'A') + (user?.lastName?.[0] ?? 'D');
 
   return (
     <aside
       className="fixed left-0 top-0 h-screen flex flex-col z-40 transition-all duration-300 ease-in-out"
       style={{
-        width: collapsed ? '80px' : '280px',
-        background: 'rgba(17, 17, 24, 0.95)',
-        backdropFilter: 'blur(20px)',
-        borderRight: '1px solid #2a2a3a',
+        width: collapsed ? '72px' : '272px',
+        background: 'rgba(9, 11, 18, 0.98)',
+        backdropFilter: 'blur(24px)',
+        borderRight: '1px solid rgba(255,255,255,0.06)',
       }}
     >
-      {/* Logo */}
+      {/* ----------------------------------------------------------------- */}
+      {/* Brand Area                                                        */}
+      {/* ----------------------------------------------------------------- */}
       <div
-        className="flex items-center gap-3 px-5 h-16 shrink-0"
-        style={{ borderBottom: '1px solid #2a2a3a' }}
+        className="shrink-0 transition-all duration-300"
+        style={{
+          padding: collapsed ? '18px 0' : '20px 20px 16px 20px',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+        }}
       >
-        <div
-          className="flex items-center justify-center w-9 h-9 rounded-lg shrink-0"
-          style={{
-            background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(59, 130, 246, 0.2))',
-            border: '1px solid rgba(6, 182, 212, 0.3)',
-          }}
-        >
-          <Shield className="w-5 h-5 text-cyan-400" />
-        </div>
-        {!collapsed && (
-          <div className="overflow-hidden">
-            <h1 className="text-sm font-bold gradient-text whitespace-nowrap">
-              CyberShield AI
-            </h1>
-            <p className="text-[10px] whitespace-nowrap" style={{ color: '#71717a' }}>
-              Threat Intelligence
-            </p>
+        {collapsed ? (
+          /* Collapsed state: Centered icon-only mark */
+          <div className="flex flex-col items-center justify-center">
+            <Link
+              href="/overview"
+              className="group flex items-center justify-center transition-transform duration-200 hover:scale-105"
+              aria-label="CyberShield AI home"
+            >
+              <CyberShieldLogo variant="icon" size={40} />
+            </Link>
           </div>
+        ) : (
+          /* Expanded state: Full logo directly on dark sidebar surface */
+          <Link
+            href="/overview"
+            className="group block transition-opacity duration-200 hover:opacity-90"
+            aria-label="CyberShield AI home"
+          >
+            <div className="flex items-center">
+              <CyberShieldLogo variant="full" width={198} />
+            </div>
+
+            {/* Brand subtitle */}
+            <div className="mt-2.5 flex items-center justify-between">
+              <span className="text-[11px] font-mono font-semibold tracking-wider uppercase text-cyan-400">
+                Threat Intelligence
+              </span>
+              <span
+                className="text-[9px] font-mono px-1.5 py-0.5 rounded font-medium"
+                style={{
+                  background: 'rgba(6, 182, 212, 0.12)',
+                  color: '#67e8f9',
+                  border: '1px solid rgba(6, 182, 212, 0.25)',
+                }}
+              >
+                SOC v2.4
+              </span>
+            </div>
+          </Link>
         )}
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 py-4 px-3 overflow-y-auto">
-        <div className="space-y-1">
-          {filteredItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative"
-                style={{
-                  background: isActive
-                    ? 'rgba(6, 182, 212, 0.1)'
-                    : 'transparent',
-                  color: isActive ? '#06b6d4' : '#a1a1aa',
-                  borderLeft: isActive
-                    ? '3px solid #06b6d4'
-                    : '3px solid transparent',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.background = 'rgba(26, 26, 36, 0.8)';
-                    e.currentTarget.style.color = '#e4e4e7';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = '#a1a1aa';
-                  }
-                }}
-              >
-                <span className="shrink-0">{item.icon}</span>
-                {!collapsed && (
-                  <span className="truncate">{item.label}</span>
-                )}
-                {item.badge && item.badge > 0 && (
-                  <span
-                    className="ml-auto text-[10px] font-bold rounded-full px-2 py-0.5 shrink-0"
-                    style={{
-                      background: 'rgba(239, 68, 68, 0.2)',
-                      color: '#ef4444',
-                      border: '1px solid rgba(239, 68, 68, 0.3)',
-                    }}
-                  >
-                    {item.badge}
-                  </span>
-                )}
+      {/* ----------------------------------------------------------------- */}
+      {/* Navigation                                                          */}
+      {/* ----------------------------------------------------------------- */}
+      <nav className="flex-1 py-3 overflow-y-auto overflow-x-hidden">
+        {navSections.map((section, sIdx) => {
+          // Filter adminOnly items
+          const visibleItems = section.items.filter(
+            (item) => !item.adminOnly || user?.role === 'ADMIN'
+          );
+          if (visibleItems.length === 0) return null;
 
-                {/* Tooltip for collapsed mode */}
-                {collapsed && (
-                  <div
-                    className="absolute left-full ml-3 px-3 py-1.5 rounded-lg text-xs font-medium opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50"
-                    style={{
-                      background: '#1a1a24',
-                      border: '1px solid #2a2a3a',
-                      color: '#e4e4e7',
-                    }}
-                  >
-                    {item.label}
-                  </div>
-                )}
-              </Link>
-            );
-          })}
-        </div>
+          return (
+            <div key={section.sectionLabel} className={sIdx > 0 ? 'mt-1' : ''}>
+              {/* Section divider */}
+              {sIdx > 0 && <div className="nav-group-divider" />}
+
+              {/* Section label — only when expanded */}
+              {!collapsed && (
+                <div className="nav-section-label mt-3 mb-1">
+                  {section.sectionLabel}
+                </div>
+              )}
+
+              {/* Nav items */}
+              <div className="px-2 space-y-0.5">
+                {visibleItems.map((item) => {
+                  const isActive = pathname === item.href;
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="group relative flex items-center gap-3 rounded-xl transition-all duration-150"
+                      style={{
+                        padding: collapsed ? '10px 0' : '9px 10px',
+                        justifyContent: collapsed ? 'center' : 'flex-start',
+                        background: isActive
+                          ? 'rgba(6, 182, 212, 0.08)'
+                          : 'transparent',
+                        color: isActive ? '#22d3ee' : '#6b7280',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                          e.currentTarget.style.color = '#cbd5e1';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.background = 'transparent';
+                          e.currentTarget.style.color = '#6b7280';
+                        }
+                      }}
+                    >
+                      {/* Active indicator strip */}
+                      {isActive && (
+                        <div
+                          className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-cyan-400"
+                          style={{ marginLeft: '-8px' }}
+                        />
+                      )}
+
+                      {/* Icon */}
+                      <span
+                        className="shrink-0 transition-colors duration-150"
+                        style={{ color: isActive ? '#22d3ee' : 'inherit' }}
+                      >
+                        {item.icon}
+                      </span>
+
+                      {/* Label + Badge — hidden when collapsed */}
+                      {!collapsed && (
+                        <>
+                          <span className="flex-1 text-[13px] font-medium truncate leading-none">
+                            {item.label}
+                          </span>
+                          {item.badge != null && item.badge > 0 && (
+                            <span
+                              className="ml-auto text-[10px] font-bold rounded-full px-1.5 py-0.5 shrink-0 tabular-nums"
+                              style={{
+                                background: 'rgba(239, 68, 68, 0.15)',
+                                color: '#f87171',
+                                border: '1px solid rgba(239,68,68,0.25)',
+                              }}
+                            >
+                              {item.badge}
+                            </span>
+                          )}
+                        </>
+                      )}
+
+                      {/* Tooltip for collapsed state */}
+                      {collapsed && (
+                        <div
+                          className="pointer-events-none absolute left-full ml-3 px-3 py-1.5 rounded-lg text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-150 whitespace-nowrap z-50"
+                          style={{
+                            background: '#111827',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            color: '#e2e8f0',
+                            boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+                          }}
+                        >
+                          {item.label}
+                          {item.badge != null && item.badge > 0 && (
+                            <span className="ml-1.5 text-rose-400">({item.badge})</span>
+                          )}
+                        </div>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </nav>
 
-      {/* User Section */}
-      <div className="shrink-0 px-3 pb-6 pt-3 border-t border-[#2a2a3a]/70 bg-[#0e1320]/80 space-y-2">
+      {/* ----------------------------------------------------------------- */}
+      {/* Bottom: User Profile + Collapse Toggle                              */}
+      {/* ----------------------------------------------------------------- */}
+      <div
+        className="shrink-0 px-2 py-3 space-y-1.5"
+        style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+      >
         {/* Collapse Toggle */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 border border-white/5 bg-white/[0.02] hover:bg-white/[0.06] text-slate-400 hover:text-white cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 rounded-xl text-[12px] font-medium transition-all duration-200 cursor-pointer"
+          style={{
+            padding: '8px 10px',
+            color: '#4b5563',
+            background: 'transparent',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+            e.currentTarget.style.color = '#94a3b8';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent';
+            e.currentTarget.style.color = '#4b5563';
+          }}
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-          {!collapsed && <span>Collapse Sidebar</span>}
+          {collapsed
+            ? <PanelLeftOpen className="w-4 h-4" />
+            : (
+              <>
+                <PanelLeftClose className="w-4 h-4" />
+                <span>Collapse</span>
+              </>
+            )
+          }
         </button>
 
         {/* User Info */}
         <div
-          className="flex items-center gap-2.5 p-2 rounded-xl border border-white/5 bg-white/[0.02]"
+          className="flex items-center gap-2.5 rounded-xl"
+          style={{
+            padding: collapsed ? '8px 0' : '8px 10px',
+            justifyContent: collapsed ? 'center' : 'flex-start',
+          }}
         >
+          {/* Avatar */}
           <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm"
-            style={{
-              background: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
-            }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold text-white shrink-0"
+            style={{ background: 'linear-gradient(135deg, #06b6d4, #3b82f6)' }}
           >
-            {user?.firstName?.[0] || 'A'}
-            {user?.lastName?.[0] || 'D'}
+            {userInitials}
           </div>
+
           {!collapsed && (
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-white truncate leading-tight">
-                {user?.firstName || 'Admin'} {user?.lastName || 'User'}
-              </p>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 leading-tight mt-0.5">
-                {user?.role || 'ADMIN'}
-              </p>
-            </div>
-          )}
-          {!collapsed && (
-            <button
-              onClick={logout}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
-              title="Logout"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
+            <>
+              <div className="flex-1 min-w-0">
+                <p className="text-[12px] font-semibold text-slate-200 truncate leading-tight">
+                  {user?.firstName ?? 'Admin'} {user?.lastName ?? 'User'}
+                </p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 leading-tight mt-0.5">
+                  {user?.role ?? 'ADMIN'}
+                </p>
+              </div>
+              <button
+                onClick={logout}
+                className="p-1.5 rounded-lg transition-colors duration-150 cursor-pointer shrink-0"
+                style={{ color: '#4b5563' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = '#f87171';
+                  e.currentTarget.style.background = 'rgba(239,68,68,0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = '#4b5563';
+                  e.currentTarget.style.background = 'transparent';
+                }}
+                title="Sign out"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </>
           )}
         </div>
       </div>

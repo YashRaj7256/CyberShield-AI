@@ -69,4 +69,15 @@ export class DashboardController {
   async getTopSources() {
     return this.dashboardService.getTopSources();
   }
+
+  /**
+   * Get geographical attack data — attack origins with coordinates,
+   * top attacking countries, and summary metrics.
+   *
+   * @returns Geo-located attack origins, country stats, and summary
+   */
+  @Get('geo-attacks')
+  async getGeoAttacks() {
+    return this.dashboardService.getGeoAttacks();
+  }
 }

@@ -268,4 +268,122 @@ export class DashboardService {
       })),
     };
   }
+
+  /**
+   * Get geographical attack data — attack origins with coordinates,
+   * top attacking countries, and summary metrics.
+   *
+   * @returns Geo-located attack origins, country stats, and summary
+   */
+  async getGeoAttacks() {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const matchGeoFilter = {
+      timestamp: { $gte: thirtyDaysAgo },
+      latitude: { $exists: true, $ne: null },
+      longitude: { $exists: true, $ne: null },
+    };
+
+    const attackOrigins = await this.securityLogModel.aggregate([
+      { $match: matchGeoFilter },
+      {
+        $group: {
+          _id: '$sourceIp',
+          latitude: { $first: '$latitude' },
+          longitude: { $first: '$longitude' },
+          country: { $first: '$country' },
+          city: { $first: '$city' },
+          eventType: { $first: '$eventType' },
+          severity: { $first: '$severity' },
+          timestamp: { $max: '$timestamp' },
+          threatScore: { $avg: '$threatScore' },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+      { $limit: 500 },
+      {
+        $project: {
+          _id: 0,
+          sourceIp: '$_id',
+          latitude: 1,
+          longitude: 1,
+          country: 1,
+          city: 1,
+          eventType: 1,
+          severity: 1,
+          threatScore: { $round: ['$threatScore', 1] },
+          timestamp: 1,
+          count: 1,
+        },
+      },
+    ]);
+
+    const topCountries = await this.securityLogModel.aggregate([
+      { $match: matchGeoFilter },
+      {
+        $group: {
+          _id: '$country',
+          attackCount: { $sum: 1 },
+          avgThreatScore: { $avg: '$threatScore' },
+          latitude: { $first: '$latitude' },
+          longitude: { $first: '$longitude' },
+        },
+      },
+      { $sort: { attackCount: -1 } },
+      { $limit: 20 },
+      {
+        $project: {
+          _id: 0,
+          country: '$_id',
+          attackCount: 1,
+          avgThreatScore: { $round: ['$avgThreatScore', 1] },
+          latitude: 1,
+          longitude: 1,
+        },
+      },
+    ]);
+
+    const [totalOriginsResult, criticalRegionalThreats, mostTargetedPortResult] = await Promise.all([
+      this.securityLogModel.aggregate([
+        { $match: matchGeoFilter },
+        { $group: { _id: '$sourceIp' } },
+        { $count: 'totalOrigins' },
+      ]),
+      this.securityLogModel.countDocuments({
+        ...matchGeoFilter,
+        severity: 'CRITICAL',
+      }),
+      this.securityLogModel.aggregate([
+        { $match: { timestamp: { $gte: thirtyDaysAgo } } },
+        {
+          $group: {
+            _id: '$destinationPort',
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { count: -1 } },
+        { $limit: 1 },
+      ]),
+    ]);
+
+    const totalOrigins =
+      totalOriginsResult.length > 0 ? totalOriginsResult[0].totalOrigins : 0;
+    const topMaliciousCountry =
+      topCountries.length > 0 ? topCountries[0].country : 'N/A';
+    const mostTargetedPort =
+      mostTargetedPortResult.length > 0 ? mostTargetedPortResult[0]._id : null;
+
+    return {
+      attackOrigins,
+      topCountries,
+      summary: {
+        totalOrigins,
+        topMaliciousCountry,
+        criticalRegionalThreats,
+        mostTargetedPort,
+      },
+    };
+  }
 }

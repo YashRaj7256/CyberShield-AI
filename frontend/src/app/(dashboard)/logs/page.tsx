@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { mockSecurityLogs } from '@/lib/mock-data';
 import { api } from '@/lib/api';
+import telemetryStore, { BASE_TOTAL_LOGS } from '@/lib/telemetry-store';
 import { useDebounce } from '@/hooks/use-debounce';
 import LogTable from '@/components/logs/log-table';
 import LogFilters from '@/components/logs/log-filters';
@@ -198,12 +199,23 @@ function UploadModal({ onClose, onSuccess, onToast }: UploadModalProps) {
     }
     setSubmitting(true);
     try {
-      await api.post('/logs', {
+      try {
+        await api.post('/logs', {
+          ...singleForm,
+          sourcePort: Number(singleForm.sourcePort) || 0,
+          destinationPort: Number(singleForm.destinationPort) || 0,
+        });
+      } catch {
+        // Backend offline or fallback mode
+      }
+
+      // Persist in unified telemetry store so it updates the 1.2M scale dashboard & logs table
+      telemetryStore.ingestLog({
         ...singleForm,
         sourcePort: Number(singleForm.sourcePort) || 0,
         destinationPort: Number(singleForm.destinationPort) || 0,
       });
-      onToast('Log ingested successfully', 'success');
+      onToast('Log ingested successfully into telemetry stream', 'success');
       onSuccess();
       onClose();
     } catch (err) {
@@ -227,8 +239,15 @@ function UploadModal({ onClose, onSuccess, onToast }: UploadModalProps) {
     }
     setSubmitting(true);
     try {
-      await api.post('/logs/bulk', { logs: parsed });
-      onToast(`${parsed.length} logs ingested successfully`, 'success');
+      try {
+        await api.post('/logs/bulk', { logs: parsed });
+      } catch {
+        // Backend offline or fallback mode
+      }
+
+      // Persist in unified telemetry store so it updates the 1.2M scale dashboard & logs table
+      telemetryStore.ingestBulkLogs(parsed as Partial<SecurityLog>[]);
+      onToast(`${parsed.length} logs ingested successfully into telemetry stream`, 'success');
       onSuccess();
       onClose();
     } catch (err) {
@@ -640,65 +659,21 @@ export default function LogsPage() {
       setIsDemo(false);
       hasEverFetchedRef.current = true;
     } catch (err) {
-      // If we've never successfully fetched, stay on demo data
+      // If we've never successfully fetched, stay on demo data with telemetryStore sync
       if (!hasEverFetchedRef.current) {
-        // Apply client-side filtering to mock data as fallback
-        let filtered = [...mockSecurityLogs];
-
-        if (debouncedSearch) {
-          const s = debouncedSearch.toLowerCase();
-          filtered = filtered.filter(
-            (l) =>
-              l.sourceIp.includes(s) ||
-              l.destinationIp.includes(s) ||
-              l.message.toLowerCase().includes(s) ||
-              l.eventType.toLowerCase().includes(s) ||
-              l.country.toLowerCase().includes(s),
-          );
-        }
-        if (selectedSeverities.length > 0) {
-          filtered = filtered.filter((l) => selectedSeverities.includes(l.severity));
-        }
-        if (selectedSources.length > 0) {
-          filtered = filtered.filter((l) => selectedSources.includes(l.source));
-        }
-        if (ipFilter) {
-          filtered = filtered.filter(
-            (l) => l.sourceIp.includes(ipFilter) || l.destinationIp.includes(ipFilter),
-          );
-        }
-        if (countryFilter) {
-          filtered = filtered.filter((l) =>
-            l.country.toLowerCase().includes(countryFilter.toLowerCase()),
-          );
-        }
-        if (startDate) {
-          filtered = filtered.filter((l) => new Date(l.timestamp) >= new Date(startDate));
-        }
-        if (endDate) {
-          filtered = filtered.filter(
-            (l) => new Date(l.timestamp) <= new Date(endDate + 'T23:59:59'),
-          );
-        }
-
-        // Sort
-        filtered.sort((a, b) => {
-          const aVal = a[sortBy as keyof SecurityLog];
-          const bVal = b[sortBy as keyof SecurityLog];
-          if (aVal === null || aVal === undefined) return 1;
-          if (bVal === null || bVal === undefined) return -1;
-          if (typeof aVal === 'string' && typeof bVal === 'string') {
-            return sortOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-          }
-          if (typeof aVal === 'number' && typeof bVal === 'number') {
-            return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
-          }
-          return 0;
+        const res = telemetryStore.getSynchronizedLogs(page, perPage, {
+          search: debouncedSearch,
+          severities: selectedSeverities,
+          sources: selectedSources,
+          ip: ipFilter,
+          country: countryFilter,
+          startDate,
+          endDate,
+          sortBy,
+          sortOrder,
         });
 
-        const total = filtered.length;
-        const sliced = filtered.slice((page - 1) * perPage, page * perPage);
-        setData({ logs: sliced, total });
+        setData({ logs: res.logs, total: res.total });
         setIsDemo(true);
         setError(null);
       } else {
@@ -725,6 +700,19 @@ export default function LogsPage() {
 
   useEffect(() => {
     fetchLogs();
+  }, [fetchLogs]);
+
+  // Re-fetch when telemetryStore updates (e.g. from an upload)
+  useEffect(() => {
+    const handleTelemetryChange = () => {
+      fetchLogs();
+    };
+    window.addEventListener('telemetry-updated', handleTelemetryChange);
+    window.addEventListener('storage', handleTelemetryChange);
+    return () => {
+      window.removeEventListener('telemetry-updated', handleTelemetryChange);
+      window.removeEventListener('storage', handleTelemetryChange);
+    };
   }, [fetchLogs]);
 
   // Derived

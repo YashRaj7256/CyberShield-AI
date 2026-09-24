@@ -13,6 +13,10 @@ export const metadata: Metadata = {
   description:
     'AI-Powered Cyber Threat Intelligence Platform for real-time security monitoring, threat detection, and incident response.',
   keywords: ['cybersecurity', 'threat intelligence', 'SOC', 'SIEM', 'AI', 'security dashboard'],
+  icons: {
+    icon: '/cybershield-ai-icon.png',
+    apple: '/cybershield-ai-icon.png',
+  },
 };
 
 export default function RootLayout({

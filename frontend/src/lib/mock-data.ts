@@ -9,6 +9,7 @@ import type {
   Alert,
   ThreatEntity,
   ThreatAnalysisSummary,
+  GeoAttackData,
 } from '@/types';
 
 // ==================== Dashboard Stats ====================
@@ -525,3 +526,43 @@ export const mockThreatSummary: ThreatAnalysisSummary = {
   avgScore: Math.round(mockThreatEntities.reduce((sum, e) => sum + e.score, 0) / mockThreatEntities.length),
   topThreats: mockThreatEntities.filter(e => e.score >= 80),
 };
+
+// ==================== Geo Attack Map Data (Phase 3) ====================
+export const mockGeoAttackData: GeoAttackData = {
+  attackOrigins: [
+    { sourceIp: '203.0.113.45', latitude: 55.7558, longitude: 37.6173, country: 'Russia', city: 'Moscow', eventType: 'BRUTE_FORCE', severity: 'CRITICAL', threatScore: 92.3, timestamp: new Date(Date.now() - 300000).toISOString(), count: 847 },
+    { sourceIp: '198.51.100.22', latitude: 39.9042, longitude: 116.4074, country: 'China', city: 'Beijing', eventType: 'PORT_SCAN', severity: 'HIGH', threatScore: 78.5, timestamp: new Date(Date.now() - 600000).toISOString(), count: 623 },
+    { sourceIp: '192.0.2.88', latitude: 35.6762, longitude: 51.4241, country: 'Iran', city: 'Tehran', eventType: 'DDOS', severity: 'CRITICAL', threatScore: 95.1, timestamp: new Date(Date.now() - 120000).toISOString(), count: 1204 },
+    { sourceIp: '203.0.113.99', latitude: 39.0392, longitude: 125.7625, country: 'North Korea', city: 'Pyongyang', eventType: 'MALWARE', severity: 'CRITICAL', threatScore: 98.7, timestamp: new Date(Date.now() - 900000).toISOString(), count: 312 },
+    { sourceIp: '198.51.100.67', latitude: -23.5505, longitude: -46.6333, country: 'Brazil', city: 'São Paulo', eventType: 'CREDENTIAL_STUFFING', severity: 'HIGH', threatScore: 71.2, timestamp: new Date(Date.now() - 1800000).toISOString(), count: 445 },
+    { sourceIp: '192.0.2.34', latitude: 6.5244, longitude: 3.3792, country: 'Nigeria', city: 'Lagos', eventType: 'PHISHING', severity: 'MEDIUM', threatScore: 54.8, timestamp: new Date(Date.now() - 2400000).toISOString(), count: 289 },
+    { sourceIp: '203.0.113.12', latitude: 28.6139, longitude: 77.2090, country: 'India', city: 'New Delhi', eventType: 'SUSPICIOUS_LOGIN', severity: 'MEDIUM', threatScore: 45.3, timestamp: new Date(Date.now() - 3600000).toISOString(), count: 178 },
+    { sourceIp: '198.51.100.41', latitude: 52.5200, longitude: 13.4050, country: 'Germany', city: 'Berlin', eventType: 'PORT_SCAN', severity: 'LOW', threatScore: 28.6, timestamp: new Date(Date.now() - 4800000).toISOString(), count: 92 },
+    { sourceIp: '192.0.2.77', latitude: 31.2304, longitude: 121.4737, country: 'China', city: 'Shanghai', eventType: 'BRUTE_FORCE', severity: 'HIGH', threatScore: 82.4, timestamp: new Date(Date.now() - 1200000).toISOString(), count: 556 },
+    { sourceIp: '203.0.113.55', latitude: 59.9343, longitude: 30.3351, country: 'Russia', city: 'St. Petersburg', eventType: 'MALWARE', severity: 'HIGH', threatScore: 76.9, timestamp: new Date(Date.now() - 5400000).toISOString(), count: 401 },
+    { sourceIp: '198.51.100.88', latitude: 51.5074, longitude: -0.1278, country: 'United Kingdom', city: 'London', eventType: 'INSIDER_THREAT', severity: 'MEDIUM', threatScore: 52.1, timestamp: new Date(Date.now() - 7200000).toISOString(), count: 134 },
+    { sourceIp: '192.0.2.11', latitude: 37.7749, longitude: -122.4194, country: 'United States', city: 'San Francisco', eventType: 'UNAUTHORIZED_ACCESS', severity: 'LOW', threatScore: 31.4, timestamp: new Date(Date.now() - 3000000).toISOString(), count: 67 },
+    { sourceIp: '203.0.113.78', latitude: 48.8566, longitude: 2.3522, country: 'France', city: 'Paris', eventType: 'PHISHING', severity: 'MEDIUM', threatScore: 48.7, timestamp: new Date(Date.now() - 6000000).toISOString(), count: 201 },
+    { sourceIp: '198.51.100.33', latitude: 35.6895, longitude: 139.6917, country: 'Japan', city: 'Tokyo', eventType: 'PORT_SCAN', severity: 'LOW', threatScore: 22.3, timestamp: new Date(Date.now() - 9000000).toISOString(), count: 55 },
+    { sourceIp: '192.0.2.55', latitude: -33.8688, longitude: 151.2093, country: 'Australia', city: 'Sydney', eventType: 'SUSPICIOUS_LOGIN', severity: 'LOW', threatScore: 19.8, timestamp: new Date(Date.now() - 10800000).toISOString(), count: 38 },
+  ],
+  topCountries: [
+    { country: 'Russia', attackCount: 1248, avgThreatScore: 84.6, latitude: 55.7558, longitude: 37.6173 },
+    { country: 'China', attackCount: 1179, avgThreatScore: 80.5, latitude: 39.9042, longitude: 116.4074 },
+    { country: 'Iran', attackCount: 1204, avgThreatScore: 95.1, latitude: 35.6762, longitude: 51.4241 },
+    { country: 'North Korea', attackCount: 312, avgThreatScore: 98.7, latitude: 39.0392, longitude: 125.7625 },
+    { country: 'Brazil', attackCount: 445, avgThreatScore: 71.2, latitude: -23.5505, longitude: -46.6333 },
+    { country: 'Nigeria', attackCount: 289, avgThreatScore: 54.8, latitude: 6.5244, longitude: 3.3792 },
+    { country: 'India', attackCount: 178, avgThreatScore: 45.3, latitude: 28.6139, longitude: 77.2090 },
+    { country: 'Germany', attackCount: 92, avgThreatScore: 28.6, latitude: 52.5200, longitude: 13.4050 },
+    { country: 'United Kingdom', attackCount: 134, avgThreatScore: 52.1, latitude: 51.5074, longitude: -0.1278 },
+    { country: 'France', attackCount: 201, avgThreatScore: 48.7, latitude: 48.8566, longitude: 2.3522 },
+  ],
+  summary: {
+    totalOrigins: 142,
+    topMaliciousCountry: 'Russia',
+    criticalRegionalThreats: 23,
+    mostTargetedPort: 443,
+  },
+};
+

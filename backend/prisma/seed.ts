@@ -16,8 +16,8 @@
 import * as dotenv from 'dotenv';
 import { resolve } from 'path';
 
-// Load environment variables from ../.env
-dotenv.config({ path: resolve(__dirname, '..', '.env') });
+// Load environment variables from project root .env
+dotenv.config({ path: resolve(__dirname, '..', '..', '.env') });
 
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
@@ -77,18 +77,122 @@ function randomIp(): string {
 // Data Pools
 // ============================================================
 
+const CITY_COORDS: Record<string, { lat: number; lng: number }> = {
+  // United States
+  'New York': { lat: 40.7128, lng: -74.0060 },
+  'Los Angeles': { lat: 34.0522, lng: -118.2437 },
+  'Chicago': { lat: 41.8781, lng: -87.6298 },
+  'Houston': { lat: 29.7604, lng: -95.3698 },
+  'Phoenix': { lat: 33.4484, lng: -112.0740 },
+  'San Francisco': { lat: 37.7749, lng: -122.4194 },
+  'Seattle': { lat: 47.6062, lng: -122.3321 },
+  'Miami': { lat: 25.7617, lng: -80.1918 },
+  'Denver': { lat: 39.7392, lng: -104.9903 },
+  'Atlanta': { lat: 33.7490, lng: -84.3880 },
+  // United Kingdom
+  'London': { lat: 51.5074, lng: -0.1278 },
+  'Manchester': { lat: 53.4808, lng: -2.2426 },
+  'Birmingham': { lat: 52.4862, lng: -1.8904 },
+  'Liverpool': { lat: 53.4084, lng: -2.9916 },
+  'Leeds': { lat: 53.8008, lng: -1.5491 },
+  'Edinburgh': { lat: 55.9533, lng: -3.1883 },
+  // Germany
+  'Berlin': { lat: 52.5200, lng: 13.4050 },
+  'Munich': { lat: 48.1351, lng: 11.5820 },
+  'Frankfurt': { lat: 50.1109, lng: 8.6821 },
+  'Hamburg': { lat: 53.5511, lng: 9.9937 },
+  'Cologne': { lat: 50.9375, lng: 6.9603 },
+  // Russia
+  'Moscow': { lat: 55.7558, lng: 37.6173 },
+  'Saint Petersburg': { lat: 59.9343, lng: 30.3351 },
+  'Novosibirsk': { lat: 55.0084, lng: 82.9357 },
+  'Yekaterinburg': { lat: 56.8389, lng: 60.6057 },
+  'Kazan': { lat: 55.7963, lng: 49.1089 },
+  // China
+  'Beijing': { lat: 39.9042, lng: 116.4074 },
+  'Shanghai': { lat: 31.2304, lng: 121.4737 },
+  'Shenzhen': { lat: 22.5431, lng: 114.0579 },
+  'Guangzhou': { lat: 23.1291, lng: 113.2644 },
+  'Chengdu': { lat: 30.5728, lng: 104.0668 },
+  'Hangzhou': { lat: 30.2741, lng: 120.1551 },
+  // Brazil
+  'São Paulo': { lat: -23.5505, lng: -46.6333 },
+  'Rio de Janeiro': { lat: -22.9068, lng: -43.1729 },
+  'Brasília': { lat: -15.7975, lng: -47.8919 },
+  'Salvador': { lat: -12.9714, lng: -38.5124 },
+  'Curitiba': { lat: -25.4284, lng: -49.2733 },
+  // India
+  'Mumbai': { lat: 19.0760, lng: 72.8777 },
+  'Delhi': { lat: 28.6139, lng: 77.2090 },
+  'Bangalore': { lat: 12.9716, lng: 77.5946 },
+  'Hyderabad': { lat: 17.3850, lng: 78.4867 },
+  'Chennai': { lat: 13.0827, lng: 80.2707 },
+  'Kolkata': { lat: 22.5726, lng: 88.3639 },
+  // Nigeria
+  'Lagos': { lat: 6.5244, lng: 3.3792 },
+  'Abuja': { lat: 9.0579, lng: 7.4951 },
+  'Kano': { lat: 12.0022, lng: 8.5920 },
+  'Ibadan': { lat: 7.3775, lng: 3.9470 },
+  // Iran
+  'Tehran': { lat: 35.6762, lng: 51.4241 },
+  'Isfahan': { lat: 32.6546, lng: 51.6680 },
+  'Tabriz': { lat: 38.0800, lng: 46.2919 },
+  'Shiraz': { lat: 29.5918, lng: 52.5837 },
+  'Mashhad': { lat: 36.2605, lng: 59.6168 },
+  // North Korea
+  'Pyongyang': { lat: 39.0392, lng: 125.7625 },
+  'Hamhung': { lat: 39.9184, lng: 127.5346 },
+  'Chongjin': { lat: 41.7955, lng: 129.7758 },
+  // Additional countries for variety
+  'Tokyo': { lat: 35.6762, lng: 139.6503 },
+  'Seoul': { lat: 37.5665, lng: 126.9780 },
+  'Sydney': { lat: -33.8688, lng: 151.2093 },
+  'Paris': { lat: 48.8566, lng: 2.3522 },
+  'Amsterdam': { lat: 52.3676, lng: 4.9041 },
+  'Toronto': { lat: 43.6532, lng: -79.3832 },
+  'Singapore': { lat: 1.3521, lng: 103.8198 },
+  'Dubai': { lat: 25.2048, lng: 55.2708 },
+  'Istanbul': { lat: 41.0082, lng: 28.9784 },
+  'Johannesburg': { lat: -26.2041, lng: 28.0473 },
+  'Mexico City': { lat: 19.4326, lng: -99.1332 },
+  'Buenos Aires': { lat: -34.6037, lng: -58.3816 },
+  'Warsaw': { lat: 52.2297, lng: 21.0122 },
+  'Bucharest': { lat: 44.4268, lng: 26.1025 },
+  'Hanoi': { lat: 21.0278, lng: 105.8342 },
+  'Jakarta': { lat: -6.2088, lng: 106.8456 },
+};
+
 const COUNTRIES = [
-  { name: 'United States', code: 'US', cities: ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'], lat: [25, 48], lon: [-125, -67] },
-  { name: 'United Kingdom', code: 'UK', cities: ['London', 'Manchester', 'Birmingham', 'Liverpool', 'Leeds'], lat: [50, 58], lon: [-8, 2] },
-  { name: 'Germany', code: 'DE', cities: ['Berlin', 'Munich', 'Frankfurt', 'Hamburg', 'Cologne'], lat: [47, 55], lon: [6, 15] },
-  { name: 'Russia', code: 'RU', cities: ['Moscow', 'Saint Petersburg', 'Novosibirsk', 'Yekaterinburg'], lat: [41, 82], lon: [19, 180] },
-  { name: 'China', code: 'CN', cities: ['Beijing', 'Shanghai', 'Shenzhen', 'Guangzhou', 'Chengdu'], lat: [18, 54], lon: [73, 135] },
-  { name: 'Brazil', code: 'BR', cities: ['São Paulo', 'Rio de Janeiro', 'Brasília', 'Salvador'], lat: [-33, 5], lon: [-74, -35] },
-  { name: 'India', code: 'IN', cities: ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai'], lat: [6, 36], lon: [68, 97] },
-  { name: 'Nigeria', code: 'NG', cities: ['Lagos', 'Abuja', 'Kano', 'Ibadan'], lat: [4, 14], lon: [3, 15] },
-  { name: 'Iran', code: 'IR', cities: ['Tehran', 'Isfahan', 'Tabriz', 'Shiraz'], lat: [25, 40], lon: [44, 63] },
-  { name: 'North Korea', code: 'KP', cities: ['Pyongyang', 'Hamhung', 'Chongjin'], lat: [37, 43], lon: [124, 131] },
+  { name: 'United States', code: 'US', cities: ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'San Francisco', 'Seattle', 'Miami', 'Denver', 'Atlanta'] },
+  { name: 'United Kingdom', code: 'UK', cities: ['London', 'Manchester', 'Birmingham', 'Liverpool', 'Leeds', 'Edinburgh'] },
+  { name: 'Germany', code: 'DE', cities: ['Berlin', 'Munich', 'Frankfurt', 'Hamburg', 'Cologne'] },
+  { name: 'Russia', code: 'RU', cities: ['Moscow', 'Saint Petersburg', 'Novosibirsk', 'Yekaterinburg', 'Kazan'] },
+  { name: 'China', code: 'CN', cities: ['Beijing', 'Shanghai', 'Shenzhen', 'Guangzhou', 'Chengdu', 'Hangzhou'] },
+  { name: 'Brazil', code: 'BR', cities: ['São Paulo', 'Rio de Janeiro', 'Brasília', 'Salvador', 'Curitiba'] },
+  { name: 'India', code: 'IN', cities: ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata'] },
+  { name: 'Nigeria', code: 'NG', cities: ['Lagos', 'Abuja', 'Kano', 'Ibadan'] },
+  { name: 'Iran', code: 'IR', cities: ['Tehran', 'Isfahan', 'Tabriz', 'Shiraz', 'Mashhad'] },
+  { name: 'North Korea', code: 'KP', cities: ['Pyongyang', 'Hamhung', 'Chongjin'] },
 ] as const;
+
+/**
+ * Returns precise coordinates for a city with small random jitter (±0.15°)
+ * so markers cluster near city centers without stacking exactly.
+ */
+function cityCoords(cityName: string): { latitude: number; longitude: number } {
+  const coords = CITY_COORDS[cityName];
+  if (!coords) {
+    // Fallback: return 0,0 (should not happen with correct city data)
+    return { latitude: 0, longitude: 0 };
+  }
+  // Add small jitter to spread markers naturally around the city center
+  const jitterLat = (random() - 0.5) * 0.3; // ±0.15 degrees ≈ ±16km
+  const jitterLng = (random() - 0.5) * 0.3;
+  return {
+    latitude: parseFloat((coords.lat + jitterLat).toFixed(4)),
+    longitude: parseFloat((coords.lng + jitterLng).toFixed(4)),
+  };
+}
 
 const MALICIOUS_COUNTRIES = ['Russia', 'China', 'Nigeria', 'Iran', 'North Korea'] as const;
 
@@ -245,8 +349,7 @@ function generateNormalLog(timestamp: Date): RawLog {
     message: pick(NORMAL_MESSAGES),
     country: countryData.name,
     city,
-    latitude: randomFloat(countryData.lat[0], countryData.lat[1], 4),
-    longitude: randomFloat(countryData.lon[0], countryData.lon[1], 4),
+    ...cityCoords(city),
     deviceType: pick(DEVICE_TYPES),
     browser: pick(BROWSERS),
     os: pick(OS_LIST),
@@ -304,8 +407,7 @@ function generateSuspiciousLog(timestamp: Date): RawLog {
     message,
     country: countryData.name,
     city,
-    latitude: randomFloat(countryData.lat[0], countryData.lat[1], 4),
-    longitude: randomFloat(countryData.lon[0], countryData.lon[1], 4),
+    ...cityCoords(city),
     userName: random() < 0.3 ? `user_${randomInt(1, 500)}` : undefined,
     deviceType: pick(DEVICE_TYPES),
     browser: pick(BROWSERS),
@@ -357,8 +459,7 @@ function generateMaliciousLog(timestamp: Date): RawLog {
     message,
     country: countryData.name,
     city,
-    latitude: randomFloat(countryData.lat[0], countryData.lat[1], 4),
-    longitude: randomFloat(countryData.lon[0], countryData.lon[1], 4),
+    ...cityCoords(city),
     userName: random() < 0.2 ? `compromised_${randomInt(1, 100)}` : undefined,
     deviceType: pick(DEVICE_TYPES),
     browser: pick(BROWSERS),

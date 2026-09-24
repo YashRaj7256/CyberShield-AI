@@ -3,12 +3,13 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
-  Shield, ShieldCheck, ArrowRight, Menu, X,
+  ShieldCheck, ArrowRight, Menu, X,
   Activity, Database, Cpu, Bell, CheckCircle2,
   BarChart3, Clock, Lock, AlertTriangle, Layers, Zap,
 } from 'lucide-react';
 import CyberHeroVisual from '@/components/landing/cyber-hero-visual';
 import CyberArchitectureVisual from '@/components/landing/cyber-architecture-visual';
+import CyberShieldLogo from '@/components/brand/CyberShieldLogo';
 
 /* ─── Types ────────────────────────────────────────────────── */
 interface Alert { id: string; time: string; src: string; cat: string; sev: string; score: number; }
@@ -109,14 +110,8 @@ export default function LandingPage() {
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
 
           {/* Brand */}
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
-            <div style={{ width: 34, height: 34, borderRadius: 10, border: `1px solid ${CYANDIM}`, background: 'rgba(6,182,212,0.07)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Shield style={{ width: 16, height: 16, color: CYAN }} />
-            </div>
-            <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.01em', color: '#fff' }}>
-              CyberShield <span style={{ color: CYAN }}>AI</span>
-            </span>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', flexShrink: 0 }}>
+            <CyberShieldLogo variant="full" width={165} />
           </Link>
 
           {/* Desktop nav */}
@@ -505,11 +500,8 @@ export default function LandingPage() {
       ═══════════════════════════════════════════════════════ */}
       <footer style={{ borderTop: `1px solid ${BORDER}`, background: 'rgba(2,3,6,0.85)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '28px 24px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, border: `1px solid rgba(6,182,212,0.2)`, background: 'rgba(6,182,212,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Shield style={{ width: 14, height: 14, color: CYAN }} />
-            </div>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>CyberShield <span style={{ color: CYAN }}>AI</span></span>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+            <CyberShieldLogo variant="full" width={140} />
           </Link>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
             {NAV_LINKS.map(l => (

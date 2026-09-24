@@ -227,3 +227,37 @@ export interface ThreatAnalysisSummary {
   avgScore: number;
   topThreats: ThreatEntity[];
 }
+
+// ==================== Geo Attack Map Types (Phase 3) ====================
+
+export interface GeoAttackOrigin {
+  sourceIp: string;
+  latitude: number;
+  longitude: number;
+  country: string;
+  city: string;
+  eventType: string;
+  severity: LogSeverity;
+  threatScore: number;
+  timestamp: string;
+  count: number;
+}
+
+export interface GeoCountryStats {
+  country: string;
+  attackCount: number;
+  avgThreatScore: number;
+  latitude: number;
+  longitude: number;
+}
+
+export interface GeoAttackData {
+  attackOrigins: GeoAttackOrigin[];
+  topCountries: GeoCountryStats[];
+  summary: {
+    totalOrigins: number;
+    topMaliciousCountry: string;
+    criticalRegionalThreats: number;
+    mostTargetedPort: number;
+  };
+}

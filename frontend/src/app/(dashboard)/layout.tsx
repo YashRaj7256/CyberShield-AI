@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/layout/sidebar';
+import CyberShieldLogo from '@/components/brand/CyberShieldLogo';
 import Header from '@/components/layout/header';
 import { useAuthStore } from '@/stores/auth-store';
 
@@ -14,7 +15,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const { isAuthenticated, loadFromStorage } = useAuthStore();
   const [mounted, setMounted] = useState(false);
-  const [sidebarWidth, setSidebarWidth] = useState(280);
+  const [sidebarWidth, setSidebarWidth] = useState(272);
 
   useEffect(() => {
     loadFromStorage();
@@ -53,12 +54,9 @@ export default function DashboardLayout({
         style={{ background: '#0a0a0f' }}
       >
         <div className="flex flex-col items-center gap-4">
-          <div
-            className="w-12 h-12 rounded-xl animate-pulse"
-            style={{
-              background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.3), rgba(59, 130, 246, 0.3))',
-            }}
-          />
+          <div className="animate-pulse opacity-80">
+            <CyberShieldLogo variant="icon" size={48} />
+          </div>
           <p className="text-sm" style={{ color: '#71717a' }}>
             Loading CyberShield AI...
           </p>

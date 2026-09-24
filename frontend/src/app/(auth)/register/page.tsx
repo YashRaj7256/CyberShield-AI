@@ -3,7 +3,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Shield, Eye, EyeOff, Loader2, AlertCircle, Check } from 'lucide-react';
+import { Eye, EyeOff, Loader2, AlertCircle, Check } from 'lucide-react';
+import CyberShieldLogo from '@/components/brand/CyberShieldLogo';
 import { useAuthStore } from '@/stores/auth-store';
 
 export default function RegisterPage() {
@@ -93,18 +94,9 @@ export default function RegisterPage() {
   return (
     <div className="animate-fade-in w-full max-w-md mx-auto">
       {/* Logo */}
-      <div className="text-center mb-6">
-        <div
-          className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-3 glow-cyan"
-          style={{
-            background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(59, 130, 246, 0.2))',
-            border: '1px solid rgba(6, 182, 212, 0.3)',
-          }}
-        >
-          <Shield className="w-7 h-7 text-cyan-400" />
-        </div>
-        <h1 className="text-2xl font-bold gradient-text">CyberShield AI</h1>
-        <p className="text-sm mt-1" style={{ color: '#71717a' }}>
+      <div className="text-center mb-6 flex flex-col items-center">
+        <CyberShieldLogo variant="full" width={240} />
+        <p className="text-sm mt-2" style={{ color: '#71717a' }}>
           Create your analyst account
         </p>
       </div>
