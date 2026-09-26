@@ -18,6 +18,10 @@ import {
   CheckCircle,
   FileJson,
   FilePlus,
+  Database,
+  ShieldCheck,
+  Activity,
+  Sparkles,
 } from 'lucide-react';
 
 // ──────────────────────────────────────────────
@@ -25,43 +29,47 @@ import {
 // ──────────────────────────────────────────────
 function SkeletonTable() {
   return (
-    <div className="glass-card-sm overflow-hidden">
+    <div className="rounded-xl border border-white/[0.06] bg-white/[0.01] overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-left border-collapse">
           <thead>
-            <tr style={{ borderBottom: '1px solid #2a2a3a' }}>
-              {['Timestamp', 'Source IP', 'Dest IP', 'Protocol', 'Action', 'Severity', 'Source', 'Country'].map(
-                (h) => (
-                  <th
-                    key={h}
-                    className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                    style={{ color: '#71717a' }}
-                  >
-                    {h}
-                  </th>
-                ),
-              )}
+            <tr className="border-b border-white/[0.06] bg-white/[0.01]">
+              {[
+                { h: 'Timestamp', w: 'w-[140px]' },
+                { h: 'Source → Destination', w: 'w-[250px]' },
+                { h: 'Event & Payload', w: 'min-w-[260px]' },
+                { h: 'Protocol', w: 'w-[80px]' },
+                { h: 'Action', w: 'w-[85px]' },
+                { h: 'Severity', w: 'w-[105px]' },
+                { h: 'Source', w: 'w-[100px]' },
+                { h: 'Location', w: 'w-[110px]' },
+              ].map(({ h, w }, idx) => (
+                <th
+                  key={h}
+                  className={`py-3 text-[11px] font-medium uppercase tracking-wider text-slate-400 ${
+                    idx === 0 ? 'pl-5 pr-4' : idx === 7 ? 'pl-4 pr-5' : 'px-4'
+                  } ${w}`}
+                >
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-white/[0.03]">
             {Array.from({ length: 8 }).map((_, i) => (
-              <tr
-                key={i}
-                style={{
-                  borderBottom: '1px solid rgba(42, 42, 58, 0.5)',
-                  background: i % 2 === 0 ? 'transparent' : 'rgba(26, 26, 36, 0.2)',
-                }}
-              >
+              <tr key={i} className="animate-pulse">
                 {Array.from({ length: 8 }).map((_, j) => (
-                  <td key={j} className="px-4 py-3">
+                  <td
+                    key={j}
+                    className={`py-3.5 ${
+                      j === 0 ? 'pl-5 pr-4' : j === 7 ? 'pl-4 pr-5' : 'px-4'
+                    }`}
+                  >
                     <div
+                      className="rounded bg-white/[0.04]"
                       style={{
-                        height: 14,
-                        borderRadius: 4,
-                        background: 'linear-gradient(90deg, #1a1a24 25%, #222230 50%, #1a1a24 75%)',
-                        backgroundSize: '200% 100%',
-                        animation: 'shimmer 1.5s infinite',
-                        width: j === 0 ? 120 : j < 3 ? 100 : 60,
+                        height: 12,
+                        width: j === 0 ? 100 : j === 1 ? 180 : j === 2 ? 220 : j === 3 ? 45 : 65,
                       }}
                     />
                   </td>
@@ -71,12 +79,6 @@ function SkeletonTable() {
           </tbody>
         </table>
       </div>
-      <style>{`
-        @keyframes shimmer {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-      `}</style>
     </div>
   );
 }
@@ -142,7 +144,7 @@ const selectStyle: React.CSSProperties = {
 
 const severityOptions: LogSeverity[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
 const sourceOptions: LogSource[] = [
-  'FIREWALL', 'IDS', 'ANTIVIRUS', 'SERVER', 'APPLICATION', 'CLOUD', 'NETWORK', 'MANUAL',
+  'FIREWALL', 'IDS', 'ANTIVIRUS', 'SERVER', 'APPLICATION', 'CLOUD', 'NETWORK', 'MANUAL', 'WINDOWS_SECURITY',
 ];
 const actionOptions: LogAction[] = ['ALLOW', 'DENY', 'DROP', 'ALERT'];
 const protocolOptions: LogProtocol[] = ['TCP', 'UDP', 'HTTP', 'HTTPS', 'DNS', 'SSH'];
@@ -226,28 +228,74 @@ function UploadModal({ onClose, onSuccess, onToast }: UploadModalProps) {
   };
 
   const handleBulkSubmit = async () => {
-    let parsed: unknown;
+    let rawParsed: unknown;
     try {
-      parsed = JSON.parse(bulkJson);
+      rawParsed = JSON.parse(bulkJson);
     } catch {
-      onToast('Invalid JSON — please paste a valid JSON array', 'error');
+      onToast('Invalid JSON — please paste a valid JSON array or object', 'error');
       return;
     }
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-      onToast('Please provide a non-empty JSON array of log objects', 'error');
+
+    let parsedList: Partial<SecurityLog>[] = [];
+    if (Array.isArray(rawParsed)) {
+      parsedList = rawParsed;
+    } else if (rawParsed && typeof rawParsed === 'object') {
+      const obj = rawParsed as Record<string, unknown>;
+      if (Array.isArray(obj.logs)) {
+        parsedList = obj.logs as Partial<SecurityLog>[];
+      } else if (Array.isArray(obj.data)) {
+        parsedList = obj.data as Partial<SecurityLog>[];
+      }
+    }
+
+    if (!parsedList || parsedList.length === 0) {
+      onToast('Please provide a non-empty array of log objects', 'error');
       return;
     }
+
     setSubmitting(true);
     try {
+      // 1. Ingest into backend in batches of 100
       try {
-        await api.post('/logs/bulk', { logs: parsed });
-      } catch {
-        // Backend offline or fallback mode
+        const cleanedForBackend = parsedList.map((l) => ({
+          sourceIp: l.sourceIp || '192.168.1.100',
+          destinationIp: l.destinationIp || '10.0.0.1',
+          sourcePort: Number(l.sourcePort) || 0,
+          destinationPort: Number(l.destinationPort) || 0,
+          protocol: l.protocol || 'TCP',
+          action: l.action || 'DENY',
+          severity: l.severity || 'HIGH',
+          source: l.source || 'FIREWALL',
+          eventType: l.eventType || 'SECURITY_EVENT',
+          message: l.message || 'Imported security event',
+          country: l.country || undefined,
+          city: l.city || undefined,
+          latitude: l.latitude != null ? Number(l.latitude) : undefined,
+          longitude: l.longitude != null ? Number(l.longitude) : undefined,
+          userId: l.userId || undefined,
+          userName: l.userName || undefined,
+          deviceType: l.deviceType || undefined,
+          browser: l.browser || undefined,
+          os: l.os || undefined,
+          timestamp: l.timestamp ? new Date(l.timestamp).toISOString() : new Date().toISOString(),
+          threatScore: l.threatScore != null ? Number(l.threatScore) : undefined,
+          anomalyScore: l.anomalyScore != null ? Number(l.anomalyScore) : undefined,
+          rawData: l.rawData || undefined,
+          metadata: l.metadata || undefined,
+        }));
+
+        const BATCH_SIZE = 100;
+        for (let i = 0; i < cleanedForBackend.length; i += BATCH_SIZE) {
+          const chunk = cleanedForBackend.slice(i, i + BATCH_SIZE);
+          await api.post('/logs/bulk', { logs: chunk });
+        }
+      } catch (backendErr) {
+        console.warn('Backend bulk upload chunk warning:', backendErr);
       }
 
-      // Persist in unified telemetry store so it updates the 1.2M scale dashboard & logs table
-      telemetryStore.ingestBulkLogs(parsed as Partial<SecurityLog>[]);
-      onToast(`${parsed.length} logs ingested successfully into telemetry stream`, 'success');
+      // 2. Persist in unified telemetry store so it updates the 1.2M scale dashboard & logs table
+      telemetryStore.ingestBulkLogs(parsedList);
+      onToast(`${parsedList.length} logs ingested successfully into telemetry stream`, 'success');
       onSuccess();
       onClose();
     } catch (err) {
@@ -579,6 +627,21 @@ function FormField({ label, children }: { label: string; children: React.ReactNo
   );
 }
 
+function StatusPill({ label, value, online = true }: { label: string; value: string; online?: boolean }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span
+        className="w-1.5 h-1.5 rounded-full shrink-0"
+        style={{
+          background: online ? '#34d399' : '#f87171',
+        }}
+      />
+      <span className="text-[11px] font-mono text-slate-500">{label}:</span>
+      <span className="text-[11px] font-mono font-medium text-slate-300">{value}</span>
+    </div>
+  );
+}
+
 // ──────────────────────────────────────────────
 // Main Logs Page
 // ──────────────────────────────────────────────
@@ -619,6 +682,21 @@ export default function LogsPage() {
   // Debounced search (300ms)
   const debouncedSearch = useDebounce(search, 300);
 
+  // Read URL query parameters on mount (e.g. from header search or cross-links)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const urlSearch = params.get('search');
+      const urlIp = params.get('ip') || params.get('sourceIp');
+      const urlSeverity = params.get('severity') as LogSeverity | null;
+      if (urlSearch) setSearch(urlSearch);
+      if (urlIp) setIpFilter(urlIp);
+      if (urlSeverity && ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].includes(urlSeverity)) {
+        setSelectedSeverities([urlSeverity]);
+      }
+    }
+  }, []);
+
   // Fetch version counter for manual refetch
   const [fetchVersion, setFetchVersion] = useState(0);
 
@@ -652,34 +730,43 @@ export default function LogsPage() {
         },
       );
 
-      // Normalise: backend shape is { logs, pagination } — not { data, total }
-      const logs = Array.isArray(result.logs) ? result.logs : [];
-      const total = result.pagination?.total ?? 0;
-      setData({ logs, total });
+      // Normalise: backend shape is { logs, pagination }
+      const backendLogs = Array.isArray(result.logs) ? result.logs : [];
+      const totalFromBackend = result.pagination?.total ?? 0;
+
+      // Merge recently uploaded logs from telemetryStore so user-ingested events appear immediately
+      const uploaded = telemetryStore.getUploadedLogs();
+      const existingIds = new Set(backendLogs.map((l) => String(l.id || l._id)));
+      const extraUploaded = uploaded.filter((u) => !existingIds.has(String(u.id || u._id)));
+
+      const displayedLogs =
+        page === 1 && !debouncedSearch && selectedSeverities.length === 0 && selectedSources.length === 0
+          ? [...extraUploaded, ...backendLogs].slice(0, perPage)
+          : backendLogs;
+
+      setData({
+        logs: displayedLogs,
+        total: totalFromBackend + extraUploaded.length,
+      });
       setIsDemo(false);
       hasEverFetchedRef.current = true;
-    } catch (err) {
-      // If we've never successfully fetched, stay on demo data with telemetryStore sync
-      if (!hasEverFetchedRef.current) {
-        const res = telemetryStore.getSynchronizedLogs(page, perPage, {
-          search: debouncedSearch,
-          severities: selectedSeverities,
-          sources: selectedSources,
-          ip: ipFilter,
-          country: countryFilter,
-          startDate,
-          endDate,
-          sortBy,
-          sortOrder,
-        });
+    } catch {
+      // Fallback gracefully to synchronized telemetry store
+      const res = telemetryStore.getSynchronizedLogs(page, perPage, {
+        search: debouncedSearch,
+        severities: selectedSeverities,
+        sources: selectedSources,
+        ip: ipFilter,
+        country: countryFilter,
+        startDate,
+        endDate,
+        sortBy,
+        sortOrder,
+      });
 
-        setData({ logs: res.logs, total: res.total });
-        setIsDemo(true);
-        setError(null);
-      } else {
-        // We had a working backend before; show the error
-        setError(err instanceof Error ? err.message : 'Failed to fetch logs');
-      }
+      setData({ logs: res.logs, total: res.total });
+      setIsDemo(true);
+      setError(null);
     } finally {
       setIsLoading(false);
     }
@@ -753,63 +840,92 @@ export default function LogsPage() {
   };
 
   return (
-    <div className="space-y-4 animate-fade-in">
+    <div className="space-y-6 animate-fade-in pb-16">
       {/* Toast */}
       {toast && (
         <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
       )}
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center"
-            style={{
-              background: 'rgba(6, 182, 212, 0.15)',
-              color: '#06b6d4',
-            }}
-          >
-            <ScrollText className="w-5 h-5" />
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* 1. Page Header & Status                                       */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-lg font-semibold text-white tracking-tight">
+              Security Operations Telemetry &amp; Logs
+            </h1>
+            {isDemo && (
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                Demo Data
+              </span>
+            )}
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold" style={{ color: '#e4e4e7' }}>
-                Security Logs
-              </h2>
-              {isDemo && (
-                <span
-                  className="text-[10px] font-bold px-2 py-0.5 rounded"
-                  style={{
-                    background: 'rgba(234, 179, 8, 0.15)',
-                    color: '#eab308',
-                    border: '1px solid rgba(234, 179, 8, 0.3)',
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  DEMO DATA
-                </span>
-              )}
-            </div>
-            <p className="text-xs" style={{ color: '#71717a' }}>
-              {data.total.toLocaleString()} logs found
-            </p>
+          <p className="text-xs text-slate-400 mt-1">
+            Real-time event stream ingestion, triage telemetry, and audit monitoring
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 self-start sm:self-center">
+          <button
+            onClick={() => fetchLogs()}
+            disabled={isLoading}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] transition-colors cursor-pointer"
+            title="Sync telemetry"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${isLoading ? 'animate-spin' : ''}`} />
+            <span>Sync</span>
+          </button>
+
+          <button
+            onClick={() => setShowUpload(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/15 border border-cyan-500/25 transition-colors cursor-pointer"
+          >
+            <Upload className="w-3.5 h-3.5" />
+            <span>Upload Logs</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* 2. Compact KPI Summary Cards (~20% smaller)                   */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 w-full pb-3">
+        <div className="flex flex-col items-center justify-center text-center px-4 py-2.5 rounded-lg bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.1] transition-colors w-full h-[70px]">
+          <span className="text-[10px] font-medium text-slate-400 tracking-wider uppercase">
+            Total Ingested Logs
+          </span>
+          <div className="text-xl font-bold font-mono text-white tracking-tight mt-0.5">
+            {data.total >= 1000 ? `${(data.total / 1000).toFixed(1)}K` : data.total}
           </div>
         </div>
 
-        <button
-          onClick={() => setShowUpload(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-          style={{
-            background: 'rgba(6, 182, 212, 0.1)',
-            border: '1px solid rgba(6, 182, 212, 0.3)',
-            color: '#06b6d4',
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(6, 182, 212, 0.2)')}
-          onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(6, 182, 212, 0.1)')}
-        >
-          <Upload className="w-4 h-4" />
-          Upload Logs
-        </button>
+        <div className="flex flex-col items-center justify-center text-center px-4 py-2.5 rounded-lg bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.1] transition-colors w-full h-[70px]">
+          <span className="text-[10px] font-medium text-slate-400 tracking-wider uppercase">
+            Critical Threat Events
+          </span>
+          <div className="text-xl font-bold font-mono text-rose-400 tracking-tight mt-0.5">
+            {data.logs.filter((l) => l.severity === 'CRITICAL').length}
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center justify-center text-center px-4 py-2.5 rounded-lg bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.1] transition-colors w-full h-[70px]">
+          <span className="text-[10px] font-medium text-slate-400 tracking-wider uppercase">
+            Perimeter Defended
+          </span>
+          <div className="text-xl font-bold font-mono text-white tracking-tight mt-0.5">
+            {data.logs.filter((l) => l.action === 'DENY' || l.action === 'DROP').length}
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center justify-center text-center px-4 py-2.5 rounded-lg bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.1] transition-colors w-full h-[70px]">
+          <span className="text-[10px] font-medium text-slate-400 tracking-wider uppercase">
+            Active Source Nodes
+          </span>
+          <div className="text-xl font-bold font-mono text-white tracking-tight mt-0.5">
+            {new Set(data.logs.map((l) => l.sourceIp)).size}
+          </div>
+        </div>
       </div>
 
       {/* Filters */}
@@ -851,87 +967,79 @@ export default function LogsPage() {
         }}
         onClear={clearFilters}
         activeCount={activeFilterCount}
+        totalLogsCount={data.total}
+        displayedLogsCount={data.logs.length}
       />
 
       {/* Error State */}
       {error && (
         <div
-          className="glass-card-sm p-6 text-center"
-          style={{ borderColor: 'rgba(239, 68, 68, 0.3)' }}
+          className="rounded-2xl border border-rose-500/30 bg-rose-950/20 backdrop-blur-xl p-6 text-center shadow-lg"
         >
-          <AlertTriangle className="w-8 h-8 mx-auto mb-3" style={{ color: '#ef4444' }} />
-          <p className="text-sm font-medium mb-1" style={{ color: '#ef4444' }}>
-            Failed to Load Logs
+          <AlertTriangle className="w-8 h-8 mx-auto mb-3 text-rose-400" />
+          <p className="text-sm font-semibold mb-1 text-rose-300">
+            Failed to Synchronize Telemetry Stream
           </p>
-          <p className="text-xs mb-4" style={{ color: '#71717a' }}>
+          <p className="text-xs mb-4 text-slate-400 font-mono">
             {error}
           </p>
           <button
             onClick={() => setFetchVersion((v) => v + 1)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all"
-            style={{
-              background: 'rgba(6, 182, 212, 0.1)',
-              border: '1px solid rgba(6, 182, 212, 0.3)',
-              color: '#06b6d4',
-            }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-medium transition-all bg-rose-500/15 border border-rose-500/30 text-rose-300 hover:bg-rose-500/25 cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            Retry
+            Retry Stream Sync
           </button>
         </div>
       )}
 
       {/* Table — loading skeleton or real data */}
-      {isLoading ? <SkeletonTable /> : !error && (
-        <LogTable
-          logs={data.logs}
-          onRowClick={setSelectedLog}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-          onSort={handleSort}
-        />
+      {isLoading ? (
+        <SkeletonTable />
+      ) : (
+        !error && (
+          <LogTable
+            logs={data.logs}
+            onRowClick={setSelectedLog}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            onSort={handleSort}
+            onFilterByIp={(ip) => {
+              setIpFilter(ip);
+              setPage(1);
+            }}
+            onClearFilters={clearFilters}
+            searchQuery={debouncedSearch}
+          />
+        )
       )}
 
       {/* Pagination */}
       {!error && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-2 px-1 text-slate-400">
           <div className="flex items-center gap-2">
-            <span className="text-xs" style={{ color: '#71717a' }}>
-              Show
-            </span>
+            <span className="text-xs font-mono text-slate-400">Show</span>
             <select
               value={perPage}
               onChange={(e) => {
                 setPerPage(Number(e.target.value));
                 setPage(1);
               }}
-              className="px-2 py-1 rounded text-xs"
-              style={{
-                background: '#1a1a24',
-                border: '1px solid #2a2a3a',
-                color: '#e4e4e7',
-              }}
+              className="px-2.5 py-1.5 rounded-lg text-xs font-mono bg-[#141822] border border-white/[0.1] text-slate-200 focus:outline-none focus:border-cyan-500/50 cursor-pointer"
             >
               <option value={10}>10</option>
               <option value={20}>20</option>
               <option value={50}>50</option>
               <option value={100}>100</option>
             </select>
-            <span className="text-xs" style={{ color: '#71717a' }}>
-              per page
-            </span>
+            <span className="text-xs font-mono text-slate-400">per page</span>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page === 1}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-30"
-              style={{
-                background: '#1a1a24',
-                border: '1px solid #2a2a3a',
-                color: '#a1a1aa',
-              }}
+              className="px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed bg-white/[0.03] border border-white/[0.08] text-slate-300 hover:bg-white/[0.07]"
             >
               Previous
             </button>
@@ -952,15 +1060,11 @@ export default function LogsPage() {
                 <button
                   key={pageNum}
                   onClick={() => setPage(pageNum)}
-                  className="w-8 h-8 rounded-lg text-xs font-medium transition-all"
-                  style={{
-                    background: page === pageNum ? 'rgba(6, 182, 212, 0.2)' : 'transparent',
-                    border:
-                      page === pageNum
-                        ? '1px solid rgba(6, 182, 212, 0.4)'
-                        : '1px solid transparent',
-                    color: page === pageNum ? '#06b6d4' : '#71717a',
-                  }}
+                  className={`w-8 h-8 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${
+                    page === pageNum
+                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm font-bold'
+                      : 'text-slate-400 border border-transparent hover:bg-white/[0.05] hover:text-slate-200'
+                  }`}
                 >
                   {pageNum}
                 </button>
@@ -970,19 +1074,15 @@ export default function LogsPage() {
             <button
               onClick={() => setPage(Math.min(totalPages, page + 1))}
               disabled={page === totalPages}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-30"
-              style={{
-                background: '#1a1a24',
-                border: '1px solid #2a2a3a',
-                color: '#a1a1aa',
-              }}
+              className="px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed bg-white/[0.03] border border-white/[0.08] text-slate-300 hover:bg-white/[0.07]"
             >
               Next
             </button>
           </div>
 
-          <span className="text-xs" style={{ color: '#71717a' }}>
-            Page {page} of {totalPages}
+          <span className="text-xs font-mono text-slate-400">
+            Page <span className="text-white font-semibold">{page}</span> of{' '}
+            <span className="text-white font-semibold">{totalPages}</span>
           </span>
         </div>
       )}

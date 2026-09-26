@@ -2,9 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import {
-  Shield,
   AlertTriangle,
-  Activity,
   Search,
   Filter,
   TrendingUp,
@@ -17,8 +15,10 @@ import {
   ChevronUp,
   Eye,
   Brain,
-  ArrowUpRight,
   BarChart3,
+  LayoutGrid,
+  Bell,
+  Boxes,
 } from 'lucide-react';
 import {
   BarChart,
@@ -36,29 +36,71 @@ import { mockThreatEntities, mockThreatSummary } from '@/lib/mock-data';
 import type { ThreatEntity, ThreatCategory } from '@/types';
 
 // ==================== Config ====================
-const categoryConfig: Record<ThreatCategory, { color: string; bg: string; glow: string; label: string }> = {
-  CRITICAL: { color: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)', glow: '0 0 20px rgba(239, 68, 68, 0.3), 0 0 40px rgba(239, 68, 68, 0.1)', label: 'Critical' },
-  HIGH_RISK: { color: '#f97316', bg: 'rgba(249, 115, 22, 0.15)', glow: 'none', label: 'High Risk' },
-  MEDIUM_RISK: { color: '#eab308', bg: 'rgba(234, 179, 8, 0.15)', glow: 'none', label: 'Medium Risk' },
-  LOW_RISK: { color: '#22c55e', bg: 'rgba(34, 197, 94, 0.15)', glow: 'none', label: 'Low Risk' },
-  SAFE: { color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)', glow: 'none', label: 'Safe' },
+const categoryConfig: Record<ThreatCategory, { color: string; bg: string; border: string; label: string }> = {
+  CRITICAL: {
+    color: '#ef4444',
+    bg: 'rgba(239, 68, 68, 0.12)',
+    border: 'rgba(239, 68, 68, 0.35)',
+    label: 'Critical',
+  },
+  HIGH_RISK: {
+    color: '#f97316',
+    bg: 'rgba(249, 115, 22, 0.12)',
+    border: 'rgba(249, 115, 22, 0.35)',
+    label: 'High Risk',
+  },
+  MEDIUM_RISK: {
+    color: '#eab308',
+    bg: 'rgba(234, 179, 8, 0.12)',
+    border: 'rgba(234, 179, 8, 0.25)',
+    label: 'Medium Risk',
+  },
+  LOW_RISK: {
+    color: '#22c55e',
+    bg: 'rgba(34, 197, 94, 0.12)',
+    border: 'rgba(34, 197, 94, 0.25)',
+    label: 'Low Risk',
+  },
+  SAFE: {
+    color: '#10b981',
+    bg: 'rgba(16, 185, 129, 0.12)',
+    border: 'rgba(16, 185, 129, 0.25)',
+    label: 'Safe',
+  },
 };
 
 const factorMeta: { key: keyof ThreatEntity['factors']; label: string; color: string }[] = [
-  { key: 'anomalyScore', label: 'Anomaly Score', color: '#8b5cf6' },
+  { key: 'anomalyScore', label: 'Anomaly Score', color: '#f43f5e' },
   { key: 'failedLoginFactor', label: 'Failed Logins', color: '#ef4444' },
   { key: 'countryRisk', label: 'Country Risk', color: '#f97316' },
   { key: 'portRisk', label: 'Port Risk', color: '#eab308' },
   { key: 'severityFactor', label: 'Severity', color: '#06b6d4' },
 ];
 
+const countryFlags: Record<string, string> = {
+  Russia: '🇷🇺',
+  China: '🇨🇳',
+  Ukraine: '🇺🇦',
+  Netherlands: '🇳🇱',
+  Germany: '🇩🇪',
+  'United States': '🇺🇸',
+  India: '🇮🇳',
+  Brazil: '🇧🇷',
+  Singapore: '🇸🇬',
+  Japan: '🇯🇵',
+  France: '🇫🇷',
+  'United Kingdom': '🇬🇧',
+};
+
 type SortOption = 'score_desc' | 'score_asc' | 'last_seen' | 'alert_count';
 
-const sortOptions: { value: SortOption; label: string }[] = [
-  { value: 'score_desc', label: 'Score (High → Low)' },
-  { value: 'score_asc', label: 'Score (Low → High)' },
-  { value: 'last_seen', label: 'Last Seen' },
-  { value: 'alert_count', label: 'Alert Count' },
+const filterTabs = [
+  { key: 'ALL', label: 'All' },
+  { key: 'CRITICAL', label: 'Critical' },
+  { key: 'HIGH_RISK', label: 'High Risk' },
+  { key: 'MEDIUM_RISK', label: 'Medium Risk' },
+  { key: 'LOW_RISK', label: 'Low Risk' },
+  { key: 'SAFE', label: 'Safe' },
 ];
 
 // ==================== Chart Tooltips ====================
@@ -68,14 +110,13 @@ function DistributionTooltip({ active, payload, label }: { active?: boolean; pay
     <div
       className="px-3 py-2 rounded-lg"
       style={{
-        background: 'rgba(17, 17, 24, 0.95)',
-        border: '1px solid #2a2a3a',
-        backdropFilter: 'blur(20px)',
+        background: 'rgba(11, 16, 27, 0.95)',
+        border: '1px solid #1e2738',
         boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5)',
       }}
     >
-      <p className="text-xs font-medium mb-1" style={{ color: '#e4e4e7' }}>{label}</p>
-      <p className="text-xs" style={{ color: payload[0].fill }}>
+      <p className="text-xs font-medium mb-1 text-zinc-300">{label}</p>
+      <p className="text-xs font-bold" style={{ color: payload[0].fill }}>
         {payload[0].value} entities
       </p>
     </div>
@@ -84,18 +125,23 @@ function DistributionTooltip({ active, payload, label }: { active?: boolean; pay
 
 function HistoryTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
   if (!active || !payload?.length) return null;
+  const val = payload[0].value;
   return (
     <div
       className="px-3 py-2 rounded-lg"
       style={{
-        background: 'rgba(17, 17, 24, 0.95)',
-        border: '1px solid #2a2a3a',
-        backdropFilter: 'blur(20px)',
+        background: 'rgba(11, 16, 27, 0.95)',
+        border: '1px solid #1e2738',
       }}
     >
-      <p className="text-[10px]" style={{ color: '#71717a' }}>{label}</p>
-      <p className="text-xs font-bold" style={{ color: payload[0].value >= 80 ? '#ef4444' : payload[0].value >= 60 ? '#f97316' : payload[0].value >= 40 ? '#eab308' : '#22c55e' }}>
-        Score: {payload[0].value}
+      <p className="text-[10px] text-zinc-500">{label}</p>
+      <p
+        className="text-xs font-bold"
+        style={{
+          color: val >= 80 ? '#ef4444' : val >= 60 ? '#f97316' : val >= 40 ? '#eab308' : '#22c55e',
+        }}
+      >
+        Score: {val}
       </p>
     </div>
   );
@@ -110,32 +156,33 @@ function getScoreColor(score: number): string {
   return '#10b981';
 }
 
-// ==================== Component ====================
+// ==================== Main Component ====================
 export default function ThreatsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [sortBy, setSortBy] = useState<SortOption>('score_desc');
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  // Distribution data for bar chart
+  // Distribution data strictly in the screenshot order: Safe -> Low Risk -> Medium Risk -> High Risk -> Critical
   const distributionData = useMemo(() => {
     const cats: ThreatCategory[] = ['SAFE', 'LOW_RISK', 'MEDIUM_RISK', 'HIGH_RISK', 'CRITICAL'];
-    return cats.map(cat => ({
+    return cats.map((cat) => ({
       name: categoryConfig[cat].label,
-      count: mockThreatEntities.filter(e => e.category === cat).length,
+      count: mockThreatEntities.filter((e) => e.category === cat).length,
       fill: categoryConfig[cat].color,
     }));
   }, []);
 
   // Filtered + sorted entities
   const filteredEntities = useMemo(() => {
-    let entities = mockThreatEntities.filter(entity => {
+    let entities = mockThreatEntities.filter((entity) => {
       const matchesCategory = categoryFilter === 'ALL' || entity.category === categoryFilter;
+      const q = searchQuery.toLowerCase().trim();
       const matchesSearch =
-        !searchQuery ||
-        entity.entityValue.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        entity.entityType.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (entity.country?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+        !q ||
+        entity.entityValue.toLowerCase().includes(q) ||
+        entity.entityType.toLowerCase().includes(q) ||
+        (entity.country?.toLowerCase().includes(q) ?? false);
       return matchesCategory && matchesSearch;
     });
 
@@ -147,7 +194,9 @@ export default function ThreatsPage() {
         entities = [...entities].sort((a, b) => a.score - b.score);
         break;
       case 'last_seen':
-        entities = [...entities].sort((a, b) => new Date(b.lastSeen).getTime() - new Date(a.lastSeen).getTime());
+        entities = [...entities].sort(
+          (a, b) => new Date(b.lastSeen).getTime() - new Date(a.lastSeen).getTime()
+        );
         break;
       case 'alert_count':
         entities = [...entities].sort((a, b) => b.alertCount - a.alertCount);
@@ -167,119 +216,151 @@ export default function ThreatsPage() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* ==================== Page Header ==================== */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div
-            className="p-2.5 rounded-xl"
-            style={{ background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)' }}
-          >
-            <Shield className="w-5 h-5" style={{ color: '#8b5cf6' }} />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold" style={{ color: '#e4e4e7' }}>Threat Analysis</h1>
-            <p className="text-xs" style={{ color: '#71717a' }}>
-              {filteredEntities.length} of {mockThreatEntities.length} entities · AI-powered risk scoring
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* ==================== Summary Stat Cards ==================== */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div className="space-y-5 animate-fade-in text-zinc-100">
+      {/* ==================== 1. Summary KPI Cards ==================== */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {/* Total Entities */}
-        <div className="glass-card-sm p-4 stat-card-hover" style={{ borderTop: '2px solid #06b6d4' }}>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="p-1.5 rounded-lg" style={{ background: 'rgba(6, 182, 212, 0.15)' }}>
-              <Activity className="w-3.5 h-3.5" style={{ color: '#06b6d4' }} />
+        <div className="bg-[#0b101b]/90 border border-[#1e2738] rounded-xl p-5 flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-cyan-950/40 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+              <LayoutGrid className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: '#71717a' }}>Total Entities</span>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                Total Entities
+              </p>
+              <p className="text-3xl font-bold text-cyan-400 leading-tight mt-0.5">
+                {mockThreatSummary.totalEntities}
+              </p>
+            </div>
           </div>
-          <p className="text-2xl font-bold animate-counter" style={{ color: '#06b6d4' }}>
-            {mockThreatSummary.totalEntities}
-          </p>
+          <div className="text-right">
+            <div className="flex items-center justify-end gap-1 text-cyan-400 text-xs font-semibold">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>+7%</span>
+            </div>
+            <p className="text-[11px] text-zinc-500 mt-1 font-medium">vs last 7 days</p>
+          </div>
         </div>
 
         {/* Critical */}
-        <div className="glass-card-sm p-4 stat-card-hover" style={{ borderTop: '2px solid #ef4444' }}>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="p-1.5 rounded-lg animate-pulse-slow" style={{ background: 'rgba(239, 68, 68, 0.15)' }}>
-              <AlertTriangle className="w-3.5 h-3.5" style={{ color: '#ef4444' }} />
+        <div className="bg-[#0b101b]/90 border border-[#1e2738] rounded-xl p-5 flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-red-950/40 border border-red-500/20 flex items-center justify-center text-red-500">
+              <AlertTriangle className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: '#71717a' }}>Critical</span>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                Critical
+              </p>
+              <p className="text-3xl font-bold text-red-500 leading-tight mt-0.5">
+                {mockThreatSummary.criticalCount}
+              </p>
+            </div>
           </div>
-          <p className="text-2xl font-bold animate-counter animate-pulse-slow" style={{ color: '#ef4444' }}>
-            {mockThreatSummary.criticalCount}
-          </p>
+          <div className="text-right">
+            <div className="flex items-center justify-end gap-1 text-red-500 text-xs font-semibold">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>+50%</span>
+            </div>
+            <p className="text-[11px] text-zinc-500 mt-1 font-medium">vs last 7 days</p>
+          </div>
         </div>
 
         {/* High Risk */}
-        <div className="glass-card-sm p-4 stat-card-hover" style={{ borderTop: '2px solid #f97316' }}>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="p-1.5 rounded-lg" style={{ background: 'rgba(249, 115, 22, 0.15)' }}>
-              <TrendingUp className="w-3.5 h-3.5" style={{ color: '#f97316' }} />
+        <div className="bg-[#0b101b]/90 border border-[#1e2738] rounded-xl p-5 flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-orange-950/40 border border-orange-500/20 flex items-center justify-center text-orange-500">
+              <Boxes className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: '#71717a' }}>High Risk</span>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                High Risk
+              </p>
+              <p className="text-3xl font-bold text-orange-500 leading-tight mt-0.5">
+                {mockThreatSummary.highRiskCount}
+              </p>
+            </div>
           </div>
-          <p className="text-2xl font-bold animate-counter" style={{ color: '#f97316' }}>
-            {mockThreatSummary.highRiskCount}
-          </p>
+          <div className="text-right">
+            <div className="flex items-center justify-end gap-1 text-orange-500 text-xs font-semibold">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>+33%</span>
+            </div>
+            <p className="text-[11px] text-zinc-500 mt-1 font-medium">vs last 7 days</p>
+          </div>
         </div>
 
         {/* Avg Score */}
-        <div className="glass-card-sm p-4 stat-card-hover" style={{ borderTop: `2px solid ${getScoreColor(mockThreatSummary.avgScore)}` }}>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="p-1.5 rounded-lg" style={{ background: `${getScoreColor(mockThreatSummary.avgScore)}15` }}>
-              <BarChart3 className="w-3.5 h-3.5" style={{ color: getScoreColor(mockThreatSummary.avgScore) }} />
+        <div className="bg-[#0b101b]/90 border border-[#1e2738] rounded-xl p-5 flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-yellow-950/40 border border-yellow-500/20 flex items-center justify-center text-yellow-500">
+              <BarChart3 className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: '#71717a' }}>Avg Score</span>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                Avg Score
+              </p>
+              <p className="text-3xl font-bold text-yellow-400 leading-tight mt-0.5">
+                {mockThreatSummary.avgScore}
+                <span className="text-zinc-500 text-base font-normal">/100</span>
+              </p>
+            </div>
           </div>
-          <p className="text-2xl font-bold animate-counter" style={{ color: getScoreColor(mockThreatSummary.avgScore) }}>
-            {mockThreatSummary.avgScore}
-            <span className="text-sm font-normal" style={{ color: '#71717a' }}>/100</span>
-          </p>
+          <div className="text-right">
+            <div className="flex items-center justify-end gap-1 text-emerald-400 text-xs font-semibold">
+              <TrendingDown className="w-3.5 h-3.5" />
+              <span>-12%</span>
+            </div>
+            <p className="text-[11px] text-zinc-500 mt-1 font-medium">vs last 7 days</p>
+          </div>
         </div>
       </div>
 
-      {/* ==================== Distribution Chart ==================== */}
-      <div className="glass-card-sm p-5" style={{ borderTop: '1px solid rgba(139, 92, 246, 0.2)' }}>
-        <div className="flex items-center justify-between mb-4">
+      {/* ==================== 2. Threat Score Distribution Chart ==================== */}
+      <div className="bg-[#0b101b]/90 border border-[#1e2738] rounded-xl p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div>
-            <h3 className="text-sm font-semibold" style={{ color: '#e4e4e7' }}>Threat Score Distribution</h3>
-            <p className="text-xs mt-0.5" style={{ color: '#71717a' }}>Entities by risk category</p>
+            <h3 className="text-lg font-bold text-white tracking-tight">Threat Score Distribution</h3>
+            <p className="text-xs text-zinc-400 mt-0.5">Entities by risk category</p>
           </div>
-          <div className="flex items-center gap-3 flex-wrap">
-            {(['SAFE', 'LOW_RISK', 'MEDIUM_RISK', 'HIGH_RISK', 'CRITICAL'] as ThreatCategory[]).map(cat => (
-              <div key={cat} className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full" style={{ background: categoryConfig[cat].color }} />
-                <span className="text-[10px]" style={{ color: '#71717a' }}>{categoryConfig[cat].label}</span>
+          {/* Legend */}
+          <div className="flex items-center gap-4 flex-wrap text-xs">
+            {distributionData.map((item) => (
+              <div key={item.name} className="flex items-center gap-1.5">
+                <span
+                  className="w-2.5 h-2.5 rounded-full inline-block"
+                  style={{ backgroundColor: item.fill }}
+                />
+                <span className="text-zinc-300 font-medium text-[11px]">{item.name}</span>
               </div>
             ))}
           </div>
         </div>
-        <div style={{ height: 200 }}>
+
+        <div style={{ height: 230 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={distributionData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3a" vertical={false} />
+            <BarChart
+              data={distributionData}
+              margin={{ top: 10, right: 15, left: -25, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e2738" vertical={false} />
               <XAxis
                 dataKey="name"
-                tick={{ fill: '#71717a', fontSize: 10 }}
+                tick={{ fill: '#94a3b8', fontSize: 11 }}
                 tickLine={false}
-                axisLine={{ stroke: '#2a2a3a' }}
+                axisLine={false}
               />
               <YAxis
-                tick={{ fill: '#71717a', fontSize: 10 }}
+                domain={[0, 4]}
+                ticks={[0, 1, 2, 3, 4]}
+                tick={{ fill: '#64748b', fontSize: 11 }}
                 tickLine={false}
                 axisLine={false}
                 allowDecimals={false}
               />
               <Tooltip content={<DistributionTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
-              <Bar
-                dataKey="count"
-                radius={[6, 6, 0, 0]}
-                maxBarSize={60}
-              >
+              <Bar dataKey="count" radius={[4, 4, 0, 0]} maxBarSize={64}>
                 {distributionData.map((entry, index) => (
                   <Cell key={index} fill={entry.fill} />
                 ))}
@@ -289,42 +370,35 @@ export default function ThreatsPage() {
         </div>
       </div>
 
-      {/* ==================== Filters ==================== */}
-      <div className="flex flex-wrap items-center gap-3">
+      {/* ==================== 3. Search, Filters & Sort ==================== */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Search */}
-        <div
-          className="flex items-center gap-2 px-3 py-2 rounded-lg flex-1 min-w-[200px] max-w-[400px]"
-          style={{ background: '#1a1a24', border: '1px solid #2a2a3a' }}
-        >
-          <Search className="w-4 h-4" style={{ color: '#71717a' }} />
+        <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl flex-1 min-w-[260px] max-w-[420px] bg-[#0b101b] border border-[#1e2738]">
+          <Search className="w-4 h-4 text-zinc-500 shrink-0" />
           <input
             type="text"
             placeholder="Search by IP, username, or country..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent text-sm flex-1"
-            style={{ color: '#e4e4e7', border: 'none', outline: 'none' }}
+            className="bg-transparent text-xs text-zinc-200 placeholder:text-zinc-500 w-full focus:outline-none"
           />
         </div>
 
-        {/* Category Filter Tabs */}
-        <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: '#111118', border: '1px solid #2a2a3a' }}>
-          {['ALL', 'CRITICAL', 'HIGH_RISK', 'MEDIUM_RISK', 'LOW_RISK', 'SAFE'].map((cat) => {
-            const isActive = categoryFilter === cat;
-            const catColor = cat === 'ALL' ? '#06b6d4' : categoryConfig[cat as ThreatCategory]?.color;
-            const catLabel = cat === 'ALL' ? 'All' : categoryConfig[cat as ThreatCategory]?.label;
+        {/* Filter Pills */}
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#0b101b] border border-[#1e2738] overflow-x-auto">
+          {filterTabs.map((tab) => {
+            const isActive = categoryFilter === tab.key;
             return (
               <button
-                key={cat}
-                onClick={() => setCategoryFilter(cat)}
-                className="px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200"
-                style={{
-                  background: isActive ? `${catColor}15` : 'transparent',
-                  color: isActive ? catColor : '#71717a',
-                  border: isActive ? `1px solid ${catColor}30` : '1px solid transparent',
-                }}
+                key={tab.key}
+                onClick={() => setCategoryFilter(tab.key)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 shrink-0 ${
+                  isActive
+                    ? 'bg-[#0284c7] text-white shadow-sm'
+                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-[#131b2e]'
+                }`}
               >
-                {catLabel}
+                {tab.label}
               </button>
             );
           })}
@@ -335,284 +409,278 @@ export default function ThreatsPage() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="text-xs font-medium px-3 py-2 rounded-lg appearance-none cursor-pointer pr-8"
-            style={{
-              background: '#1a1a24',
-              border: '1px solid #2a2a3a',
-              color: '#a1a1aa',
-              outline: 'none',
-            }}
+            className="text-xs font-medium px-4 py-2.5 rounded-xl appearance-none cursor-pointer pr-9 bg-[#0b101b] border border-[#1e2738] text-zinc-300 focus:outline-none focus:border-cyan-500/50"
           >
-            {sortOptions.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
+            <option value="score_desc">Score (High → Low)</option>
+            <option value="score_asc">Score (Low → High)</option>
+            <option value="last_seen">Last Seen</option>
+            <option value="alert_count">Alert Count</option>
           </select>
-          <ChevronDown
-            className="w-3 h-3 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
-            style={{ color: '#71717a' }}
-          />
+          <ChevronDown className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500" />
         </div>
       </div>
 
-      {/* ==================== Entity Cards ==================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+      {/* ==================== 4. Entity Cards Grid (3 Columns) ==================== */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filteredEntities.map((entity) => {
           const cat = categoryConfig[entity.category];
           const isExpanded = expandedId === entity.id;
           const scoreColor = getScoreColor(entity.score);
-          const isCritical = entity.category === 'CRITICAL';
 
           return (
             <div
               key={entity.id}
-              className="glass-card-sm overflow-hidden transition-all duration-300 stat-card-hover cursor-pointer"
+              className="bg-[#0b101b]/95 rounded-xl p-5 border transition-all duration-200 hover:shadow-lg cursor-pointer"
               style={{
-                boxShadow: isCritical ? cat.glow : 'none',
-                borderColor: isCritical ? 'rgba(239, 68, 68, 0.3)' : undefined,
+                borderColor: cat.border,
               }}
               onClick={() => setExpandedId(isExpanded ? null : entity.id)}
             >
-              {/* Top accent stripe */}
-              <div style={{ height: 2, background: cat.color }} />
-
-              <div className="p-4">
-                {/* Header row: entity type + value + score */}
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    {/* Entity type badge */}
-                    <div
-                      className="p-1.5 rounded-lg shrink-0"
-                      style={{
-                        background: entity.entityType === 'IP' ? 'rgba(6, 182, 212, 0.15)' : 'rgba(139, 92, 246, 0.15)',
-                        border: `1px solid ${entity.entityType === 'IP' ? 'rgba(6, 182, 212, 0.25)' : 'rgba(139, 92, 246, 0.25)'}`,
-                      }}
-                    >
-                      {entity.entityType === 'IP' ? (
-                        <Wifi className="w-3.5 h-3.5" style={{ color: '#06b6d4' }} />
-                      ) : (
-                        <User className="w-3.5 h-3.5" style={{ color: '#8b5cf6' }} />
+              {/* Header: Icon + Info + Score */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                      entity.entityType === 'IP'
+                        ? 'bg-cyan-950/60 border border-cyan-500/20 text-cyan-400'
+                        : 'bg-purple-950/60 border border-purple-500/20 text-purple-400'
+                    }`}
+                  >
+                    {entity.entityType === 'IP' ? (
+                      <Wifi className="w-5 h-5" />
+                    ) : (
+                      <User className="w-5 h-5" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="text-sm font-bold text-white tracking-tight truncate">
+                      {entity.entityValue}
+                    </h4>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span
+                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                          entity.entityType === 'IP'
+                            ? 'bg-[#082f49] text-cyan-400'
+                            : 'bg-[#3b0764] text-purple-400'
+                        }`}
+                      >
+                        {entity.entityType}
+                      </span>
+                      {entity.country && (
+                        <span className="flex items-center gap-1.5 text-xs text-zinc-400 truncate">
+                          <span>{countryFlags[entity.country] || '🌐'}</span>
+                          <span>{entity.country}</span>
+                        </span>
                       )}
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold truncate" style={{ color: '#e4e4e7' }}>
-                        {entity.entityValue}
-                      </p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span
-                          className="text-[10px] px-1.5 py-0.5 rounded font-medium"
-                          style={{
-                            background: entity.entityType === 'IP' ? 'rgba(6, 182, 212, 0.1)' : 'rgba(139, 92, 246, 0.1)',
-                            color: entity.entityType === 'IP' ? '#06b6d4' : '#8b5cf6',
-                          }}
-                        >
-                          {entity.entityType}
-                        </span>
-                        {entity.country && (
-                          <span className="flex items-center gap-1 text-[10px]" style={{ color: '#71717a' }}>
-                            <Globe className="w-3 h-3" />
-                            {entity.country}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Score */}
-                  <div className="text-center shrink-0">
-                    <div
-                      className="text-2xl font-bold leading-none"
-                      style={{ color: scoreColor }}
-                    >
-                      {entity.score}
-                    </div>
-                    <div className="text-[9px] mt-1 font-medium uppercase tracking-wider" style={{ color: '#71717a' }}>score</div>
                   </div>
                 </div>
 
-                {/* Category badge + meta row */}
-                <div className="flex items-center gap-2 flex-wrap mb-3">
-                  <span
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${isCritical ? 'animate-pulse-slow' : ''}`}
-                    style={{ background: cat.bg, color: cat.color }}
-                  >
-                    {cat.label.toUpperCase()}
-                  </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
-                    {entity.confidence}% confidence
-                  </span>
-                  {entity.alertCount > 0 && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}>
-                      {entity.alertCount} alerts
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1 text-[10px] ml-auto" style={{ color: '#71717a' }}>
-                    <Clock className="w-3 h-3" />
-                    {formatTime(entity.lastSeen)}
-                  </span>
+                {/* Score Number + Label */}
+                <div className="text-right shrink-0">
+                  <div className="text-2xl font-black leading-tight" style={{ color: scoreColor }}>
+                    {entity.score}
+                  </div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mt-0.5">
+                    SCORE
+                  </div>
                 </div>
+              </div>
 
-                {/* Factor breakdown bars */}
-                <div className="space-y-1.5">
-                  {factorMeta.map((factor) => {
-                    const value = entity.factors[factor.key];
-                    return (
-                      <div key={factor.key} className="flex items-center gap-2">
-                        <span className="text-[9px] w-[72px] shrink-0 text-right" style={{ color: '#71717a' }}>
-                          {factor.label}
-                        </span>
+              {/* Badges line: Category + Confidence + Alerts + Last Seen */}
+              <div className="flex items-center gap-2.5 mt-3.5 mb-4 flex-wrap text-xs">
+                <span className="font-bold tracking-wide text-xs" style={{ color: cat.color }}>
+                  {cat.label.toUpperCase()}
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#0c2a38] text-cyan-400 border border-cyan-800/40">
+                  {entity.confidence}% confidence
+                </span>
+                {entity.alertCount > 0 && (
+                  <span className="flex items-center gap-1 text-zinc-400 text-xs">
+                    <Bell className="w-3.5 h-3.5 text-orange-400/80" />
+                    <span>{entity.alertCount} alerts</span>
+                  </span>
+                )}
+                <span className="flex items-center gap-1 text-zinc-400 text-xs ml-auto">
+                  <Clock className="w-3.5 h-3.5 text-zinc-500" />
+                  <span>{formatTime(entity.lastSeen)}</span>
+                </span>
+              </div>
+
+              {/* Factor Breakdown Bars */}
+              <div className="space-y-2 mt-2">
+                {factorMeta.map((factor) => {
+                  const value = entity.factors[factor.key];
+                  const pct = Math.round(value * 100);
+                  return (
+                    <div key={factor.key} className="flex items-center gap-3">
+                      <span className="text-xs text-zinc-400 w-24 shrink-0 font-normal">
+                        {factor.label}
+                      </span>
+                      <div className="flex-1 h-2 rounded-full overflow-hidden bg-[#141d2e]">
                         <div
-                          className="flex-1 h-1.5 rounded-full overflow-hidden"
-                          style={{ background: '#1a1a24' }}
-                        >
-                          <div
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{
-                              width: `${value * 100}%`,
-                              background: factor.color,
-                              opacity: 0.8,
-                            }}
-                          />
-                        </div>
-                        <span className="text-[9px] w-[28px] shrink-0" style={{ color: '#a1a1aa' }}>
-                          {Math.round(value * 100)}%
-                        </span>
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${pct}%`,
+                            backgroundColor: factor.color,
+                          }}
+                        />
                       </div>
-                    );
-                  })}
-                </div>
-
-                {/* Expand toggle */}
-                <div className="flex items-center justify-center mt-3 pt-2" style={{ borderTop: '1px solid #2a2a3a' }}>
-                  {isExpanded ? (
-                    <ChevronUp className="w-4 h-4" style={{ color: '#71717a' }} />
-                  ) : (
-                    <ChevronDown className="w-4 h-4" style={{ color: '#71717a' }} />
-                  )}
-                </div>
-
-                {/* ==================== Expanded Detail Section ==================== */}
-                {isExpanded && (
-                  <div className="mt-3 pt-3 animate-fade-in" style={{ borderTop: '1px solid #2a2a3a' }}>
-                    {/* Score History Chart */}
-                    <div className="mb-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <TrendingUp className="w-3.5 h-3.5" style={{ color: '#8b5cf6' }} />
-                        <span className="text-xs font-semibold" style={{ color: '#8b5cf6' }}>Score History (7 days)</span>
-                      </div>
-                      <div style={{ height: 120 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={entity.scoreHistory} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-                            <defs>
-                              <linearGradient id={`grad-${entity.id}`} x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor={scoreColor} stopOpacity={0.3} />
-                                <stop offset="100%" stopColor={scoreColor} stopOpacity={0} />
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3a" vertical={false} />
-                            <XAxis
-                              dataKey="date"
-                              tick={{ fill: '#71717a', fontSize: 9 }}
-                              tickLine={false}
-                              axisLine={{ stroke: '#2a2a3a' }}
-                              tickFormatter={(v: string) => {
-                                const d = new Date(v);
-                                return `${d.getMonth() + 1}/${d.getDate()}`;
-                              }}
-                            />
-                            <YAxis
-                              domain={[0, 100]}
-                              tick={{ fill: '#71717a', fontSize: 9 }}
-                              tickLine={false}
-                              axisLine={false}
-                            />
-                            <Tooltip content={<HistoryTooltip />} />
-                            <Line
-                              type="monotone"
-                              dataKey="score"
-                              stroke={scoreColor}
-                              strokeWidth={2}
-                              dot={{ r: 3, fill: scoreColor, stroke: '#111118', strokeWidth: 2 }}
-                              activeDot={{ r: 5, fill: scoreColor, stroke: '#111118', strokeWidth: 2 }}
-                            />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </div>
-
-                    {/* AI Analysis */}
-                    <div className="mb-3">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Brain className="w-3.5 h-3.5" style={{ color: '#8b5cf6' }} />
-                        <span className="text-xs font-semibold" style={{ color: '#8b5cf6' }}>AI Analysis</span>
-                      </div>
-                      <p className="text-xs leading-relaxed" style={{ color: '#a1a1aa' }}>
-                        The {entity.modelUsed} model classified this {entity.entityType.toLowerCase()} entity with a{' '}
-                        <span style={{ color: scoreColor, fontWeight: 600 }}>{entity.confidence}% confidence</span> threat score of{' '}
-                        <span style={{ color: scoreColor, fontWeight: 600 }}>{entity.score}/100</span>.
-                        {entity.factors.anomalyScore > 0.7 && ' Significant anomaly patterns were detected in network behavior.'}
-                        {entity.factors.failedLoginFactor > 0.7 && ' Elevated failed authentication attempts indicate potential brute-force activity.'}
-                        {entity.factors.countryRisk > 0.7 && ` Traffic originating from ${entity.country || 'high-risk region'} contributes to elevated risk.`}
-                        {entity.factors.portRisk > 0.6 && ' Suspicious port scanning or exploitation attempts were observed.'}
-                        {entity.score >= 80 && ' Immediate investigation is recommended.'}
-                        {entity.score >= 60 && entity.score < 80 && ' Continued monitoring advised.'}
-                        {entity.score < 40 && ' Entity behavior within acceptable thresholds.'}
-                      </p>
-                    </div>
-
-                    {/* Related Alerts */}
-                    {entity.relatedAlerts.length > 0 && (
-                      <div className="mb-3">
-                        <div className="flex items-center gap-2 mb-2">
-                          <AlertTriangle className="w-3.5 h-3.5" style={{ color: '#f97316' }} />
-                          <span className="text-xs font-semibold" style={{ color: '#f97316' }}>
-                            Related Alerts ({entity.relatedAlerts.length})
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {entity.relatedAlerts.map(alertId => (
-                            <span
-                              key={alertId}
-                              className="text-[10px] px-2 py-1 rounded-md font-mono"
-                              style={{ background: '#1a1a24', color: '#a1a1aa', border: '1px solid #2a2a3a' }}
-                            >
-                              {alertId}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Model info */}
-                    <div className="flex items-center gap-3 flex-wrap pt-2" style={{ borderTop: '1px solid #2a2a3a' }}>
-                      <span className="text-[10px] px-2 py-1 rounded-md" style={{ background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
-                        Model: {entity.modelUsed}
+                      <span className="text-xs text-zinc-300 w-8 text-right font-medium font-mono">
+                        {pct}%
                       </span>
-                      <span className="text-[10px]" style={{ color: '#71717a' }}>
-                        First seen: {new Date(entity.createdAt).toLocaleDateString()}
-                      </span>
-                      <button
-                        className="ml-auto text-[10px] px-2.5 py-1 rounded-md font-medium transition-all duration-200"
-                        style={{ background: 'rgba(6, 182, 212, 0.1)', color: '#06b6d4', border: '1px solid rgba(6, 182, 212, 0.2)' }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Eye className="w-3 h-3 inline mr-1" />
-                        Investigate
-                      </button>
                     </div>
-                  </div>
+                  );
+                })}
+              </div>
+
+              {/* Bottom Chevron toggle */}
+              <div className="flex justify-center mt-3 pt-1">
+                {isExpanded ? (
+                  <ChevronUp className="w-4 h-4 text-zinc-500 hover:text-zinc-300 transition-colors" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-zinc-500 hover:text-zinc-300 transition-colors" />
                 )}
               </div>
+
+              {/* ==================== Expanded Detail Section ==================== */}
+              {isExpanded && (
+                <div
+                  className="mt-3 pt-4 border-t border-[#1e2738] animate-fade-in space-y-4"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Score History Line Chart */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <TrendingUp className="w-3.5 h-3.5 text-cyan-400" />
+                      <span className="text-xs font-semibold text-zinc-300">
+                        Score History (7 days)
+                      </span>
+                    </div>
+                    <div style={{ height: 120 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart
+                          data={entity.scoreHistory}
+                          margin={{ top: 5, right: 10, left: -25, bottom: 0 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="#1e2738" vertical={false} />
+                          <XAxis
+                            dataKey="date"
+                            tick={{ fill: '#71717a', fontSize: 9 }}
+                            tickLine={false}
+                            axisLine={{ stroke: '#1e2738' }}
+                            tickFormatter={(v: string) => {
+                              const d = new Date(v);
+                              return `${d.getMonth() + 1}/${d.getDate()}`;
+                            }}
+                          />
+                          <YAxis
+                            domain={[0, 100]}
+                            tick={{ fill: '#71717a', fontSize: 9 }}
+                            tickLine={false}
+                            axisLine={false}
+                          />
+                          <Tooltip content={<HistoryTooltip />} />
+                          <Line
+                            type="monotone"
+                            dataKey="score"
+                            stroke={scoreColor}
+                            strokeWidth={2}
+                            dot={{ r: 3, fill: scoreColor, stroke: '#0b101b', strokeWidth: 2 }}
+                            activeDot={{ r: 5, fill: scoreColor, stroke: '#0b101b', strokeWidth: 2 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {/* AI Analysis */}
+                  <div className="bg-[#111726]/80 p-3 rounded-lg border border-[#1e2738]">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Brain className="w-3.5 h-3.5 text-cyan-400" />
+                      <span className="text-xs font-semibold text-cyan-400">AI Threat Insight</span>
+                    </div>
+                    <p className="text-xs leading-relaxed text-zinc-400">
+                      The {entity.modelUsed} classified this {entity.entityType.toLowerCase()}{' '}
+                      entity with a{' '}
+                      <span className="font-semibold" style={{ color: scoreColor }}>
+                        {entity.confidence}% confidence
+                      </span>{' '}
+                      threat score of{' '}
+                      <span className="font-semibold" style={{ color: scoreColor }}>
+                        {entity.score}/100
+                      </span>
+                      .
+                      {entity.factors.anomalyScore > 0.7 &&
+                        ' Significant anomaly patterns were detected in network behavior.'}
+                      {entity.factors.failedLoginFactor > 0.7 &&
+                        ' Elevated failed authentication attempts indicate potential brute-force activity.'}
+                      {entity.factors.countryRisk > 0.7 &&
+                        ` Traffic originating from ${
+                          entity.country || 'high-risk region'
+                        } contributes to elevated risk.`}
+                      {entity.factors.portRisk > 0.6 &&
+                        ' Suspicious port scanning or exploitation attempts were observed.'}
+                      {entity.score >= 80 && ' Immediate SOC containment is recommended.'}
+                      {entity.score >= 60 &&
+                        entity.score < 80 &&
+                        ' Heightened surveillance and telemetry capture recommended.'}
+                      {entity.score < 40 && ' Entity behavior within baseline normal limits.'}
+                    </p>
+                  </div>
+
+                  {/* Related Alerts */}
+                  {entity.relatedAlerts.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <AlertTriangle className="w-3.5 h-3.5 text-orange-400" />
+                        <span className="text-xs font-semibold text-zinc-300">
+                          Related Alerts ({entity.relatedAlerts.length})
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {entity.relatedAlerts.map((alertId) => (
+                          <span
+                            key={alertId}
+                            className="text-[10px] px-2 py-0.5 rounded font-mono bg-[#141d2e] text-zinc-300 border border-[#1e2738]"
+                          >
+                            {alertId}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Footer Meta + Investigate */}
+                  <div className="flex items-center justify-between pt-2 border-t border-[#1e2738] text-[11px] text-zinc-500">
+                    <span>Model: {entity.modelUsed}</span>
+                    <button
+                      className="px-2.5 py-1 rounded-lg text-xs font-medium bg-cyan-950/80 text-cyan-400 border border-cyan-800/50 hover:bg-cyan-900/80 transition-colors flex items-center gap-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                    >
+                      <Eye className="w-3 h-3" />
+                      Investigate
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
       </div>
 
-      {/* ==================== Empty State ==================== */}
+      {/* ==================== 5. Empty State ==================== */}
       {filteredEntities.length === 0 && (
-        <div className="glass-card p-12 text-center">
-          <Filter className="w-10 h-10 mx-auto mb-3" style={{ color: '#71717a' }} />
-          <p className="text-sm font-medium" style={{ color: '#a1a1aa' }}>No threat entities match your filters</p>
-          <p className="text-xs mt-1" style={{ color: '#71717a' }}>Try adjusting your search or filter criteria</p>
+        <div className="bg-[#0b101b]/90 border border-[#1e2738] rounded-xl p-12 text-center">
+          <Filter className="w-10 h-10 mx-auto mb-3 text-zinc-600" />
+          <p className="text-sm font-semibold text-zinc-300">
+            No threat entities match your filters
+          </p>
+          <p className="text-xs mt-1 text-zinc-500">
+            Try adjusting your search query or category filter criteria
+          </p>
         </div>
       )}
     </div>

@@ -566,3 +566,160 @@ export const mockGeoAttackData: GeoAttackData = {
   },
 };
 
+// ==================== Mock Reports Data (Phase 3) ====================
+
+export const mockReportsStats = {
+  totalReports: 6,
+  pdfReports: 4,
+  csvReports: 2,
+  lastGeneratedAt: '2026-09-25T11:45:00.000Z',
+  lastReportTitle: 'Cyber Threat Intelligence — Weekly SOC Briefing',
+};
+
+export const mockReports = [
+  {
+    id: 'rep-001-soc-weekly',
+    title: 'Cyber Threat Intelligence — Weekly SOC Briefing',
+    type: 'WEEKLY' as const,
+    format: 'PDF' as const,
+    dateRangeStart: '2026-09-18T00:00:00.000Z',
+    dateRangeEnd: '2026-09-25T00:00:00.000Z',
+    status: 'COMPLETED' as const,
+    createdAt: '2026-09-25T11:45:00.000Z',
+    generatedById: 'usr-admin-01',
+    generatedBy: {
+      id: 'usr-admin-01',
+      firstName: 'Admin',
+      lastName: 'Security',
+      email: 'admin@cti.com',
+    },
+    summary: {
+      reportId: 'rep-001-soc-weekly',
+      title: 'Cyber Threat Intelligence — Weekly SOC Briefing',
+      type: 'WEEKLY',
+      format: 'PDF',
+      dateRangeStart: '2026-09-18T00:00:00.000Z',
+      dateRangeEnd: '2026-09-25T00:00:00.000Z',
+      generatedAt: '2026-09-25T11:45:00.000Z',
+      generatedBy: {
+        id: 'usr-admin-01',
+        name: 'Admin Security',
+        email: 'admin@cti.com',
+      },
+      metrics: {
+        totalLogs: 10420,
+        anomalousLogs: 1380,
+        totalAlerts: 48,
+        criticalAlerts: 14,
+        highAlerts: 22,
+        mediumAlerts: 9,
+        lowAlerts: 3,
+        resolvedAlerts: 31,
+        activeAlerts: 17,
+        blockedIpsCount: 12,
+        averageThreatScore: 48.7,
+        riskPosture: 'ELEVATED' as const,
+      },
+      severityBreakdown: [
+        { severity: 'CRITICAL', count: 14, percentage: 29 },
+        { severity: 'HIGH', count: 22, percentage: 46 },
+        { severity: 'MEDIUM', count: 9, percentage: 19 },
+        { severity: 'LOW', count: 3, percentage: 6 },
+      ],
+      statusBreakdown: [
+        { status: 'NEW', count: 8 },
+        { status: 'INVESTIGATING', count: 9 },
+        { status: 'RESOLVED', count: 31 },
+        { status: 'FALSE_POSITIVE', count: 2 },
+      ],
+      topThreatTypes: [
+        { type: 'BRUTE_FORCE', count: 18 },
+        { type: 'PORT_SCAN', count: 12 },
+        { type: 'DDOS', count: 9 },
+        { type: 'CREDENTIAL_STUFFING', count: 6 },
+      ],
+      topOffendingIps: [
+        { ip: '185.220.101.5', count: 1420, country: 'Russia', avgScore: 88.4 },
+        { ip: '103.251.167.20', count: 980, country: 'China', avgScore: 82.1 },
+        { ip: '45.154.255.89', count: 670, country: 'Iran', avgScore: 94.6 },
+      ],
+      topTargetPorts: [
+        { port: 22, count: 2150 },
+        { port: 443, count: 1840 },
+        { port: 3389, count: 920 },
+      ],
+      recentAlerts: [
+        {
+          id: 'alt-001',
+          title: 'Distributed SSH Brute Force Campaign',
+          type: 'BRUTE_FORCE',
+          severity: 'CRITICAL',
+          sourceIp: '185.220.101.5',
+          threatScore: 92.4,
+          createdAt: '2026-09-25T10:30:00.000Z',
+        },
+        {
+          id: 'alt-002',
+          title: 'SYN Flood Volumetric Anomaly',
+          type: 'DDOS',
+          severity: 'HIGH',
+          sourceIp: '103.251.167.20',
+          threatScore: 78.5,
+          createdAt: '2026-09-24T18:15:00.000Z',
+        },
+      ],
+      recommendations: [
+        {
+          id: 'REC-001',
+          priority: 'HIGH' as const,
+          category: 'Perimeter Defense',
+          action: 'Dynamic Geofencing & Offending IP Blacklisting',
+          description: 'Permanently drop traffic from identified repeat attacker subnet 185.220.101.0/24.',
+        },
+        {
+          id: 'REC-002',
+          priority: 'HIGH' as const,
+          category: 'Identity Security',
+          action: 'Enforce Global MFA & Rate Limiting',
+          description: 'Elevated credential stuffing detected across public gateway endpoints.',
+        },
+      ],
+    },
+  },
+  {
+    id: 'rep-002-daily-telemetry',
+    title: 'Daily Telemetry & Anomaly Audit Sheet',
+    type: 'DAILY' as const,
+    format: 'CSV' as const,
+    dateRangeStart: '2026-09-24T00:00:00.000Z',
+    dateRangeEnd: '2026-09-25T00:00:00.000Z',
+    status: 'COMPLETED' as const,
+    createdAt: '2026-09-25T08:12:00.000Z',
+    generatedById: 'usr-admin-01',
+    generatedBy: {
+      id: 'usr-admin-01',
+      firstName: 'Admin',
+      lastName: 'Security',
+      email: 'admin@cti.com',
+    },
+  },
+  {
+    id: 'rep-003-incident-postmortem',
+    title: 'Incident Analysis — Automated Threat Escalation',
+    type: 'INCIDENT' as const,
+    format: 'PDF' as const,
+    dateRangeStart: '2026-09-23T00:00:00.000Z',
+    dateRangeEnd: '2026-09-25T00:00:00.000Z',
+    status: 'COMPLETED' as const,
+    createdAt: '2026-09-24T16:30:00.000Z',
+    generatedById: 'usr-analyst-01',
+    generatedBy: {
+      id: 'usr-analyst-01',
+      firstName: 'SOC',
+      lastName: 'Analyst',
+      email: 'analyst@cti.com',
+    },
+  },
+];
+
+

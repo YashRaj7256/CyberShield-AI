@@ -647,7 +647,11 @@ async function main() {
   for (let i = 0; i < TOTAL_ALERTS; i++) {
     const sourcelog = alertSourceLogs[i % alertSourceLogs.length]!;
     const alertType = pick(ALERT_TYPES);
-    const severity = i < 20 ? 'CRITICAL' : i < 60 ? 'HIGH' : i < 110 ? 'MEDIUM' : 'LOW';
+    const threatScore = Math.round(sourcelog.threatScore || randomFloat(35, 98));
+    const severity =
+      threatScore >= 80 ? 'CRITICAL' :
+      threatScore >= 60 ? 'HIGH' :
+      threatScore >= 40 ? 'MEDIUM' : 'LOW';
     const statusRoll = random();
     const status =
       statusRoll < 0.35 ? 'NEW' :
@@ -665,7 +669,7 @@ async function main() {
       title,
       description: `${title}. Source IP: ${sourcelog.sourceIp}, Country: ${sourcelog.country}. Event detected by ${sourcelog.source} at ${sourcelog.timestamp.toISOString()}.`,
       sourceIp: sourcelog.sourceIp,
-      threatScore: sourcelog.threatScore || randomFloat(40, 100),
+      threatScore,
       reasons: [
         `Detected from ${sourcelog.country}`,
         `Event type: ${sourcelog.eventType}`,

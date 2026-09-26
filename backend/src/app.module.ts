@@ -9,6 +9,8 @@ import { LogsModule } from './logs/logs.module.js';
 import { AlertsModule } from './alerts/alerts.module.js';
 import { DashboardModule } from './dashboard/dashboard.module.js';
 import { JobsModule } from './jobs/jobs.module.js';
+import { PredictionsModule } from './predictions/predictions.module.js';
+import { ReportsModule } from './reports/reports.module.js';
 
 /**
  * Root application module — imports and configures all feature modules,
@@ -54,6 +56,8 @@ import { JobsModule } from './jobs/jobs.module.js';
     AlertsModule,
     DashboardModule,
     JobsModule,
+    PredictionsModule,
+    ReportsModule,
   ],
 })
 export class AppModule {}

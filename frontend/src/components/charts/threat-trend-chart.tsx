@@ -76,52 +76,50 @@ export default function ThreatTrendChart({ data, isLoading }: ThreatTrendChartPr
 
   return (
     <div
-      className="relative rounded-2xl flex flex-col h-full overflow-hidden"
+      className="relative rounded-xl flex flex-col h-full overflow-hidden"
       style={{
-        padding: '24px',
-        background: 'rgba(11, 15, 25, 0.92)',
-        border: '1px solid rgba(30, 41, 59, 0.9)',
-        transition: 'border-color 0.2s, box-shadow 0.2s',
+        padding: '20px',
+        background: 'rgba(13, 17, 23, 0.92)',
+        border: '1px solid rgba(255, 255, 255, 0.07)',
+        transition: 'border-color 0.15s',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = 'rgba(51, 65, 85, 0.9)';
-        e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.25)';
+        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = 'rgba(30, 41, 59, 0.9)';
-        e.currentTarget.style.boxShadow = 'none';
+        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.07)';
       }}
     >
-      {/* Top accent */}
-      <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-500/70 to-transparent" />
+      {/* Top subtle line */}
+      <div className="absolute inset-x-0 top-0 h-px bg-white/[0.06]" />
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
-          <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-[14px] font-semibold text-white tracking-tight">
               Threat Activity & Mitigation Trend
             </h3>
-            <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-cyan-950/40 text-cyan-400 border border-cyan-800/40">
+            <span className="text-[9px] font-mono font-medium px-1.5 py-0.5 rounded bg-cyan-950/40 text-cyan-400 border border-cyan-800/30">
               30-DAY
             </span>
           </div>
           {/* Summary stats */}
           <div className="flex flex-wrap items-center gap-3 mt-1.5 text-[12px]">
             <div className="flex items-center gap-1.5 text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-cyan-400" />
-              <span>Detected: <strong className="text-slate-200 font-mono">{totalThreats.toLocaleString()}</strong></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+              <span>Detected: <strong className="text-slate-200 font-mono font-medium">{totalThreats.toLocaleString()}</strong></span>
             </div>
             <div className="flex items-center gap-1.5 text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-blue-500" />
-              <span>Mitigated: <strong className="text-slate-200 font-mono">{totalBlocked.toLocaleString()}</strong></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+              <span>Mitigated: <strong className="text-slate-200 font-mono font-medium">{totalBlocked.toLocaleString()}</strong></span>
             </div>
             <span
-              className="text-[11px] font-mono font-medium px-1.5 py-0.5 rounded border"
+              className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded border"
               style={{
-                background: 'rgba(52,211,153,0.08)',
+                background: 'rgba(52,211,153,0.06)',
                 color: '#34d399',
-                borderColor: 'rgba(52,211,153,0.2)',
+                borderColor: 'rgba(52,211,153,0.18)',
               }}
             >
               {mitigationRate}% Defended
@@ -131,18 +129,18 @@ export default function ThreatTrendChart({ data, isLoading }: ThreatTrendChartPr
 
         {/* View mode segmented control */}
         <div
-          className="flex items-center gap-0.5 p-0.5 rounded-xl self-start sm:self-auto shrink-0"
-          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+          className="flex items-center gap-0.5 p-0.5 rounded-lg self-start sm:self-auto shrink-0 bg-slate-900/60"
+          style={{ border: '1px solid rgba(255,255,255,0.06)' }}
         >
           {(['all', 'threats', 'blocked'] as ViewMode[]).map((mode) => (
             <button
               key={mode}
               onClick={() => setViewMode(mode)}
-              className="px-3 py-1.5 text-[11px] font-mono font-medium rounded-lg transition-all duration-150 cursor-pointer capitalize"
+              className="px-2.5 py-1 text-[11px] font-mono font-medium rounded-md transition-all duration-150 cursor-pointer capitalize"
               style={{
-                background: viewMode === mode ? 'rgba(6,182,212,0.15)' : 'transparent',
-                color: viewMode === mode ? '#22d3ee' : '#6b7280',
-                border: viewMode === mode ? '1px solid rgba(6,182,212,0.3)' : '1px solid transparent',
+                background: viewMode === mode ? 'rgba(6,182,212,0.14)' : 'transparent',
+                color: viewMode === mode ? '#22d3ee' : '#64748b',
+                border: viewMode === mode ? '1px solid rgba(6,182,212,0.25)' : '1px solid transparent',
               }}
             >
               {mode === 'all' ? 'Combined' : mode === 'threats' ? 'Threats' : 'Mitigated'}

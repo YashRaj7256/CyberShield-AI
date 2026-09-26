@@ -69,27 +69,25 @@ export default function SeverityDistributionChart({ data, isLoading }: SeverityD
 
   return (
     <div
-      className="relative rounded-2xl flex flex-col h-full overflow-hidden"
+      className="relative rounded-xl flex flex-col h-full overflow-hidden"
       style={{
-        padding: '24px',
-        background: 'rgba(11, 15, 25, 0.92)',
-        border: '1px solid rgba(30, 41, 59, 0.9)',
-        transition: 'border-color 0.2s, box-shadow 0.2s',
+        padding: '20px',
+        background: 'rgba(13, 17, 23, 0.92)',
+        border: '1px solid rgba(255, 255, 255, 0.07)',
+        transition: 'border-color 0.15s',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = 'rgba(51, 65, 85, 0.9)';
-        e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.25)';
+        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = 'rgba(30, 41, 59, 0.9)';
-        e.currentTarget.style.boxShadow = 'none';
+        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.07)';
       }}
     >
-      {/* Top accent */}
-      <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500/70 to-transparent" />
+      {/* Top subtle line */}
+      <div className="absolute inset-x-0 top-0 h-px bg-white/[0.06]" />
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-2 mb-4">
+      <div className="flex items-start justify-between gap-2 mb-3">
         <div>
           <h3 className="text-[14px] font-semibold text-white tracking-tight">
             Severity Distribution
@@ -99,10 +97,10 @@ export default function SeverityDistributionChart({ data, isLoading }: SeverityD
           </p>
         </div>
         <span
-          className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded shrink-0"
+          className="text-[9px] font-mono font-medium px-1.5 py-0.5 rounded shrink-0"
           style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.07)',
             color: '#64748b',
           }}
         >
@@ -112,27 +110,27 @@ export default function SeverityDistributionChart({ data, isLoading }: SeverityD
 
       {isLoading ? (
         <div className="flex-1 flex flex-col justify-between gap-4">
-          <div className="relative h-[190px] w-[190px] mx-auto rounded-full animate-pulse border-[10px] border-slate-800 flex items-center justify-center">
+          <div className="relative h-[180px] w-[180px] mx-auto rounded-full animate-pulse border-[8px] border-slate-800 flex items-center justify-center">
             <span className="text-[11px] font-mono text-slate-600">Loading…</span>
           </div>
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-2 gap-2">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-[60px] rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.03)' }} />
+              <div key={i} className="h-[54px] rounded-lg animate-pulse bg-white/[0.02]" />
             ))}
           </div>
         </div>
       ) : (
         <>
           {/* Donut Chart */}
-          <div className="relative h-[185px] w-full min-w-0 my-2">
+          <div className="relative h-[180px] w-full min-w-0 my-1">
             <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <PieChart>
                 <Pie
                   data={chartData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={58}
-                  outerRadius={80}
+                  innerRadius={56}
+                  outerRadius={76}
                   paddingAngle={3}
                   dataKey="value"
                   stroke="none"
@@ -147,7 +145,7 @@ export default function SeverityDistributionChart({ data, isLoading }: SeverityD
                         opacity: activeIndex === null || activeIndex === index ? 1 : 0.45,
                         cursor: 'pointer',
                         transition: 'opacity 0.2s',
-                        filter: activeIndex === index ? `drop-shadow(0 0 8px ${entry.color}80)` : 'none',
+                        filter: activeIndex === index ? `drop-shadow(0 0 6px ${entry.color}60)` : 'none',
                       }}
                     />
                   ))}
@@ -158,49 +156,46 @@ export default function SeverityDistributionChart({ data, isLoading }: SeverityD
 
             {/* Center label */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-[26px] font-bold text-white font-mono tracking-tight leading-none">
+              <span className="text-[22px] font-bold text-white font-mono tracking-tight leading-none">
                 {total.toLocaleString()}
               </span>
-              <span className="text-[9px] uppercase font-mono font-semibold tracking-wider text-slate-500 mt-1">
-                Total Incidents
+              <span className="text-[9px] uppercase font-mono font-medium tracking-wider text-slate-500 mt-1">
+                Incidents
               </span>
             </div>
           </div>
 
-          {/* Severity breakdown */}
+          {/* Severity breakdown — neutral surfaces with semantic indicators */}
           <div className="grid grid-cols-2 gap-2 mt-1">
             {chartData.map((item) => {
               const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
-              const cfg = SEVERITY_CONFIG[item.name] ?? {
-                bg: 'rgba(255,255,255,0.02)',
-                border: 'rgba(255,255,255,0.07)',
-                bar: item.color,
-                text: item.color,
-              };
 
               return (
                 <div
                   key={item.name}
-                  className="p-3 rounded-xl border transition-all duration-150"
-                  style={{ background: cfg.bg, borderColor: cfg.border }}
+                  className="p-2.5 rounded-lg border transition-all duration-150"
+                  style={{
+                    background: 'rgba(255,255,255,0.02)',
+                    borderColor: 'rgba(255,255,255,0.05)',
+                  }}
                 >
-                  <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <div className="w-2 h-2 rounded-full shrink-0" style={{ background: item.color }} />
+                      <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: item.color }} />
                       <span className="text-[11px] font-medium text-slate-300 truncate">{item.name}</span>
                     </div>
-                    <span className="text-[11px] font-mono font-bold ml-1" style={{ color: cfg.text }}>
+                    <span className="text-[10px] font-mono font-semibold ml-1" style={{ color: item.color }}>
                       {pct}%
                     </span>
                   </div>
-                  <div className="text-[13px] font-mono font-bold text-white mb-2 leading-none">
+                  <div className="text-[13px] font-mono font-semibold text-slate-200 mb-1.5 leading-none">
                     {item.value.toLocaleString()}
                   </div>
                   {/* Progress bar */}
-                  <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.3)' }}>
+                  <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                     <div
                       className="h-full rounded-full transition-all duration-700 ease-out"
-                      style={{ width: `${pct}%`, background: cfg.bar }}
+                      style={{ width: `${pct}%`, background: item.color }}
                     />
                   </div>
                 </div>

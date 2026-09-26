@@ -25,27 +25,25 @@ export default function TopSourcesChart({ data, isLoading }: TopSourcesChartProp
 
   return (
     <div
-      className="relative rounded-2xl flex flex-col h-full overflow-hidden"
+      className="relative rounded-xl flex flex-col h-full overflow-hidden"
       style={{
-        padding: '24px',
-        background: 'rgba(11, 15, 25, 0.92)',
-        border: '1px solid rgba(30, 41, 59, 0.9)',
-        transition: 'border-color 0.2s, box-shadow 0.2s',
+        padding: '20px',
+        background: 'rgba(13, 17, 23, 0.92)',
+        border: '1px solid rgba(255, 255, 255, 0.07)',
+        transition: 'border-color 0.15s',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = 'rgba(51, 65, 85, 0.9)';
-        e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.25)';
+        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = 'rgba(30, 41, 59, 0.9)';
-        e.currentTarget.style.boxShadow = 'none';
+        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.07)';
       }}
     >
-      {/* Top accent */}
-      <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500/70 to-transparent" />
+      {/* Top subtle line */}
+      <div className="absolute inset-x-0 top-0 h-px bg-white/[0.06]" />
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-2 mb-5">
+      <div className="flex items-start justify-between gap-2 mb-4">
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-[14px] font-semibold text-white tracking-tight">
@@ -67,22 +65,22 @@ export default function TopSourcesChart({ data, isLoading }: TopSourcesChartProp
       </div>
 
       {/* Sources list */}
-      <div className="space-y-2.5 flex-1">
+      <div className="space-y-2 flex-1">
         {isLoading ? (
           Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="p-3.5 rounded-xl border"
-              style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(30,41,59,0.9)' }}
+              className="p-3 rounded-lg border bg-white/[0.02]"
+              style={{ borderColor: 'rgba(255,255,255,0.05)' }}
             >
-              <div className="flex items-center justify-between mb-2.5">
+              <div className="flex items-center justify-between mb-2">
                 <div
-                  className="h-3.5 rounded-lg animate-pulse"
-                  style={{ width: `${140 - i * 10}px`, background: 'rgba(255,255,255,0.05)' }}
+                  className="h-3 rounded-md animate-pulse bg-white/[0.05]"
+                  style={{ width: `${140 - i * 10}px` }}
                 />
-                <div className="h-3.5 w-12 rounded-lg animate-pulse" style={{ background: 'rgba(255,255,255,0.05)' }} />
+                <div className="h-3 w-12 rounded-md animate-pulse bg-white/[0.05]" />
               </div>
-              <div className="h-1.5 rounded-full animate-pulse" style={{ width: `${100 - i * 12}%`, background: 'rgba(255,255,255,0.04)' }} />
+              <div className="h-1 rounded-full animate-pulse bg-white/[0.04]" style={{ width: `${100 - i * 12}%` }} />
             </div>
           ))
         ) : (
@@ -94,27 +92,33 @@ export default function TopSourcesChart({ data, isLoading }: TopSourcesChartProp
             return (
               <div
                 key={index}
-                className="group p-3.5 rounded-xl border transition-all duration-150"
+                className="group p-2.5 rounded-lg border transition-all duration-150"
                 style={{
                   background: 'rgba(255,255,255,0.02)',
-                  borderColor: 'rgba(30,41,59,0.9)',
+                  borderColor: 'rgba(255,255,255,0.05)',
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(51,65,85,0.8)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(30,41,59,0.9)'; e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.035)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
+                }}
               >
-                <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center justify-between gap-2 mb-1.5">
                   {/* Left: rank + IP + copy + country */}
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-[10px] font-mono font-bold text-slate-600 w-4 text-center shrink-0">
+                    <span className="text-[10px] font-mono font-medium text-slate-500 w-4 text-center shrink-0">
                       #{index + 1}
                     </span>
-                    <span className="text-[12px] font-bold font-mono text-slate-100 tracking-wide truncate">
+                    <span className="text-[12px] font-medium font-mono text-slate-200 tracking-wide truncate">
                       {source.ip}
                     </span>
                     <button
                       onClick={() => handleCopy(source.ip)}
                       title="Copy IP Address"
-                      className="p-0.5 rounded text-slate-600 hover:text-slate-300 transition-colors cursor-pointer shrink-0"
+                      className="p-0.5 rounded text-slate-500 hover:text-slate-300 transition-colors cursor-pointer shrink-0"
                     >
                       {isCopied ? (
                         <Check className="w-3 h-3 text-emerald-400" />
@@ -123,9 +127,9 @@ export default function TopSourcesChart({ data, isLoading }: TopSourcesChartProp
                       )}
                     </button>
                     <span
-                      className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded shrink-0"
+                      className="text-[9px] font-mono font-medium px-1.5 py-0.5 rounded shrink-0"
                       style={{
-                        background: 'rgba(255,255,255,0.04)',
+                        background: 'rgba(255,255,255,0.03)',
                         border: '1px solid rgba(255,255,255,0.07)',
                         color: '#64748b',
                       }}
@@ -137,23 +141,23 @@ export default function TopSourcesChart({ data, isLoading }: TopSourcesChartProp
                   {/* Right: severity + count */}
                   <div className="flex items-center gap-2 shrink-0">
                     <span
-                      className="text-[10px] font-mono font-bold uppercase px-1.5 py-0.5 rounded"
+                      className="text-[9px] font-mono font-medium uppercase px-1.5 py-0.5 rounded"
                       style={{
-                        background: `${color}12`,
+                        background: `${color}10`,
                         color: color,
-                        border: `1px solid ${color}28`,
+                        border: `1px solid ${color}22`,
                       }}
                     >
                       {source.threatLevel}
                     </span>
-                    <span className="text-[12px] font-mono font-bold text-slate-200 min-w-[40px] text-right tabular-nums">
+                    <span className="text-[12px] font-mono font-medium text-slate-200 min-w-[36px] text-right tabular-nums">
                       {source.count.toLocaleString()}
                     </span>
                   </div>
                 </div>
 
-                {/* Progress bar — thicker */}
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.35)' }}>
+                {/* Progress bar */}
+                <div className="h-1 rounded-full overflow-hidden bg-white/[0.05]">
                   <div
                     className="h-full rounded-full transition-all duration-700 ease-out"
                     style={{ width: `${width}%`, background: color }}
@@ -167,8 +171,7 @@ export default function TopSourcesChart({ data, isLoading }: TopSourcesChartProp
 
       {/* Footer */}
       <div
-        className="flex items-center justify-between text-[10px] text-slate-600 pt-3 mt-3"
-        style={{ borderTop: '1px solid rgba(30,41,59,0.7)' }}
+        className="flex items-center justify-between text-[10px] text-slate-500 pt-2.5 mt-2.5 border-t border-white/[0.06]"
       >
         <span className="font-mono uppercase tracking-wider">Threat Reputation: High Risk</span>
         <span className="font-mono">{chartData.length} hostile nodes indexed</span>

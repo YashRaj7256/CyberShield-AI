@@ -20,3 +20,4 @@ ml-service/venv/
 .idea/
 
 docker_data/
+backend/storage/

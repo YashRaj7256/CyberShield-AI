@@ -18,7 +18,11 @@ import {
   LogOut,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
+import { useSidebarStore, SIDEBAR_EXPANDED_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '@/stores/sidebar-store';
 import CyberShieldLogo from '@/components/brand/CyberShieldLogo';
+import { useApi } from '@/hooks/use-api';
+import telemetryStore from '@/lib/telemetry-store';
+import { mockDashboardStats } from '@/lib/mock-data';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -38,37 +42,37 @@ interface NavSection {
 }
 
 // ---------------------------------------------------------------------------
-// Navigation structure — same hrefs as before, now grouped
+// Navigation structure — standard items & semantic icons
 // ---------------------------------------------------------------------------
 
 const navSections: NavSection[] = [
   {
     sectionLabel: 'Overview',
     items: [
-      { label: 'Dashboard', href: '/overview', icon: <LayoutDashboard className="w-[18px] h-[18px]" /> },
+      { label: 'Dashboard', href: '/overview', icon: <LayoutDashboard className="w-4 h-4" /> },
     ],
   },
   {
     sectionLabel: 'Monitoring',
     items: [
-      { label: 'Security Logs', href: '/logs', icon: <ScrollText className="w-[18px] h-[18px]" /> },
-      { label: 'Alerts', href: '/alerts', icon: <Bell className="w-[18px] h-[18px]" />, badge: 23 },
-      { label: 'Threat Analysis', href: '/threats', icon: <ShieldAlert className="w-[18px] h-[18px]" /> },
-      { label: 'Predictions', href: '/predictions', icon: <TrendingUp className="w-[18px] h-[18px]" /> },
+      { label: 'Security Logs', href: '/logs', icon: <ScrollText className="w-4 h-4" /> },
+      { label: 'Alerts', href: '/alerts', icon: <Bell className="w-4 h-4" />, badge: 23 },
+      { label: 'Threat Analysis', href: '/threats', icon: <ShieldAlert className="w-4 h-4" /> },
+      { label: 'Predictions', href: '/predictions', icon: <TrendingUp className="w-4 h-4" /> },
     ],
   },
   {
     sectionLabel: 'Intelligence',
     items: [
-      { label: 'Geo Map', href: '/geo-map', icon: <Globe className="w-[18px] h-[18px]" /> },
-      { label: 'Reports', href: '/reports', icon: <FileText className="w-[18px] h-[18px]" /> },
+      { label: 'Geo Map', href: '/geo-map', icon: <Globe className="w-4 h-4" /> },
+      { label: 'Reports', href: '/reports', icon: <FileText className="w-4 h-4" /> },
     ],
   },
   {
     sectionLabel: 'System',
     items: [
-      { label: 'Users', href: '/users', icon: <Users className="w-[18px] h-[18px]" />, adminOnly: true },
-      { label: 'Settings', href: '/settings', icon: <Settings className="w-[18px] h-[18px]" /> },
+      { label: 'Users', href: '/users', icon: <Users className="w-4 h-4" />, adminOnly: true },
+      { label: 'Settings', href: '/settings', icon: <Settings className="w-4 h-4" /> },
     ],
   },
 ];
@@ -80,8 +84,12 @@ const navSections: NavSection[] = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, toggleSidebar } = useSidebarStore();
   const [mounted, setMounted] = useState(false);
+
+  // Live alert stats from backend
+  const rawStats = useApi<{ criticalAlerts: number; totalAlerts: number }>('/dashboard/stats', undefined, { fallbackData: undefined });
+  const alertCount = rawStats.data?.criticalAlerts ?? 23;
 
   useEffect(() => {
     setMounted(true);
@@ -96,7 +104,7 @@ export default function Sidebar() {
     <aside
       className="fixed left-0 top-0 h-screen flex flex-col z-40 transition-all duration-300 ease-in-out"
       style={{
-        width: collapsed ? '72px' : '272px',
+        width: collapsed ? `${SIDEBAR_COLLAPSED_WIDTH}px` : `${SIDEBAR_EXPANDED_WIDTH}px`,
         background: 'rgba(9, 11, 18, 0.98)',
         backdropFilter: 'blur(24px)',
         borderRight: '1px solid rgba(255,255,255,0.06)',
@@ -108,7 +116,7 @@ export default function Sidebar() {
       <div
         className="shrink-0 transition-all duration-300"
         style={{
-          padding: collapsed ? '18px 0' : '20px 20px 16px 20px',
+          padding: collapsed ? '18px 0' : '18px 16px 14px 16px',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
         }}
       >
@@ -131,7 +139,7 @@ export default function Sidebar() {
             aria-label="CyberShield AI home"
           >
             <div className="flex items-center">
-              <CyberShieldLogo variant="full" width={198} />
+              <CyberShieldLogo variant="full" width={170} />
             </div>
 
             {/* Brand subtitle */}
@@ -166,60 +174,49 @@ export default function Sidebar() {
           if (visibleItems.length === 0) return null;
 
           return (
-            <div key={section.sectionLabel} className={sIdx > 0 ? 'mt-1' : ''}>
+            <div key={section.sectionLabel} className={sIdx > 0 ? 'mt-2' : ''}>
               {/* Section divider */}
               {sIdx > 0 && <div className="nav-group-divider" />}
 
               {/* Section label — only when expanded */}
               {!collapsed && (
-                <div className="nav-section-label mt-3 mb-1">
+                <div className="nav-section-label mt-2 mb-1">
                   {section.sectionLabel}
                 </div>
               )}
 
               {/* Nav items */}
-              <div className="px-2 space-y-0.5">
+              <div className="px-2 space-y-1">
                 {visibleItems.map((item) => {
                   const isActive = pathname === item.href;
+                  const itemBadge = item.href === '/alerts' ? alertCount : item.badge;
 
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="group relative flex items-center gap-3 rounded-xl transition-all duration-150"
+                      className={`group relative flex items-center gap-2.5 rounded-lg transition-all duration-150 ${
+                        isActive
+                          ? 'bg-cyan-500/[0.08] text-cyan-300 font-medium border border-cyan-500/20'
+                          : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.03] border border-transparent'
+                      }`}
                       style={{
-                        padding: collapsed ? '10px 0' : '9px 10px',
+                        padding: collapsed ? '9px 0' : '8px 10px',
                         justifyContent: collapsed ? 'center' : 'flex-start',
-                        background: isActive
-                          ? 'rgba(6, 182, 212, 0.08)'
-                          : 'transparent',
-                        color: isActive ? '#22d3ee' : '#6b7280',
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!isActive) {
-                          e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-                          e.currentTarget.style.color = '#cbd5e1';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!isActive) {
-                          e.currentTarget.style.background = 'transparent';
-                          e.currentTarget.style.color = '#6b7280';
-                        }
                       }}
                     >
                       {/* Active indicator strip */}
                       {isActive && (
                         <div
-                          className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-cyan-400"
-                          style={{ marginLeft: '-8px' }}
+                          className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full bg-cyan-400"
                         />
                       )}
 
                       {/* Icon */}
                       <span
-                        className="shrink-0 transition-colors duration-150"
-                        style={{ color: isActive ? '#22d3ee' : 'inherit' }}
+                        className={`shrink-0 transition-colors duration-150 ${
+                          isActive ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-300'
+                        }`}
                       >
                         {item.icon}
                       </span>
@@ -230,16 +227,16 @@ export default function Sidebar() {
                           <span className="flex-1 text-[13px] font-medium truncate leading-none">
                             {item.label}
                           </span>
-                          {item.badge != null && item.badge > 0 && (
+                          {itemBadge != null && itemBadge > 0 && (
                             <span
-                              className="ml-auto text-[10px] font-bold rounded-full px-1.5 py-0.5 shrink-0 tabular-nums"
+                              className="ml-auto text-[10px] font-mono font-bold rounded-full px-2 py-0.5 shrink-0 tabular-nums flex items-center justify-center min-w-[20px] h-[18px]"
                               style={{
-                                background: 'rgba(239, 68, 68, 0.15)',
+                                background: 'rgba(239, 68, 68, 0.12)',
                                 color: '#f87171',
-                                border: '1px solid rgba(239,68,68,0.25)',
+                                border: '1px solid rgba(239, 68, 68, 0.25)',
                               }}
                             >
-                              {item.badge}
+                              {itemBadge}
                             </span>
                           )}
                         </>
@@ -257,8 +254,8 @@ export default function Sidebar() {
                           }}
                         >
                           {item.label}
-                          {item.badge != null && item.badge > 0 && (
-                            <span className="ml-1.5 text-rose-400">({item.badge})</span>
+                          {itemBadge != null && itemBadge > 0 && (
+                            <span className="ml-1.5 text-rose-400">({itemBadge})</span>
                           )}
                         </div>
                       )}
@@ -275,26 +272,13 @@ export default function Sidebar() {
       {/* Bottom: User Profile + Collapse Toggle                              */}
       {/* ----------------------------------------------------------------- */}
       <div
-        className="shrink-0 px-2 py-3 space-y-1.5"
+        className="shrink-0 p-2.5 space-y-1"
         style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
       >
         {/* Collapse Toggle */}
         <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="w-full flex items-center justify-center gap-2 rounded-xl text-[12px] font-medium transition-all duration-200 cursor-pointer"
-          style={{
-            padding: '8px 10px',
-            color: '#4b5563',
-            background: 'transparent',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-            e.currentTarget.style.color = '#94a3b8';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.color = '#4b5563';
-          }}
+          onClick={toggleSidebar}
+          className="w-full flex items-center justify-center gap-2 rounded-lg text-[12px] font-medium transition-all duration-150 cursor-pointer text-slate-400 hover:text-slate-200 hover:bg-white/[0.03] py-2 px-2.5"
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed
@@ -310,7 +294,7 @@ export default function Sidebar() {
 
         {/* User Info */}
         <div
-          className="flex items-center gap-2.5 rounded-xl"
+          className="flex items-center gap-2.5 rounded-lg bg-white/[0.02] border border-white/[0.04]"
           style={{
             padding: collapsed ? '8px 0' : '8px 10px',
             justifyContent: collapsed ? 'center' : 'flex-start',
@@ -318,8 +302,8 @@ export default function Sidebar() {
         >
           {/* Avatar */}
           <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold text-white shrink-0"
-            style={{ background: 'linear-gradient(135deg, #06b6d4, #3b82f6)' }}
+            className="w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-mono font-bold text-white shrink-0"
+            style={{ background: 'linear-gradient(135deg, #0891b2, #2563eb)' }}
           >
             {userInitials}
           </div>
@@ -327,25 +311,16 @@ export default function Sidebar() {
           {!collapsed && (
             <>
               <div className="flex-1 min-w-0">
-                <p className="text-[12px] font-semibold text-slate-200 truncate leading-tight">
+                <p className="text-[12px] font-medium text-slate-200 truncate leading-tight">
                   {user?.firstName ?? 'Admin'} {user?.lastName ?? 'User'}
                 </p>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 leading-tight mt-0.5">
+                <p className="text-[9px] uppercase tracking-wider font-mono font-semibold text-cyan-400/90 leading-tight mt-0.5">
                   {user?.role ?? 'ADMIN'}
                 </p>
               </div>
               <button
                 onClick={logout}
-                className="p-1.5 rounded-lg transition-colors duration-150 cursor-pointer shrink-0"
-                style={{ color: '#4b5563' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = '#f87171';
-                  e.currentTarget.style.background = 'rgba(239,68,68,0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = '#4b5563';
-                  e.currentTarget.style.background = 'transparent';
-                }}
+                className="p-1.5 rounded-md text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors duration-150 cursor-pointer shrink-0"
                 title="Sign out"
               >
                 <LogOut className="w-3.5 h-3.5" />

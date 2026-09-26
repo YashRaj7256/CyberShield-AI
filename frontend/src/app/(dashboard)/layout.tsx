@@ -6,6 +6,7 @@ import Sidebar from '@/components/layout/sidebar';
 import CyberShieldLogo from '@/components/brand/CyberShieldLogo';
 import Header from '@/components/layout/header';
 import { useAuthStore } from '@/stores/auth-store';
+import { useSidebarStore, SIDEBAR_EXPANDED_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '@/stores/sidebar-store';
 
 export default function DashboardLayout({
   children,
@@ -14,31 +15,15 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const { isAuthenticated, loadFromStorage } = useAuthStore();
+  const { collapsed } = useSidebarStore();
   const [mounted, setMounted] = useState(false);
-  const [sidebarWidth, setSidebarWidth] = useState(272);
+
+  const sidebarWidth = collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_EXPANDED_WIDTH;
 
   useEffect(() => {
     loadFromStorage();
     setMounted(true);
   }, [loadFromStorage]);
-
-  // Listen for sidebar width changes
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      const sidebar = document.querySelector('aside');
-      if (sidebar) {
-        const width = parseInt(sidebar.style.width || '280');
-        setSidebarWidth(width);
-      }
-    });
-
-    const sidebar = document.querySelector('aside');
-    if (sidebar) {
-      observer.observe(sidebar, { attributes: true, attributeFilter: ['style'] });
-    }
-
-    return () => observer.disconnect();
-  }, [mounted]);
 
   // Redirect unauthenticated users to login
   useEffect(() => {
@@ -66,15 +51,24 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#0a0a0f' }}>
+    <div
+      className="min-h-screen flex"
+      style={{
+        background: '#0a0a0f',
+        '--sidebar-width': `${sidebarWidth}px`,
+      } as React.CSSProperties}
+    >
       <Sidebar />
       <div
-        className="flex-1 flex flex-col min-h-screen transition-all duration-300 min-w-0 overflow-x-hidden"
-        style={{ marginLeft: `${sidebarWidth}px` }}
+        className="flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out min-w-0 overflow-x-hidden"
+        style={{
+          marginLeft: `${sidebarWidth}px`,
+          width: `calc(100% - ${sidebarWidth}px)`,
+        }}
       >
         <Header />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto cyber-grid-bg">
-          <div className="max-w-[1600px] mx-auto w-full">
+        <main className="flex-1 overflow-y-auto cyber-grid-bg transition-all duration-300 px-8 sm:px-10 lg:px-12">
+          <div className="w-full pt-8 pb-20">
             {children}
           </div>
         </main>

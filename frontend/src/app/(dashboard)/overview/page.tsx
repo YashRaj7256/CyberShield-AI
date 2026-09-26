@@ -13,7 +13,6 @@ import {
   RefreshCw,
   ArrowUpRight,
   ShieldCheck,
-  Radio,
   Database,
   Cpu,
 } from 'lucide-react';
@@ -25,6 +24,7 @@ import TopSourcesChart from '@/components/charts/top-sources-chart';
 import RecentActivity from '@/components/dashboard/recent-activity';
 import { useApi } from '@/hooks/use-api';
 import telemetryStore from '@/lib/telemetry-store';
+import { parseAlertDescription } from '@/lib/alert-parser';
 import {
   mockDashboardStats,
   mockThreatTrend,
@@ -108,6 +108,7 @@ interface RawRecentActivityResponse {
   recentAlerts: {
     id: string;
     createdAt: string;
+    title?: string;
     type: string;
     severity: string;
     description: string;
@@ -213,7 +214,7 @@ function transformRecentActivity(raw: RawRecentActivityResponse): RecentActivity
     timestamp: alert.createdAt,
     type: alert.type ?? 'ANOMALY',
     severity: (alert.severity as LogSeverity) ?? 'LOW',
-    message: alert.description ?? '',
+    message: parseAlertDescription(alert.description, alert.title, alert.type, alert.sourceIp).narrative,
     sourceIp: alert.sourceIp ?? '',
   }));
 
@@ -249,31 +250,28 @@ function StatusBadge({ isUsingFallback, isLoading }: { isUsingFallback: boolean;
 function StatCardSkeleton() {
   return (
     <div
-      className="relative rounded-2xl overflow-hidden"
+      className="relative rounded-xl overflow-hidden"
       style={{
-        padding: '24px',
-        minHeight: '172px',
-        background: 'rgba(11, 15, 25, 0.92)',
-        border: '1px solid rgba(30, 41, 59, 0.9)',
+        padding: '20px',
+        minHeight: '176px',
+        background: 'rgba(13, 17, 23, 0.92)',
+        border: '1px solid rgba(255, 255, 255, 0.07)',
       }}
     >
-      <div className="absolute inset-x-0 top-0 h-[2px] animate-pulse bg-slate-800/80" />
+      <div className="absolute inset-x-0 top-0 h-px bg-slate-800/80" />
       {/* Header row */}
       <div className="flex items-center justify-between gap-2 mb-4">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full animate-pulse bg-slate-800" />
-          <div className="h-3 w-28 rounded-lg animate-pulse bg-slate-800" />
-        </div>
-        <div className="w-8 h-8 rounded-xl animate-pulse bg-slate-800 shrink-0" />
+        <div className="h-3.5 w-28 rounded-md animate-pulse bg-slate-800" />
+        <div className="w-7 h-7 rounded-lg animate-pulse bg-slate-800 shrink-0" />
       </div>
       {/* Value */}
-      <div className="h-9 w-24 rounded-xl animate-pulse my-3 bg-slate-800" />
+      <div className="h-8 w-24 rounded-lg animate-pulse my-4 bg-slate-800" />
       {/* Footer */}
       <div
-        className="flex items-center gap-2 pt-3 border-t"
-        style={{ borderColor: 'rgba(30,41,59,0.7)' }}
+        className="flex items-center gap-2 pt-3 border-t mt-auto"
+        style={{ borderColor: 'rgba(255,255,255,0.06)' }}
       >
-        <div className="h-5 w-16 rounded-md animate-pulse bg-slate-800" />
+        <div className="h-4 w-14 rounded animate-pulse bg-slate-800" />
         <div className="h-3 w-10 rounded animate-pulse bg-slate-800" />
       </div>
     </div>
@@ -291,11 +289,10 @@ function StatusPill({ label, value, online = true }: { label: string; value: str
         className="w-1.5 h-1.5 rounded-full shrink-0"
         style={{
           background: online ? '#34d399' : '#f87171',
-          boxShadow: online ? '0 0 6px rgba(52,211,153,0.6)' : '0 0 6px rgba(248,113,113,0.6)',
         }}
       />
       <span className="text-[11px] font-mono text-slate-500">{label}:</span>
-      <span className="text-[11px] font-mono font-semibold text-slate-300">{value}</span>
+      <span className="text-[11px] font-mono font-medium text-slate-300">{value}</span>
     </div>
   );
 }
@@ -396,43 +393,43 @@ export default function OverviewPage() {
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-6 animate-fade-in pb-20">
+    <div className="space-y-7 animate-fade-in">
 
       {/* ================================================================= */}
       {/* 1. SOC COMMAND HEADER                                              */}
       {/* ================================================================= */}
       <div
-        className="relative rounded-2xl overflow-hidden"
+        className="relative rounded-xl overflow-hidden"
         style={{
-          padding: '24px 28px',
-          background: 'rgba(11, 15, 25, 0.95)',
-          border: '1px solid rgba(30, 41, 59, 0.9)',
+          padding: '20px 24px',
+          background: 'rgba(13, 17, 23, 0.92)',
+          border: '1px solid rgba(255, 255, 255, 0.07)',
         }}
       >
-        {/* Top accent — dual tone */}
-        <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-cyan-500/80 via-blue-500/70 to-emerald-500/60" />
+        {/* Top accent — subtle 1px line */}
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-cyan-500/50 via-blue-500/30 to-transparent" />
 
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
 
           {/* Left: brand + status */}
           <div>
             {/* Title row */}
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-3 mb-2.5">
               <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                 style={{
-                  background: 'rgba(6,182,212,0.1)',
-                  border: '1px solid rgba(6,182,212,0.25)',
+                  background: 'rgba(6,182,212,0.08)',
+                  border: '1px solid rgba(6,182,212,0.2)',
                 }}
               >
-                <ShieldCheck className="w-5 h-5 text-cyan-400" />
+                <ShieldCheck className="w-4 h-4 text-cyan-400" />
               </div>
               <div>
-                <div className="flex items-center gap-2.5">
-                  <h2 className="text-[17px] font-bold text-white tracking-tight">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-[16px] font-semibold text-white tracking-tight">
                     Security Operations Center
                   </h2>
-                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-cyan-950/50 text-cyan-400 border border-cyan-800/40">
+                  <span className="text-[9px] font-mono font-medium px-1.5 py-0.5 rounded bg-cyan-950/40 text-cyan-400 border border-cyan-800/30">
                     ENCLAVE-01
                   </span>
                 </div>
@@ -444,7 +441,7 @@ export default function OverviewPage() {
 
             {/* System status row */}
             <div
-              className="flex flex-wrap items-center gap-4 pt-3 mt-1"
+              className="flex flex-wrap items-center gap-4 pt-2.5 mt-1"
               style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
             >
               <StatusPill label="Defense Posture" value="Optimal" online={true} />
@@ -454,24 +451,24 @@ export default function OverviewPage() {
           </div>
 
           {/* Right: actions */}
-          <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-center">
+          <div className="flex flex-wrap items-center gap-2 self-start lg:self-center">
             <StatusBadge isUsingFallback={anyFallback} isLoading={allLoading} />
 
             <button
               onClick={handleRefreshAll}
               disabled={isRefreshing}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px] font-mono font-medium transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-mono font-medium transition-all cursor-pointer"
               style={{
-                background: 'rgba(255,255,255,0.04)',
+                background: 'rgba(255,255,255,0.03)',
                 border: '1px solid rgba(255,255,255,0.08)',
                 color: '#94a3b8',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.07)';
+                e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
                 e.currentTarget.style.color = '#e2e8f0';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
                 e.currentTarget.style.color = '#94a3b8';
               }}
               title="Sync telemetry"
@@ -484,14 +481,14 @@ export default function OverviewPage() {
 
             <Link
               href="/alerts"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px] font-mono font-medium transition-all"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-mono font-medium transition-all"
               style={{
                 background: 'rgba(239,68,68,0.08)',
-                border: '1px solid rgba(239,68,68,0.22)',
+                border: '1px solid rgba(239,68,68,0.2)',
                 color: '#f87171',
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.14)';
+                (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.12)';
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.08)';
@@ -509,11 +506,13 @@ export default function OverviewPage() {
       {/* 2. KPI CARDS — 3 × 2 responsive grid                              */}
       {/* ================================================================= */}
       <div>
-        <div className="flex items-center gap-2 mb-4">
-          <Database className="w-3.5 h-3.5 text-slate-500" />
-          <span className="section-eyebrow">Key Performance Indicators</span>
+        <div className="flex items-center gap-2 mb-3">
+          <Database className="w-3 h-3 text-slate-500" />
+          <span className="text-[11px] font-mono font-semibold tracking-[0.14em] uppercase text-slate-400">
+            Key Performance Indicators
+          </span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
           {rawStats.isLoading ? (
             Array.from({ length: 6 }).map((_, i) => <StatCardSkeleton key={i} />)
           ) : (
@@ -579,11 +578,13 @@ export default function OverviewPage() {
       {/* 3. PRIMARY THREAT INTELLIGENCE — trend + severity                 */}
       {/* ================================================================= */}
       <div>
-        <div className="flex items-center gap-2 mb-4">
-          <Cpu className="w-3.5 h-3.5 text-slate-500" />
-          <span className="section-eyebrow">Threat Intelligence</span>
+        <div className="flex items-center gap-2 mb-3">
+          <Cpu className="w-3 h-3 text-slate-500" />
+          <span className="text-[11px] font-mono font-semibold tracking-[0.14em] uppercase text-slate-400">
+            Threat Intelligence
+          </span>
         </div>
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 items-stretch">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-3.5 items-stretch">
           <div className="xl:col-span-2 min-w-0">
             <ThreatTrendChart data={threatTrendData} isLoading={rawThreatTrend.isLoading} />
           </div>
@@ -596,7 +597,7 @@ export default function OverviewPage() {
       {/* ================================================================= */}
       {/* 4. ATTACK VECTORS & GEOGRAPHIC SOURCES                            */}
       {/* ================================================================= */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-stretch">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-3.5 items-stretch">
         <div className="min-w-0">
           <AttackFrequencyChart data={attackFreqData} isLoading={rawAttackFreq.isLoading} />
         </div>

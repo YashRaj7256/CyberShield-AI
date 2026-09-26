@@ -20,6 +20,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
+import { useSidebarStore } from '@/stores/sidebar-store';
 
 // ---------------------------------------------------------------------------
 // Page metadata
@@ -89,6 +90,7 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
+  const { collapsed } = useSidebarStore();
 
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -161,14 +163,14 @@ export default function Header() {
 
   return (
     <header
-      className="h-16 flex items-center justify-between shrink-0 z-30 sticky top-0"
+      className="h-16 shrink-0 z-30 sticky top-0 transition-all duration-300 px-8 sm:px-10 lg:px-12"
       style={{
         background: 'rgba(9, 11, 18, 0.96)',
         backdropFilter: 'blur(20px)',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
-        padding: '0 24px',
       }}
     >
+      <div className="w-full h-full flex items-center justify-between">
       {/* ----------------------------------------------------------------- */}
       {/* Left: Breadcrumb page title                                         */}
       {/* ----------------------------------------------------------------- */}
@@ -189,21 +191,20 @@ export default function Header() {
       {/* ----------------------------------------------------------------- */}
       {/* Right: Search + Notifications + User                               */}
       {/* ----------------------------------------------------------------- */}
-      <div className="flex items-center gap-2.5 shrink-0">
+      <div className="flex items-center gap-3 sm:gap-3.5 shrink-0">
 
         {/* ── Search ─────────────────────────────────────────────────── */}
-        <div ref={searchContainerRef} className="relative hidden md:block w-64 lg:w-72">
+        <div ref={searchContainerRef} className="relative hidden md:block w-72 lg:w-80">
           <form onSubmit={handleSearchSubmit}>
             <div
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-150 ${
+              className={`flex items-center gap-2.5 px-3 h-9 rounded-lg transition-all duration-150 ${
                 isSearchFocused
-                  ? 'ring-1 ring-cyan-500/40'
-                  : ''
+                  ? 'ring-1 ring-cyan-500/40 bg-white/[0.05]'
+                  : 'bg-white/[0.03]'
               }`}
               style={{
-                background: 'rgba(255,255,255,0.04)',
                 border: isSearchFocused
-                  ? '1px solid rgba(6,182,212,0.45)'
+                  ? '1px solid rgba(6,182,212,0.4)'
                   : '1px solid rgba(255,255,255,0.07)',
               }}
             >
@@ -215,18 +216,18 @@ export default function Header() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
                 placeholder="Search threats, IPs, tactics..."
-                className="flex-1 min-w-0 bg-transparent text-[12px] font-mono text-white placeholder:text-slate-600 focus:outline-none border-none"
+                className="flex-1 min-w-0 bg-transparent text-[12px] font-mono text-white placeholder:text-slate-500 focus:outline-none border-none"
               />
               {searchQuery ? (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="text-slate-600 hover:text-slate-300 p-0.5 cursor-pointer transition-colors"
+                  className="text-slate-500 hover:text-slate-300 p-0.5 cursor-pointer transition-colors"
                 >
                   <X className="w-3 h-3" />
                 </button>
               ) : (
-                <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold text-slate-600 bg-slate-900/80 border border-slate-800/80 shrink-0 select-none">
+                <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium text-slate-500 bg-slate-900/80 border border-slate-800 shrink-0 select-none">
                   ⌘K
                 </kbd>
               )}
@@ -312,27 +313,28 @@ export default function Header() {
               setShowNotifications(!showNotifications);
               setHasUnreadAlerts(false);
             }}
-            className="relative p-2 rounded-xl transition-all duration-150 cursor-pointer"
+            className="flex items-center gap-1.5 h-9 px-2.5 rounded-lg transition-all duration-150 cursor-pointer"
             style={{
-              background: 'rgba(255,255,255,0.04)',
+              background: 'rgba(255,255,255,0.03)',
               border: '1px solid rgba(255,255,255,0.07)',
-              color: '#6b7280',
+              color: '#94a3b8',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.color = '#e2e8f0';
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)';
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
+              e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#6b7280';
+              e.currentTarget.style.color = '#94a3b8';
               e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)';
+              e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
             }}
             aria-label="Notifications"
           >
-            <Bell className="w-4 h-4" />
+            <Bell className="w-3.5 h-3.5 shrink-0" />
             {hasUnreadAlerts && (
-              <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-70" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500 ring-2 ring-[#090b12]" />
+              <span className="inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[9px] font-mono font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30 tabular-nums">
+                3
               </span>
             )}
           </button>
@@ -409,42 +411,47 @@ export default function Header() {
         </div>
 
         {/* ── Divider ────────────────────────────────────────────────── */}
-        <div className="w-px h-5 bg-white/[0.07] shrink-0" />
+        <div className="w-px h-4 bg-white/[0.08] shrink-0" />
 
         {/* ── User menu ──────────────────────────────────────────────── */}
         <div className="relative shrink-0">
           <button
-            className="flex items-center gap-2 rounded-xl transition-all duration-150 cursor-pointer"
+            className="flex items-center gap-2.5 h-9 px-2.5 rounded-lg transition-all duration-150 cursor-pointer"
             style={{
-              padding: '5px 8px 5px 5px',
-              background: 'rgba(255,255,255,0.04)',
+              background: 'rgba(255,255,255,0.03)',
               border: '1px solid rgba(255,255,255,0.07)',
             }}
             onClick={(e) => {
               e.stopPropagation();
               setShowDropdown(!showDropdown);
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
+              e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)';
+              e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+            }}
           >
             {/* Avatar */}
             <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-bold text-white shrink-0"
-              style={{ background: 'linear-gradient(135deg, #06b6d4, #3b82f6)' }}
+              className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-mono font-bold text-white shrink-0"
+              style={{ background: 'linear-gradient(135deg, #0891b2, #2563eb)' }}
             >
               {userInitials}
             </div>
             {/* Name + Role */}
-            <div className="hidden sm:block text-left leading-tight min-w-0">
-              <p className="text-[12px] font-semibold text-slate-200 truncate max-w-[100px]">
+            <div className="hidden sm:block text-left leading-tight min-w-0 pr-1">
+              <p className="text-[12px] font-medium text-slate-200 truncate max-w-[110px]">
                 {user?.firstName ?? 'System'} {user?.lastName ?? 'Admin'}
               </p>
-              <p className="text-[9px] uppercase tracking-widest font-bold text-cyan-400 mt-0.5">
+              <p className="text-[9px] uppercase tracking-wider font-mono font-semibold text-cyan-400/90 mt-0.5">
                 {user?.role ?? 'ADMIN'}
               </p>
             </div>
             <ChevronDown
-              className="w-3.5 h-3.5 text-slate-600 shrink-0 hidden sm:block transition-transform duration-150"
+              className="w-3.5 h-3.5 text-slate-500 shrink-0 hidden sm:block transition-transform duration-150"
               style={{ transform: showDropdown ? 'rotate(180deg)' : 'none' }}
             />
           </button>
@@ -505,6 +512,7 @@ export default function Header() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </header>
   );

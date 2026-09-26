@@ -33,7 +33,7 @@ export interface RegisterRequest {
 // ==================== Security Log Types ====================
 export type LogSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 export type LogAction = 'ALLOW' | 'DENY' | 'DROP' | 'ALERT';
-export type LogSource = 'FIREWALL' | 'IDS' | 'ANTIVIRUS' | 'SERVER' | 'APPLICATION' | 'CLOUD' | 'NETWORK' | 'MANUAL';
+export type LogSource = 'FIREWALL' | 'IDS' | 'ANTIVIRUS' | 'SERVER' | 'APPLICATION' | 'CLOUD' | 'NETWORK' | 'MANUAL' | 'WINDOWS_SECURITY';
 export type LogProtocol = 'TCP' | 'UDP' | 'ICMP' | 'HTTP' | 'HTTPS' | 'DNS' | 'SSH' | 'FTP' | 'SMTP' | 'OTHER';
 
 export interface SecurityLog {
@@ -58,7 +58,12 @@ export interface SecurityLog {
   userName: string | null;
   rawData?: Record<string, unknown>;
   threatScore: number | null;
+  anomalyScore?: number | null;
   isThreat?: boolean;
+  deviceType?: string;
+  browser?: string;
+  os?: string;
+  metadata?: Record<string, unknown>;
   createdAt?: string;
 }
 
@@ -261,3 +266,117 @@ export interface GeoAttackData {
     mostTargetedPort: number;
   };
 }
+
+// ==================== Attack Prediction Types ====================
+
+export interface PredictionScenario {
+  attack_type: string;
+  probability: number;
+  confidence: number;
+  timeframe: string;
+  description: string;
+  affected_assets: string[];
+  countermeasures: string[];
+  indicators: string[];
+  severity: LogSeverity;
+}
+
+export interface PredictionResponse {
+  predictions: PredictionScenario[];
+  analysis_window_hours: number;
+  total_logs_analyzed: number;
+  processing_time_ms: number;
+  telemetry_source?: 'REAL_TELEMETRY' | 'DEMO_DATA';
+}
+
+export interface PredictRequestParams {
+  windowHours?: number;
+  useDatabaseLogs?: boolean;
+  logs?: Record<string, unknown>[];
+}
+
+// ==================== Reports Types (Phase 3) ====================
+
+export type ReportType = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'INCIDENT';
+export type ReportFormat = 'PDF' | 'CSV' | 'EXCEL';
+export type ReportStatus = 'PENDING' | 'GENERATING' | 'COMPLETED' | 'FAILED';
+
+export interface ReportItem {
+  id: string;
+  title: string;
+  type: ReportType;
+  format: ReportFormat;
+  dateRangeStart: string;
+  dateRangeEnd: string;
+  filePath?: string | null;
+  status: ReportStatus;
+  createdAt: string;
+  generatedById: string;
+  generatedBy?: {
+    id: string;
+    firstName?: string;
+    lastName?: string;
+    email: string;
+  } | null;
+  summary?: ReportSummaryData | null;
+}
+
+export interface ReportSummaryData {
+  reportId: string;
+  title: string;
+  type: string;
+  format: string;
+  dateRangeStart: string;
+  dateRangeEnd: string;
+  generatedAt: string;
+  generatedBy: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  metrics: {
+    totalLogs: number;
+    anomalousLogs: number;
+    totalAlerts: number;
+    criticalAlerts: number;
+    highAlerts: number;
+    mediumAlerts: number;
+    lowAlerts: number;
+    resolvedAlerts: number;
+    activeAlerts: number;
+    blockedIpsCount: number;
+    averageThreatScore: number;
+    riskPosture: 'CRITICAL' | 'ELEVATED' | 'MODERATE' | 'NORMAL';
+  };
+  severityBreakdown: { severity: string; count: number; percentage: number }[];
+  statusBreakdown: { status: string; count: number }[];
+  topThreatTypes: { type: string; count: number }[];
+  topOffendingIps: { ip: string; count: number; country?: string; avgScore?: number }[];
+  topTargetPorts: { port: number; count: number }[];
+  recentAlerts: {
+    id: string;
+    title: string;
+    type: string;
+    severity: string;
+    sourceIp: string;
+    threatScore: number;
+    createdAt: string;
+  }[];
+  recommendations: {
+    id: string;
+    priority: 'HIGH' | 'MEDIUM' | 'LOW';
+    category: string;
+    action: string;
+    description: string;
+  }[];
+}
+
+export interface ReportsStats {
+  totalReports: number;
+  pdfReports: number;
+  csvReports: number;
+  lastGeneratedAt: string | null;
+  lastReportTitle: string | null;
+}
+
+

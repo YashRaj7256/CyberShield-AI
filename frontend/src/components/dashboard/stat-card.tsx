@@ -22,13 +22,13 @@ interface StatCardProps {
 function RiskGauge({ score }: { score: number }) {
   const clampedScore = Math.min(100, Math.max(0, Math.round(score)));
   // SVG arc parameters — half-circle (180°)
-  const R = 40;
+  const R = 38;
   const cx = 56;
-  const cy = 52;
-  const circumference = Math.PI * R; // half circle arc length
+  const cy = 46;
+  const circumference = Math.PI * R;
   const dashOffset = circumference * (1 - clampedScore / 100);
 
-  // Color ramp: green → yellow → orange → red
+  // Semantic color ramp: green → yellow → orange → red
   const gaugeColor =
     clampedScore >= 75 ? '#ef4444'
     : clampedScore >= 50 ? '#f97316'
@@ -42,64 +42,67 @@ function RiskGauge({ score }: { score: number }) {
     : 'Low Risk';
 
   return (
-    <div className="flex flex-col items-center mt-2 gap-1">
-      <svg
-        width={112}
-        height={62}
-        viewBox="0 0 112 62"
-        fill="none"
-        aria-label={`Risk score ${clampedScore} out of 100`}
-      >
-        {/* Track arc */}
-        <path
-          d={`M ${cx - R} ${cy} A ${R} ${R} 0 0 1 ${cx + R} ${cy}`}
-          stroke="rgba(255,255,255,0.07)"
-          strokeWidth="7"
-          strokeLinecap="round"
+    <div className="flex flex-col items-center justify-center my-auto">
+      <div className="relative flex items-center justify-center">
+        <svg
+          width={112}
+          height={56}
+          viewBox="0 0 112 56"
           fill="none"
-        />
-        {/* Value arc */}
-        <path
-          d={`M ${cx - R} ${cy} A ${R} ${R} 0 0 1 ${cx + R} ${cy}`}
-          stroke={gaugeColor}
-          strokeWidth="7"
-          strokeLinecap="round"
-          strokeDasharray={`${circumference}`}
-          strokeDashoffset={dashOffset}
-          fill="none"
-          style={{ transition: 'stroke-dashoffset 0.9s cubic-bezier(0.4,0,0.2,1), stroke 0.4s' }}
-        />
-        {/* Score label */}
-        <text
-          x={cx}
-          y={cy - 4}
-          textAnchor="middle"
-          fontSize="17"
-          fontWeight="700"
-          fontFamily="ui-monospace, monospace"
-          fill="#f1f5f9"
+          aria-label={`Risk score ${clampedScore} out of 100`}
         >
-          {clampedScore}
-        </text>
-        <text
-          x={cx}
-          y={cy + 11}
-          textAnchor="middle"
-          fontSize="9"
-          fontWeight="600"
-          fontFamily="ui-monospace, monospace"
-          fill="#64748b"
-        >
-          /100
-        </text>
-      </svg>
-      {/* Risk label */}
+          {/* Track arc */}
+          <path
+            d={`M ${cx - R} ${cy} A ${R} ${R} 0 0 1 ${cx + R} ${cy}`}
+            stroke="rgba(255,255,255,0.06)"
+            strokeWidth="6"
+            strokeLinecap="round"
+            fill="none"
+          />
+          {/* Value arc */}
+          <path
+            d={`M ${cx - R} ${cy} A ${R} ${R} 0 0 1 ${cx + R} ${cy}`}
+            stroke={gaugeColor}
+            strokeWidth="6"
+            strokeLinecap="round"
+            strokeDasharray={`${circumference}`}
+            strokeDashoffset={dashOffset}
+            fill="none"
+            style={{ transition: 'stroke-dashoffset 0.9s cubic-bezier(0.4,0,0.2,1), stroke 0.4s' }}
+          />
+          {/* Prominent score number */}
+          <text
+            x={cx}
+            y={cy - 2}
+            textAnchor="middle"
+            fontSize="21"
+            fontWeight="700"
+            fontFamily="ui-monospace, monospace"
+            fill="#f8fafc"
+          >
+            {clampedScore}
+          </text>
+          <text
+            x={cx}
+            y={cy + 12}
+            textAnchor="middle"
+            fontSize="9"
+            fontWeight="500"
+            fontFamily="ui-monospace, monospace"
+            fill="#64748b"
+          >
+            /100
+          </text>
+        </svg>
+      </div>
+
+      {/* Prominent severity state */}
       <span
-        className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded"
+        className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded mt-1.5"
         style={{
           color: gaugeColor,
           background: `${gaugeColor}14`,
-          border: `1px solid ${gaugeColor}28`,
+          border: `1px solid ${gaugeColor}24`,
         }}
       >
         {riskLabel}
@@ -155,117 +158,80 @@ export default function StatCard({
   };
 
   const isScoreCard = format === 'score';
-  // For security metrics, "up" = worse (more threats), except risk score where down = better
   const isPositiveChange = change >= 0;
 
   return (
     <div
-      className={`group relative rounded-2xl flex flex-col justify-between overflow-hidden transition-all duration-200 ${
+      className={`group relative rounded-xl flex flex-col justify-between overflow-hidden transition-all duration-150 ${
         pulse
-          ? 'shadow-[0_0_24px_rgba(244,63,94,0.14)] ring-1 ring-rose-500/25'
-          : ''
+          ? 'border border-rose-500/35 bg-[rgba(13,17,23,0.92)] shadow-[0_0_16px_rgba(244,63,94,0.08)]'
+          : 'border border-white/[0.07] bg-[rgba(13,17,23,0.92)] hover:border-white/[0.12] hover:bg-[rgba(15,20,28,0.95)]'
       }`}
       style={{
-        padding: isScoreCard ? '24px 24px 20px' : '24px',
-        minHeight: isScoreCard ? '210px' : '172px',
-        background: 'rgba(11, 15, 25, 0.92)',
-        border: pulse
-          ? '1px solid rgba(244,63,94,0.35)'
-          : '1px solid rgba(30, 41, 59, 0.9)',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-      }}
-      onMouseEnter={(e) => {
-        if (!pulse) {
-          e.currentTarget.style.borderColor = 'rgba(51, 65, 85, 0.9)';
-          e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.28)';
-          e.currentTarget.style.transform = 'translateY(-1px)';
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!pulse) {
-          e.currentTarget.style.borderColor = 'rgba(30, 41, 59, 0.9)';
-          e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.2)';
-          e.currentTarget.style.transform = 'none';
-        }
+        padding: '20px',
+        minHeight: '176px',
+        height: '100%',
       }}
     >
-      {/* Top accent line */}
-      <div
-        className="absolute inset-x-0 top-0 h-[2px] opacity-80 group-hover:opacity-100 transition-opacity"
-        style={{
-          background: `linear-gradient(90deg, transparent 0%, ${accentColor} 45%, ${accentColor}88 80%, transparent 100%)`,
-        }}
-      />
-
-      {/* Header: label + icon */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <span
-            className="w-2 h-2 rounded-full shrink-0 mt-0.5"
-            style={{ background: accentColor }}
-          />
-          <span
-            className="text-[11px] font-medium text-slate-400 truncate leading-snug"
-            title={label}
-          >
-            {label}
-          </span>
-        </div>
+      {/* 1. Header: Metric Label + Subtle Icon Container */}
+      <div className="flex items-center justify-between gap-3">
+        <span
+          className="text-[12px] font-medium text-slate-400 truncate tracking-normal"
+          title={label}
+        >
+          {label}
+        </span>
         <div
-          className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+          className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors"
           style={{
-            background: `${accentColor}12`,
+            background: `${accentColor}0f`,
             color: accentColor,
-            border: `1px solid ${accentColor}28`,
+            border: `1px solid ${accentColor}20`,
           }}
         >
           {icon}
         </div>
       </div>
 
-      {/* Risk gauge for score cards */}
+      {/* 2. Middle Value Area: Primary Metric Number (or centered gauge) */}
       {isScoreCard ? (
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center my-auto py-1">
           <RiskGauge score={mounted ? displayValue : 0} />
         </div>
       ) : (
-        /* Primary metric value */
-        <div className="flex items-baseline gap-1.5 my-3">
+        <div className="flex items-baseline gap-1.5 my-auto py-2">
           <span
-            className={`text-[2.2rem] font-bold font-mono text-white tracking-tight leading-none ${
+            className={`text-[2rem] sm:text-[2.2rem] font-bold font-mono text-white tracking-tight leading-none ${
               mounted ? 'animate-counter' : ''
             }`}
           >
             {formatValue(displayValue)}
           </span>
           {suffix && (
-            <span className="text-xs font-mono text-slate-500 leading-none mb-0.5">
+            <span className="text-xs font-mono text-slate-500 leading-none">
               {suffix}
             </span>
           )}
         </div>
       )}
 
-      {/* Footer: trend + sublabel */}
-      <div
-        className="flex items-center justify-between gap-2 pt-3 border-t"
-        style={{ borderColor: 'rgba(30,41,59,0.7)' }}
-      >
+      {/* 3. Divider + 4. Footer: Trend badge & context */}
+      <div className="flex items-center justify-between gap-2 pt-3 border-t border-white/[0.06] mt-auto">
         {change !== undefined && (
           <div className="flex items-center gap-1.5">
             <span
-              className="inline-flex items-center gap-1 font-mono font-semibold text-[11px] px-2 py-0.5 rounded-md"
+              className="inline-flex items-center gap-1 font-mono font-medium text-[11px] px-1.5 py-0.5 rounded"
               style={{
                 background: isPositiveChange
-                  ? change > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(148,163,184,0.08)'
-                  : 'rgba(34,197,94,0.1)',
+                  ? change > 0 ? 'rgba(239,68,68,0.08)' : 'rgba(148,163,184,0.06)'
+                  : 'rgba(34,197,94,0.08)',
                 color: isPositiveChange
-                  ? change > 0 ? '#f87171' : '#64748b'
+                  ? change > 0 ? '#f87171' : '#94a3b8'
                   : '#4ade80',
                 border: `1px solid ${
                   isPositiveChange
-                    ? change > 0 ? 'rgba(239,68,68,0.22)' : 'rgba(148,163,184,0.15)'
-                    : 'rgba(34,197,94,0.22)'
+                    ? change > 0 ? 'rgba(239,68,68,0.18)' : 'rgba(148,163,184,0.12)'
+                    : 'rgba(34,197,94,0.18)'
                 }`,
               }}
             >
@@ -279,11 +245,11 @@ export default function StatCard({
                 {change}%
               </span>
             </span>
-            <span className="text-slate-600 text-[10px] font-mono">vs 7d</span>
+            <span className="text-slate-500 text-[10px] font-mono">vs 7d</span>
           </div>
         )}
         {sublabel && (
-          <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400 px-2 py-0.5 rounded bg-slate-900 border border-slate-800 ml-auto">
+          <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400 px-1.5 py-0.5 rounded bg-slate-900/80 border border-slate-800 ml-auto">
             {sublabel}
           </span>
         )}

@@ -17,10 +17,30 @@ import { Type } from 'class-transformer';
  * DTO for creating / ingesting a single security log entry.
  */
 export class CreateLogDto {
+  /** Optional client or generated log ID */
+  @IsOptional()
+  @IsString()
+  id?: string;
+
+  /** Optional Mongo ObjectId */
+  @IsOptional()
+  @IsString()
+  _id?: string;
+
   /** Event timestamp (ISO 8601) */
   @IsOptional()
   @IsDateString()
   timestamp?: string;
+
+  /** Creation timestamp (ISO 8601) */
+  @IsOptional()
+  @IsDateString()
+  createdAt?: string;
+
+  /** Optional threat flag */
+  @IsOptional()
+  @IsBoolean()
+  isThreat?: boolean;
 
   /** Source IP address */
   @IsString()
@@ -56,7 +76,7 @@ export class CreateLogDto {
   severity!: string;
 
   /** Log source system */
-  @IsEnum(['FIREWALL', 'IDS', 'ANTIVIRUS', 'SERVER', 'APPLICATION', 'CLOUD', 'NETWORK', 'MANUAL'])
+  @IsEnum(['FIREWALL', 'IDS', 'ANTIVIRUS', 'SERVER', 'APPLICATION', 'CLOUD', 'NETWORK', 'MANUAL', 'WINDOWS_SECURITY'])
   source!: string;
 
   /** Event type identifier */

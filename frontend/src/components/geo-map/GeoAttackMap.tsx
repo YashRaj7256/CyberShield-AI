@@ -4,7 +4,7 @@ import { useEffect, useRef, useCallback, useState, useImperativeHandle, forwardR
 import L from 'leaflet';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Map as LeafletIcon, Layers } from 'lucide-react';
+import { Map as LeafletIcon, Layers, RotateCcw } from 'lucide-react';
 import type { GeoAttackOrigin, LogSeverity } from '@/types';
 
 // ---------------------------------------------------------------------------
@@ -37,10 +37,10 @@ const SEVERITY_BADGE_COLORS: Record<LogSeverity, { bg: string; text: string; bor
 function createSeverityIcon(severity: LogSeverity): L.DivIcon {
   const cls = SEVERITY_CLASS[severity] || 'geo-marker-low';
   return L.divIcon({
-    className: '',
-    iconSize: [18, 18],
-    iconAnchor: [9, 9],
-    popupAnchor: [0, -10],
+    className: 'geo-custom-icon',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12],
     html: `<div class="geo-marker ${cls}"><div class="geo-marker-ping"></div><div class="geo-marker-dot"></div></div>`,
   });
 }
@@ -318,9 +318,9 @@ const GeoAttackMap = forwardRef<GeoAttackMapHandle, GeoAttackMapProps>(
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <MapContainer
-          center={[20, 15]}
-          zoom={2.5}
-          minZoom={2}
+          center={[20, 0]}
+          zoom={2}
+          minZoom={1.5}
           maxZoom={18}
           scrollWheelZoom
           zoomControl
@@ -352,6 +352,38 @@ const GeoAttackMap = forwardRef<GeoAttackMapHandle, GeoAttackMapProps>(
 
         {/* Tile layer switcher overlay */}
         <TileLayerSwitcher activeTile={activeTile} onSwitch={setActiveTile} />
+
+        {/* Reset to Global View button */}
+        <button
+          onClick={() => setFlyTarget({ lat: 20, lng: 0, zoom: 2 })}
+          title="Reset to Global View"
+          style={{
+            position: 'absolute',
+            top: 120,
+            right: 10,
+            zIndex: 1000,
+            width: 34,
+            height: 34,
+            borderRadius: 4,
+            background: 'rgba(11, 15, 25, 0.92)',
+            border: '1px solid rgba(30, 41, 59, 0.9)',
+            color: '#94a3b8',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = '#06b6d4';
+            e.currentTarget.style.borderColor = 'rgba(6,182,212,0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = '#94a3b8';
+            e.currentTarget.style.borderColor = 'rgba(30, 41, 59, 0.9)';
+          }}
+        >
+          <RotateCcw className="w-4 h-4" />
+        </button>
 
         {/* Legend */}
         <div

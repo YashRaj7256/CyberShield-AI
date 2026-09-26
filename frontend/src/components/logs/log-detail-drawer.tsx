@@ -42,7 +42,7 @@ export default function LogDetailDrawer({ log, onClose }: LogDetailDrawerProps) 
 
       {/* Drawer */}
       <div
-        className="fixed right-0 top-0 h-full w-[520px] max-w-[90vw] z-50 overflow-y-auto animate-slide-in-right"
+        className="fixed right-0 top-0 h-full w-[520px] max-w-[90vw] z-[55] overflow-y-auto animate-slide-in-right"
         style={{
           background: '#111118',
           borderLeft: '1px solid #2a2a3a',

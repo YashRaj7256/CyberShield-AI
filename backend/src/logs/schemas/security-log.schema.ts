@@ -33,6 +33,7 @@ export enum LogSource {
   CLOUD = 'CLOUD',
   NETWORK = 'NETWORK',
   MANUAL = 'MANUAL',
+  WINDOWS_SECURITY = 'WINDOWS_SECURITY',
 }
 
 export type SecurityLogDocument = HydratedDocument<SecurityLog>;

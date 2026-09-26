@@ -103,27 +103,25 @@ export default function AttackFrequencyChart({ data, isLoading }: AttackFrequenc
 
   return (
     <div
-      className="relative rounded-2xl flex flex-col h-full overflow-hidden"
+      className="relative rounded-xl flex flex-col h-full overflow-hidden"
       style={{
-        padding: '24px',
-        background: 'rgba(11, 15, 25, 0.92)',
-        border: '1px solid rgba(30, 41, 59, 0.9)',
-        transition: 'border-color 0.2s, box-shadow 0.2s',
+        padding: '20px',
+        background: 'rgba(13, 17, 23, 0.92)',
+        border: '1px solid rgba(255, 255, 255, 0.07)',
+        transition: 'border-color 0.15s',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = 'rgba(51, 65, 85, 0.9)';
-        e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.25)';
+        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = 'rgba(30, 41, 59, 0.9)';
-        e.currentTarget.style.boxShadow = 'none';
+        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.07)';
       }}
     >
-      {/* Top accent */}
-      <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-purple-500/70 to-transparent" />
+      {/* Top subtle line */}
+      <div className="absolute inset-x-0 top-0 h-px bg-white/[0.06]" />
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-2 mb-5">
+      <div className="flex items-start justify-between gap-2 mb-4">
         <div>
           <h3 className="text-[14px] font-semibold text-white tracking-tight">
             Attack Frequency by Vector
@@ -133,10 +131,10 @@ export default function AttackFrequencyChart({ data, isLoading }: AttackFrequenc
           </p>
         </div>
         <span
-          className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded shrink-0"
+          className="text-[9px] font-mono font-medium px-1.5 py-0.5 rounded shrink-0"
           style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.07)',
             color: '#64748b',
           }}
         >
@@ -147,7 +145,7 @@ export default function AttackFrequencyChart({ data, isLoading }: AttackFrequenc
       {/* Chart Canvas */}
       <div className="h-[280px] w-full min-w-0 flex-1">
         {isLoading ? (
-          <div className="w-full h-full rounded-xl animate-pulse flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.03)' }}>
+          <div className="w-full h-full rounded-lg animate-pulse flex items-center justify-center bg-white/[0.02]">
             <span className="text-[12px] font-mono text-slate-600">Loading vectors…</span>
           </div>
         ) : (
@@ -155,7 +153,7 @@ export default function AttackFrequencyChart({ data, isLoading }: AttackFrequenc
             <BarChart data={chartData} margin={{ top: 12, right: 8, left: -12, bottom: 4 }}>
               <CartesianGrid
                 strokeDasharray="2 4"
-                stroke="rgba(255,255,255,0.04)"
+                stroke="rgba(255,255,255,0.03)"
                 vertical={false}
               />
               <XAxis
@@ -182,8 +180,8 @@ export default function AttackFrequencyChart({ data, isLoading }: AttackFrequenc
                   name={attackLabels[key]}
                   fill={attackColors[key]}
                   stackId="attacks"
-                  radius={index === arr.length - 1 ? [3, 3, 0, 0] : [0, 0, 0, 0]}
-                  maxBarSize={28}
+                  radius={index === arr.length - 1 ? [2, 2, 0, 0] : [0, 0, 0, 0]}
+                  maxBarSize={24}
                 />
               ))}
             </BarChart>
@@ -193,8 +191,8 @@ export default function AttackFrequencyChart({ data, isLoading }: AttackFrequenc
 
       {/* Vector legend */}
       <div
-        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mt-4 pt-4"
-        style={{ borderTop: '1px solid rgba(30,41,59,0.7)' }}
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mt-4 pt-3"
+        style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
       >
         {Object.entries(attackLabels).map(([key, label]) => {
           const color = attackColors[key];
@@ -203,19 +201,17 @@ export default function AttackFrequencyChart({ data, isLoading }: AttackFrequenc
           return (
             <div
               key={key}
-              className="p-2.5 rounded-xl transition-all duration-150"
+              className="p-2.5 rounded-lg transition-all duration-150"
               style={{
                 background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(30,41,59,0.9)',
+                border: '1px solid rgba(255,255,255,0.05)',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(51,65,85,0.8)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(30,41,59,0.9)'; }}
             >
-              <div className="flex items-center gap-1.5 mb-1.5 min-w-0">
-                <div className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />
+              <div className="flex items-center gap-1.5 mb-1 min-w-0">
+                <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: color }} />
                 <span className="text-[11px] font-medium text-slate-400 truncate">{label}</span>
               </div>
-              <div className="text-[13px] font-mono font-bold text-slate-200">
+              <div className="text-[13px] font-mono font-medium text-slate-200">
                 {count.toLocaleString()}
               </div>
             </div>

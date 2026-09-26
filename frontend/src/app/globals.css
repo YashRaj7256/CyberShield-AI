@@ -2,6 +2,9 @@
 
 
 :root {
+  /* Layout */
+  --sidebar-width: 272px;
+
   /* Background */
   --bg-primary: #0a0a0f;
   --bg-card: #111118;
@@ -612,27 +615,25 @@ input:-webkit-autofill:active {
 /* Improved dashboard card */
 .dashboard-card {
   position: relative;
-  border-radius: 16px;
-  border: 1px solid rgba(30, 41, 59, 0.9);
-  background: rgba(11, 15, 25, 0.92);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(13, 17, 23, 0.92);
   overflow: hidden;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  transition: border-color 0.15s ease;
 }
 
 .dashboard-card:hover {
-  border-color: rgba(51, 65, 85, 0.9);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 /* Section heading eyebrow */
 .section-eyebrow {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   font-family: ui-monospace, monospace;
-  color: #64748b;
+  color: #94a3b8;
 }
 
 /* Subtle row hover */
@@ -659,79 +660,96 @@ aside ::-webkit-scrollbar-thumb {
 /* Radar-ping animation for attack markers */
 @keyframes radar-ping {
   0% {
-    transform: scale(1);
-    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 0.9;
   }
-  70% {
-    transform: scale(2.2);
-    opacity: 0;
+  65% {
+    transform: translate(-50%, -50%) scale(2.0);
+    opacity: 0.15;
   }
   100% {
-    transform: scale(2.2);
+    transform: translate(-50%, -50%) scale(2.4);
     opacity: 0;
   }
+}
+
+.geo-custom-icon {
+  background: transparent !important;
+  border: none !important;
 }
 
 .geo-marker {
   position: relative;
-  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .geo-marker-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: relative;
   z-index: 2;
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  transition: transform 0.15s ease;
+}
+
+.geo-marker:hover .geo-marker-dot {
+  transform: scale(1.3);
 }
 
 .geo-marker-ping {
-  width: 8px;
-  height: 8px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  animation: radar-ping 2.5s ease-out infinite;
+  animation: radar-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
   z-index: 1;
+  pointer-events: none;
 }
 
 /* Severity color variants */
 .geo-marker-low .geo-marker-dot {
-  background: #22c55e;
-  box-shadow: 0 0 5px rgba(34, 197, 94, 0.4);
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.9), 0 0 16px rgba(16, 185, 129, 0.4);
 }
 .geo-marker-low .geo-marker-ping {
-  background: rgba(34, 197, 94, 0.25);
+  background: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
 }
 
 .geo-marker-medium .geo-marker-dot {
-  background: #eab308;
-  box-shadow: 0 0 5px rgba(234, 179, 8, 0.4);
+  background: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.9), 0 0 16px rgba(245, 158, 11, 0.4);
 }
 .geo-marker-medium .geo-marker-ping {
-  background: rgba(234, 179, 8, 0.25);
+  background: rgba(245, 158, 11, 0.4);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
 }
 
 .geo-marker-high .geo-marker-dot {
   background: #f97316;
-  box-shadow: 0 0 6px rgba(249, 115, 22, 0.5);
+  box-shadow: 0 0 10px rgba(249, 115, 22, 1), 0 0 20px rgba(249, 115, 22, 0.5);
 }
 .geo-marker-high .geo-marker-ping {
-  background: rgba(249, 115, 22, 0.3);
+  background: rgba(249, 115, 22, 0.45);
+  box-shadow: 0 0 10px rgba(249, 115, 22, 0.6);
 }
 
 .geo-marker-critical .geo-marker-dot {
   background: #ef4444;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 1), 0 0 24px rgba(239, 68, 68, 0.6);
 }
 .geo-marker-critical .geo-marker-ping {
-  background: rgba(239, 68, 68, 0.35);
-  animation-duration: 1.6s;
+  background: rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.7);
+  animation-duration: 1.5s;
 }
 
 /* Leaflet popup glassmorphic dark override */
