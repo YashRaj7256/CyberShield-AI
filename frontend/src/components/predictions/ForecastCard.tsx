@@ -51,9 +51,10 @@ export function ForecastCard({
   const config = severityConfig[item.severity] || severityConfig.MEDIUM;
 
   return (
-    <div
+    <button
+      type="button"
       onClick={onClick}
-      className="group relative rounded-xl cursor-pointer transition-all duration-150 p-4 sm:p-5 flex flex-col justify-between"
+      className="group relative w-full rounded-xl cursor-pointer text-left transition-all duration-150 p-4 sm:p-5 flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70"
       style={{
         background: isSelected ? 'rgba(6, 182, 212, 0.05)' : 'rgba(13, 17, 23, 0.92)',
         border: isSelected
@@ -111,6 +112,6 @@ export function ForecastCard({
           <ArrowUpRight className="w-3.5 h-3.5" />
         </span>
       </div>
-    </div>
+    </button>
   );
 }

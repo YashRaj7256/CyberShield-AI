@@ -52,23 +52,19 @@ export default function DashboardLayout({
 
   return (
     <div
-      className="min-h-screen flex"
+      className="dashboard-shell min-h-dvh flex"
       style={{
         background: '#0a0a0f',
-        '--sidebar-width': `${sidebarWidth}px`,
+        '--dashboard-sidebar-width': `${sidebarWidth}px`,
       } as React.CSSProperties}
     >
       <Sidebar />
       <div
-        className="flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out min-w-0 overflow-x-hidden"
-        style={{
-          marginLeft: `${sidebarWidth}px`,
-          width: `calc(100% - ${sidebarWidth}px)`,
-        }}
+        className="dashboard-main flex-1 flex flex-col min-h-dvh transition-[margin,width] duration-300 ease-in-out min-w-0"
       >
         <Header />
-        <main className="flex-1 overflow-y-auto cyber-grid-bg transition-all duration-300 px-8 sm:px-10 lg:px-12">
-          <div className="w-full pt-8 pb-20">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden cyber-grid-bg">
+          <div className="dashboard-page-content w-full pt-5 pb-12 sm:pt-6 sm:pb-16 lg:pt-8 lg:pb-20">
             {children}
           </div>
         </main>

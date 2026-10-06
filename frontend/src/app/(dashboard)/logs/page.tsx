@@ -46,7 +46,7 @@ function SkeletonTable() {
               ].map(({ h, w }, idx) => (
                 <th
                   key={h}
-                  className={`py-3 text-[11px] font-medium uppercase tracking-wider text-slate-400 ${
+                  className={`pt-5 pb-3 text-[11px] font-medium uppercase tracking-wider text-slate-400 ${
                     idx === 0 ? 'pl-5 pr-4' : idx === 7 ? 'pl-4 pr-5' : 'px-4'
                   } ${w}`}
                 >
@@ -61,7 +61,7 @@ function SkeletonTable() {
                 {Array.from({ length: 8 }).map((_, j) => (
                   <td
                     key={j}
-                    className={`py-3.5 ${
+                    className={`py-3 ${
                       j === 0 ? 'pl-5 pr-4' : j === 7 ? 'pl-4 pr-5' : 'px-4'
                     }`}
                   >
@@ -840,7 +840,7 @@ export default function LogsPage() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in pb-16">
+    <div className="flex flex-col gap-4 animate-fade-in pt-5 pb-20 min-w-0 w-full max-w-full">
       {/* Toast */}
       {toast && (
         <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
@@ -850,7 +850,7 @@ export default function LogsPage() {
       {/* 1. Page Header & Status                                       */}
       {/* ───────────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
+        <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2.5">
             <h1 className="text-lg font-semibold text-white tracking-tight">
               Security Operations Telemetry &amp; Logs
@@ -861,7 +861,7 @@ export default function LogsPage() {
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-400">
             Real-time event stream ingestion, triage telemetry, and audit monitoring
           </p>
         </div>
@@ -870,7 +870,7 @@ export default function LogsPage() {
           <button
             onClick={() => fetchLogs()}
             disabled={isLoading}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] transition-colors cursor-pointer"
+            className="h-9 inline-flex items-center justify-center gap-2 px-3.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] transition-colors cursor-pointer"
             title="Sync telemetry"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${isLoading ? 'animate-spin' : ''}`} />
@@ -879,7 +879,7 @@ export default function LogsPage() {
 
           <button
             onClick={() => setShowUpload(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/15 border border-cyan-500/25 transition-colors cursor-pointer"
+            className="h-9 inline-flex items-center justify-center gap-2 px-3.5 rounded-lg text-xs font-medium text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/15 border border-cyan-500/25 transition-colors cursor-pointer"
           >
             <Upload className="w-3.5 h-3.5" />
             <span>Upload Logs</span>
@@ -888,135 +888,144 @@ export default function LogsPage() {
       </div>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* 2. Compact KPI Summary Cards (~20% smaller)                   */}
+      {/* 2. Compact KPI Summary Cards (16px gap from Header)           */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 w-full pb-3">
-        <div className="flex flex-col items-center justify-center text-center px-4 py-2.5 rounded-lg bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.1] transition-colors w-full h-[70px]">
-          <span className="text-[10px] font-medium text-slate-400 tracking-wider uppercase">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+        <div className="flex flex-col items-center justify-center text-center p-3 rounded-lg bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.1] transition-colors w-full h-[76px]">
+          <span className="text-[10px] font-medium text-slate-400 tracking-wider uppercase text-center">
             Total Ingested Logs
           </span>
-          <div className="text-xl font-bold font-mono text-white tracking-tight mt-0.5">
+          <div className="text-xl font-bold font-mono text-white tracking-tight mt-1 text-center">
             {data.total >= 1000 ? `${(data.total / 1000).toFixed(1)}K` : data.total}
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-center text-center px-4 py-2.5 rounded-lg bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.1] transition-colors w-full h-[70px]">
-          <span className="text-[10px] font-medium text-slate-400 tracking-wider uppercase">
+        <div className="flex flex-col items-center justify-center text-center p-3 rounded-lg bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.1] transition-colors w-full h-[76px]">
+          <span className="text-[10px] font-medium text-slate-400 tracking-wider uppercase text-center">
             Critical Threat Events
           </span>
-          <div className="text-xl font-bold font-mono text-rose-400 tracking-tight mt-0.5">
+          <div className="text-xl font-bold font-mono text-rose-400 tracking-tight mt-1 text-center">
             {data.logs.filter((l) => l.severity === 'CRITICAL').length}
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-center text-center px-4 py-2.5 rounded-lg bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.1] transition-colors w-full h-[70px]">
-          <span className="text-[10px] font-medium text-slate-400 tracking-wider uppercase">
+        <div className="flex flex-col items-center justify-center text-center p-3 rounded-lg bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.1] transition-colors w-full h-[76px]">
+          <span className="text-[10px] font-medium text-slate-400 tracking-wider uppercase text-center">
             Perimeter Defended
           </span>
-          <div className="text-xl font-bold font-mono text-white tracking-tight mt-0.5">
+          <div className="text-xl font-bold font-mono text-white tracking-tight mt-1 text-center">
             {data.logs.filter((l) => l.action === 'DENY' || l.action === 'DROP').length}
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-center text-center px-4 py-2.5 rounded-lg bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.1] transition-colors w-full h-[70px]">
-          <span className="text-[10px] font-medium text-slate-400 tracking-wider uppercase">
+        <div className="flex flex-col items-center justify-center text-center p-3 rounded-lg bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.1] transition-colors w-full h-[76px]">
+          <span className="text-[10px] font-medium text-slate-400 tracking-wider uppercase text-center">
             Active Source Nodes
           </span>
-          <div className="text-xl font-bold font-mono text-white tracking-tight mt-0.5">
+          <div className="text-xl font-bold font-mono text-white tracking-tight mt-1 text-center">
             {new Set(data.logs.map((l) => l.sourceIp)).size}
           </div>
         </div>
       </div>
 
-      {/* Filters */}
-      <LogFilters
-        search={search}
-        onSearchChange={(v) => {
-          setSearch(v);
-          setPage(1);
-        }}
-        selectedSeverities={selectedSeverities}
-        onSeveritiesChange={(v) => {
-          setSelectedSeverities(v);
-          setPage(1);
-        }}
-        selectedSources={selectedSources}
-        onSourcesChange={(v) => {
-          setSelectedSources(v);
-          setPage(1);
-        }}
-        startDate={startDate}
-        endDate={endDate}
-        onStartDateChange={(v) => {
-          setStartDate(v);
-          setPage(1);
-        }}
-        onEndDateChange={(v) => {
-          setEndDate(v);
-          setPage(1);
-        }}
-        ipFilter={ipFilter}
-        onIpFilterChange={(v) => {
-          setIpFilter(v);
-          setPage(1);
-        }}
-        countryFilter={countryFilter}
-        onCountryFilterChange={(v) => {
-          setCountryFilter(v);
-          setPage(1);
-        }}
-        onClear={clearFilters}
-        activeCount={activeFilterCount}
-        totalLogsCount={data.total}
-        displayedLogsCount={data.logs.length}
-      />
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* 3. Filter & Table Content Container (20px gap from KPI Cards) */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-3 mt-1 min-w-0 w-full max-w-full">
+        {/* Filters Toolbar */}
+        <LogFilters
+          search={search}
+          onSearchChange={(v) => {
+            setSearch(v);
+            setPage(1);
+          }}
+          selectedSeverities={selectedSeverities}
+          onSeveritiesChange={(v) => {
+            setSelectedSeverities(v);
+            setPage(1);
+          }}
+          selectedSources={selectedSources}
+          onSourcesChange={(v) => {
+            setSelectedSources(v);
+            setPage(1);
+          }}
+          startDate={startDate}
+          endDate={endDate}
+          onStartDateChange={(v) => {
+            setStartDate(v);
+            setPage(1);
+          }}
+          onEndDateChange={(v) => {
+            setEndDate(v);
+            setPage(1);
+          }}
+          ipFilter={ipFilter}
+          onIpFilterChange={(v) => {
+            setIpFilter(v);
+            setPage(1);
+          }}
+          countryFilter={countryFilter}
+          onCountryFilterChange={(v) => {
+            setCountryFilter(v);
+            setPage(1);
+          }}
+          onClear={clearFilters}
+          activeCount={activeFilterCount}
+          totalLogsCount={data.total}
+          displayedLogsCount={data.logs.length}
+        />
 
-      {/* Error State */}
-      {error && (
-        <div
-          className="rounded-2xl border border-rose-500/30 bg-rose-950/20 backdrop-blur-xl p-6 text-center shadow-lg"
-        >
-          <AlertTriangle className="w-8 h-8 mx-auto mb-3 text-rose-400" />
-          <p className="text-sm font-semibold mb-1 text-rose-300">
-            Failed to Synchronize Telemetry Stream
-          </p>
-          <p className="text-xs mb-4 text-slate-400 font-mono">
-            {error}
-          </p>
-          <button
-            onClick={() => setFetchVersion((v) => v + 1)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-medium transition-all bg-rose-500/15 border border-rose-500/30 text-rose-300 hover:bg-rose-500/25 cursor-pointer"
+        {/* Error State */}
+        {error && (
+          <div
+            className="rounded-2xl border border-rose-500/30 bg-rose-950/20 backdrop-blur-xl p-6 text-center shadow-lg"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            Retry Stream Sync
-          </button>
+            <AlertTriangle className="w-8 h-8 mx-auto mb-3 text-rose-400" />
+            <p className="text-sm font-semibold mb-1 text-rose-300">
+              Failed to Synchronize Telemetry Stream
+            </p>
+            <p className="text-xs mb-4 text-slate-400 font-mono">
+              {error}
+            </p>
+            <button
+              onClick={() => setFetchVersion((v) => v + 1)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-medium transition-all bg-rose-500/15 border border-rose-500/30 text-rose-300 hover:bg-rose-500/25 cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Retry Stream Sync
+            </button>
+          </div>
+        )}
+
+        {/* 4. Table (12px gap from Filter Row) */}
+        <div className="min-w-0 w-full max-w-full">
+          {isLoading ? (
+            <SkeletonTable />
+          ) : (
+            !error && (
+              <LogTable
+                logs={data.logs}
+                onRowClick={setSelectedLog}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSort={handleSort}
+                onFilterByIp={(ip) => {
+                  setIpFilter(ip);
+                  setPage(1);
+                }}
+                onClearFilters={clearFilters}
+                searchQuery={debouncedSearch}
+              />
+            )
+          )}
         </div>
-      )}
+      </div>
 
-      {/* Table — loading skeleton or real data */}
-      {isLoading ? (
-        <SkeletonTable />
-      ) : (
-        !error && (
-          <LogTable
-            logs={data.logs}
-            onRowClick={setSelectedLog}
-            sortBy={sortBy}
-            sortOrder={sortOrder}
-            onSort={handleSort}
-            onFilterByIp={(ip) => {
-              setIpFilter(ip);
-              setPage(1);
-            }}
-            onClearFilters={clearFilters}
-            searchQuery={debouncedSearch}
-          />
-        )
-      )}
-
-      {/* Pagination */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* 5. Pagination Controls                                        */}
+      {/* ───────────────────────────────────────────────────────────── */}
       {!error && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-2 px-1 text-slate-400">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 mt-2 border-t border-white/[0.04] text-slate-400">
           <div className="flex items-center gap-2">
             <span className="text-xs font-mono text-slate-400">Show</span>
             <select

@@ -536,6 +536,7 @@ async function main() {
     prisma.alert.deleteMany(),
     prisma.report.deleteMany(),
     prisma.notificationSetting.deleteMany(),
+    prisma.platformSetting.deleteMany(),
   ]);
   await prisma.user.deleteMany();
   await SecurityLogModel.deleteMany({});
@@ -823,6 +824,15 @@ async function main() {
     });
   }
   console.log('✅ Created notification settings\n');
+
+  console.log('⚙️ Creating platform settings…');
+  await Promise.all([
+    prisma.platformSetting.create({ data: { key: 'threat_threshold', value: 75, category: 'detection' } }),
+    prisma.platformSetting.create({ data: { key: 'log_retention_days', value: 30, category: 'storage' } }),
+    prisma.platformSetting.create({ data: { key: 'auto_block_ips', value: false, category: 'response' } }),
+    prisma.platformSetting.create({ data: { key: 'ml_auto_retrain', value: true, category: 'ml' } }),
+  ]);
+  console.log('✅ Created platform settings\n');
 
   // ─── Summary ───────────────────────────────────────────────────
   console.log('═══════════════════════════════════════════════════');

@@ -115,7 +115,7 @@ export default function LandingPage() {
           </Link>
 
           {/* Desktop nav */}
-          <nav style={{ display: 'flex', alignItems: 'center', gap: 32 }} className="hidden lg:flex">
+          <nav style={{ alignItems: 'center', gap: 32, whiteSpace: 'nowrap' }} className="hidden xl:flex">
             {NAV_LINKS.map(l => (
               <a key={l.href} href={l.href} style={{ fontSize: 14, color: '#64748b', textDecoration: 'none', transition: 'color .15s' }}
                 onMouseEnter={e => (e.currentTarget.style.color = '#e2e8f0')}
@@ -145,15 +145,15 @@ export default function LandingPage() {
           <button onClick={() => setMobile(!mobile)} aria-label="Toggle navigation menu"
             style={{ display: 'none', padding: 8, borderRadius: 8, border: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.04)',
               color: '#94a3b8', cursor: 'pointer' }}
-            className="lg:!hidden !flex">
+            className="xl:!hidden !flex">
             {mobile ? <X style={{ width: 18, height: 18 }} /> : <Menu style={{ width: 18, height: 18 }} />}
           </button>
         </div>
 
         {/* Mobile drawer */}
         {mobile && (
-          <div style={{ background: 'rgba(4,6,12,0.98)', borderBottom: `1px solid ${BORDER}`, padding: '8px 24px 16px', backdropFilter: 'blur(24px)' }}
-            className="lg:hidden animate-fade-in">
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, minHeight: 'calc(100dvh - 64px)', background: 'rgba(4,6,12,0.98)', borderBottom: `1px solid ${BORDER}`, padding: '8px 24px 16px', backdropFilter: 'blur(24px)', boxShadow: '0 20px 40px rgba(0,0,0,0.35)' }}
+            className="xl:hidden animate-fade-in">
             {NAV_LINKS.map(l => (
               <a key={l.href} href={l.href} onClick={() => setMobile(false)}
                 style={{ display: 'block', padding: '10px 12px', borderRadius: 8, fontSize: 14, color: '#64748b', textDecoration: 'none', marginBottom: 2 }}>

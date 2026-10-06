@@ -24,14 +24,14 @@ interface LogTableProps {
 }
 
 const columns = [
-  { key: 'timestamp', label: 'Timestamp', width: 'w-[140px] min-w-[130px]' },
-  { key: 'sourceIp', label: 'Source → Destination', width: 'w-[250px] min-w-[220px]' },
-  { key: 'eventType', label: 'Event & Payload', width: 'min-w-[260px]' },
-  { key: 'protocol', label: 'Protocol', width: 'w-[80px] min-w-[75px]' },
-  { key: 'action', label: 'Action', width: 'w-[85px] min-w-[80px]' },
-  { key: 'severity', label: 'Severity', width: 'w-[105px] min-w-[95px]' },
-  { key: 'source', label: 'Source', width: 'w-[100px] min-w-[90px]' },
-  { key: 'country', label: 'Location', width: 'w-[110px] min-w-[95px]' },
+  { key: 'timestamp', label: 'Timestamp', width: 'w-[130px]' },
+  { key: 'sourceIp', label: 'Source → Destination', width: 'w-[300px]' },
+  { key: 'eventType', label: 'Event & Payload', width: 'min-w-[320px] w-auto' },
+  { key: 'protocol', label: 'Protocol', width: 'w-[90px]' },
+  { key: 'action', label: 'Action', width: 'w-[90px]' },
+  { key: 'severity', label: 'Severity', width: 'w-[110px]' },
+  { key: 'source', label: 'Source', width: 'w-[120px]' },
+  { key: 'country', label: 'Location', width: 'w-[130px]' },
 ];
 
 const severityColors: Record<string, string> = {
@@ -79,34 +79,38 @@ export default function LogTable({
 
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.01] overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+      <div className="overflow-x-auto w-full">
+        <table
+          className="min-w-[1290px] w-full text-left border-collapse"
+          style={{ tableLayout: 'fixed' }}
+        >
           <thead>
-            <tr className="border-b border-white/[0.06] bg-white/[0.01]">
-              {columns.map((col, index) => (
+            <tr className="sticky top-0 z-10 border-b border-white/[0.08] bg-[#0c1017]">
+              {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={`py-3 text-[11px] font-medium uppercase tracking-wider text-slate-400 cursor-pointer select-none transition-colors ${
-                    index === 0
-                      ? 'pl-5 pr-4'
-                      : index === columns.length - 1
-                      ? 'pl-4 pr-5'
-                      : 'px-4'
+                  className={`px-3 pt-5 pb-3 text-[11px] font-medium uppercase tracking-wider text-slate-400 cursor-pointer select-none transition-colors align-middle ${
+                    col.key === 'timestamp' ? 'text-center' : 'text-left'
                   } ${col.width}`}
                   onClick={() => onSort(col.key)}
+                  style={{ verticalAlign: 'middle' }}
                 >
-                  <div className="flex items-center gap-1.5 whitespace-nowrap">
+                  <div
+                    className={`flex items-center gap-1 whitespace-nowrap ${
+                      col.key === 'timestamp' ? 'justify-center' : 'justify-start'
+                    }`}
+                  >
                     <span className={sortBy === col.key ? 'text-cyan-400' : ''}>
                       {col.label}
                     </span>
                     {sortBy === col.key ? (
                       sortOrder === 'asc' ? (
-                        <ArrowUp className="w-3 h-3 text-cyan-400 shrink-0" />
+                        <ArrowUp className="w-3.5 h-3.5 text-cyan-400 shrink-0 ml-1" />
                       ) : (
-                        <ArrowDown className="w-3 h-3 text-cyan-400 shrink-0" />
+                        <ArrowDown className="w-3.5 h-3.5 text-cyan-400 shrink-0 ml-1" />
                       )
                     ) : (
-                      <ArrowUpDown className="w-3 h-3 opacity-25 shrink-0" />
+                      <ArrowUpDown className="w-3.5 h-3.5 opacity-25 shrink-0 ml-1" />
                     )}
                   </div>
                 </th>
@@ -127,64 +131,83 @@ export default function LogTable({
                   className="cursor-pointer transition-colors duration-100 hover:bg-white/[0.02] group"
                 >
                   {/* Timestamp */}
-                  <td className="pl-5 pr-4 py-3.5 text-xs font-mono text-slate-400 whitespace-nowrap">
+                  <td
+                    className="px-3 py-3 text-xs font-mono text-slate-400 whitespace-nowrap align-middle text-center"
+                    style={{ verticalAlign: 'middle' }}
+                  >
                     {formatDateShort(log.timestamp)}
                   </td>
 
-                  {/* Source → Destination IP */}
-                  <td className="px-4 py-3.5 text-xs font-mono whitespace-nowrap">
-                    <div className="flex items-center gap-1.5">
-                      <div className="flex items-center gap-1 group/ip">
-                        <span className="font-medium text-slate-200">
+                  {/* Source → Destination IP: 3-part grid layout with vertically aligned arrow */}
+                  <td
+                    className="px-3 py-3 text-xs font-mono align-middle"
+                    style={{ verticalAlign: 'middle' }}
+                  >
+                    <div className="grid grid-cols-[1fr_24px_1fr] items-center text-xs font-mono tabular-nums">
+                      {/* Source Block */}
+                      <div className="flex items-center gap-1 min-w-0 justify-end group/ip">
+                        <span className="font-medium text-slate-200 truncate">
                           {log.sourceIp}
                         </span>
                         {log.sourcePort > 0 && (
-                          <span className="text-[10px] text-slate-600">:{log.sourcePort}</span>
+                          <span className="text-[10px] text-slate-500 shrink-0">
+                            :{log.sourcePort}
+                          </span>
                         )}
-
-                        {onFilterByIp && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onFilterByIp(log.sourceIp);
-                            }}
-                            className="opacity-0 group-hover/ip:opacity-100 p-0.5 rounded text-slate-400 hover:text-cyan-400 transition-opacity cursor-pointer"
-                            title={`Filter by ${log.sourceIp}`}
-                          >
-                            <Filter className="w-2.5 h-2.5" />
-                          </button>
-                        )}
+                        {onFilterByIp ? (
+                          <span className="w-4 h-4 flex items-center justify-center shrink-0">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onFilterByIp(log.sourceIp);
+                              }}
+                              className="opacity-0 group-hover/ip:opacity-100 p-0.5 rounded text-slate-400 hover:text-cyan-400 transition-opacity cursor-pointer"
+                              title={`Filter by ${log.sourceIp}`}
+                            >
+                              <Filter className="w-2.5 h-2.5" />
+                            </button>
+                          </span>
+                        ) : null}
                       </div>
 
-                      <ArrowRight className="w-3 h-3 text-slate-600 shrink-0" />
+                      {/* Fixed-width Arrow Block */}
+                      <div className="flex items-center justify-center text-slate-600 shrink-0">
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </div>
 
-                      <div className="flex items-center gap-1">
-                        <span className="text-slate-400">
+                      {/* Destination Block */}
+                      <div className="flex items-center gap-1 min-w-0 justify-start">
+                        <span className="text-slate-400 truncate">
                           {log.destinationIp}
                         </span>
                         {log.destinationPort > 0 && (
-                          <span className="text-[10px] text-slate-600">:{log.destinationPort}</span>
+                          <span className="text-[10px] text-slate-500 shrink-0">
+                            :{log.destinationPort}
+                          </span>
                         )}
                       </div>
                     </div>
                   </td>
 
-                  {/* Event & Message Payload */}
-                  <td className="px-4 py-3.5 min-w-[260px] max-w-[420px]">
-                    <div className="space-y-0.5">
+                  {/* Event & Message Payload: Stacked event type + inline score, 2-line clamp description */}
+                  <td
+                    className="px-3 py-3 align-middle"
+                    style={{ verticalAlign: 'middle' }}
+                  >
+                    <div className="flex flex-col justify-center gap-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-slate-200 font-mono">
-                          {log.eventType || 'Security Event'}
+                        <span className="text-xs font-bold text-slate-200 font-mono tracking-tight whitespace-nowrap">
+                          {log.eventType || 'SECURITY_EVENT'}
                         </span>
-                        {log.threatScore != null && log.threatScore > 70 && (
-                          <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-white/[0.04] text-slate-400 border border-white/[0.06]">
+                        {log.threatScore != null && (
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/[0.05] text-slate-300 border border-white/[0.08] ml-2 shrink-0">
                             {log.threatScore}
                           </span>
                         )}
                       </div>
                       <p
-                        className="text-[11px] text-slate-400 truncate leading-normal"
+                        className="text-[11px] text-slate-400 line-clamp-2 leading-snug break-words"
                         title={log.message}
                       >
                         {log.message}
@@ -192,18 +215,27 @@ export default function LogTable({
                     </div>
                   </td>
 
-                  {/* Protocol (Secondary Metadata: subtle) */}
-                  <td className="px-4 py-3.5 text-[11px] font-mono text-slate-400 whitespace-nowrap">
+                  {/* Protocol */}
+                  <td
+                    className="px-3 py-3 text-[11px] font-mono text-slate-400 whitespace-nowrap align-middle"
+                    style={{ verticalAlign: 'middle' }}
+                  >
                     {log.protocol}
                   </td>
 
-                  {/* Action (Clean neutral SIEM style) */}
-                  <td className="px-4 py-3.5 text-[11px] font-mono text-slate-300 font-medium whitespace-nowrap">
+                  {/* Action */}
+                  <td
+                    className="px-3 py-3 text-[11px] font-mono text-slate-300 font-medium whitespace-nowrap align-middle"
+                    style={{ verticalAlign: 'middle' }}
+                  >
                     {log.action}
                   </td>
 
-                  {/* Severity (ONLY place using severity colors) */}
-                  <td className="px-4 py-3.5 whitespace-nowrap">
+                  {/* Severity */}
+                  <td
+                    className="px-3 py-3 whitespace-nowrap align-middle"
+                    style={{ verticalAlign: 'middle' }}
+                  >
                     <span
                       className="inline-flex items-center gap-1.5 text-xs font-medium"
                       style={{ color: sevColor }}
@@ -216,13 +248,20 @@ export default function LogTable({
                     </span>
                   </td>
 
-                  {/* Source (Secondary Metadata: subtle) */}
-                  <td className="px-4 py-3.5 text-[11px] font-mono text-slate-400 whitespace-nowrap">
+                  {/* Source */}
+                  <td
+                    className="px-3 py-3 text-[11px] font-mono text-slate-400 whitespace-nowrap align-middle"
+                    style={{ verticalAlign: 'middle' }}
+                  >
                     {log.source}
                   </td>
 
-                  {/* Location (Secondary Metadata: subtle) */}
-                  <td className="pl-4 pr-5 py-3.5 text-[11px] font-mono text-slate-400 whitespace-nowrap">
+                  {/* Location */}
+                  <td
+                    className="px-3 py-3 text-[11px] font-mono text-slate-400 whitespace-nowrap truncate align-middle"
+                    style={{ verticalAlign: 'middle' }}
+                    title={log.country || 'Unknown'}
+                  >
                     {log.country ?? '—'}
                   </td>
                 </tr>

@@ -18,6 +18,7 @@ import {
   Activity,
   CheckCircle2,
   ChevronRight,
+  Menu,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSidebarStore } from '@/stores/sidebar-store';
@@ -90,7 +91,7 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
-  const { collapsed } = useSidebarStore();
+  const { mobileOpen, toggleMobileSidebar } = useSidebarStore();
 
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -163,18 +164,27 @@ export default function Header() {
 
   return (
     <header
-      className="h-16 shrink-0 z-30 sticky top-0 transition-all duration-300 px-8 sm:px-10 lg:px-12"
+      className="h-16 shrink-0 z-30 sticky top-0 transition-all duration-300 px-6 sm:px-8 lg:px-10 xl:px-12"
       style={{
         background: 'rgba(9, 11, 18, 0.96)',
         backdropFilter: 'blur(20px)',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
       }}
     >
-      <div className="w-full h-full flex items-center justify-between">
+      <div className="w-full h-full flex items-center justify-between gap-3">
       {/* ----------------------------------------------------------------- */}
-      {/* Left: Breadcrumb page title                                         */}
+      {/* Left: Breadcrumb page title (left padding matching page content)   */}
       {/* ----------------------------------------------------------------- */}
-      <div className="flex items-center gap-2 min-w-0 mr-6">
+      <div className="flex items-center gap-2 min-w-0 pl-1 sm:pl-2">
+        <button
+          type="button"
+          onClick={toggleMobileSidebar}
+          aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-expanded={mobileOpen}
+          className="lg:hidden inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.03] text-slate-300 transition-colors hover:bg-white/[0.07] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50"
+        >
+          {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+        </button>
         {pageSection && (
           <>
             <span className="text-[12px] text-slate-500 font-medium hidden sm:block">
@@ -191,7 +201,7 @@ export default function Header() {
       {/* ----------------------------------------------------------------- */}
       {/* Right: Search + Notifications + User                               */}
       {/* ----------------------------------------------------------------- */}
-      <div className="flex items-center gap-3 sm:gap-3.5 shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
 
         {/* ── Search ─────────────────────────────────────────────────── */}
         <div ref={searchContainerRef} className="relative hidden md:block w-72 lg:w-80">
@@ -330,6 +340,8 @@ export default function Header() {
               e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
             }}
             aria-label="Notifications"
+            aria-expanded={showNotifications}
+            aria-haspopup="dialog"
           >
             <Bell className="w-3.5 h-3.5 shrink-0" />
             {hasUnreadAlerts && (
@@ -342,7 +354,7 @@ export default function Header() {
           {/* Notifications panel */}
           {showNotifications && (
             <div
-              className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-xl z-50 animate-fade-in overflow-hidden"
+              className="absolute right-0 top-full mt-2 w-[min(24rem,calc(100vw-2rem))] rounded-xl z-50 animate-fade-in overflow-hidden"
               style={{
                 background: '#0d1117',
                 border: '1px solid rgba(255,255,255,0.08)',
@@ -416,7 +428,7 @@ export default function Header() {
         {/* ── User menu ──────────────────────────────────────────────── */}
         <div className="relative shrink-0">
           <button
-            className="flex items-center gap-2.5 h-9 px-2.5 rounded-lg transition-all duration-150 cursor-pointer"
+            className="flex items-center gap-3 h-9 px-2.5 rounded-lg transition-all duration-150 cursor-pointer min-w-0"
             style={{
               background: 'rgba(255,255,255,0.03)',
               border: '1px solid rgba(255,255,255,0.07)',
@@ -425,6 +437,8 @@ export default function Header() {
               e.stopPropagation();
               setShowDropdown(!showDropdown);
             }}
+            aria-expanded={showDropdown}
+            aria-haspopup="menu"
             onMouseEnter={(e) => {
               e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
               e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
@@ -436,15 +450,15 @@ export default function Header() {
           >
             {/* Avatar */}
             <div
-              className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-mono font-bold text-white shrink-0"
+              className="w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-mono font-bold text-white shrink-0"
               style={{ background: 'linear-gradient(135deg, #0891b2, #2563eb)' }}
             >
               {userInitials}
             </div>
             {/* Name + Role */}
-            <div className="hidden sm:block text-left leading-tight min-w-0 pr-1">
-              <p className="text-[12px] font-medium text-slate-200 truncate max-w-[110px]">
-                {user?.firstName ?? 'System'} {user?.lastName ?? 'Admin'}
+            <div className="hidden sm:block text-left leading-tight min-w-0">
+              <p className="text-[12px] font-medium text-slate-200 truncate">
+                {user?.firstName ? `${user.firstName} ${user.lastName ?? ''}`.trim() : 'System Administrator'}
               </p>
               <p className="text-[9px] uppercase tracking-wider font-mono font-semibold text-cyan-400/90 mt-0.5">
                 {user?.role ?? 'ADMIN'}

@@ -3,25 +3,20 @@
 import { useState, useMemo, useEffect, useCallback, Fragment } from 'react';
 import {
   ShieldAlert,
-  Search,
   AlertTriangle,
   Eye,
   CheckCircle,
   XCircle,
   Clock,
-  ChevronDown,
   ChevronRight,
-  ChevronUp,
   Brain,
   Zap,
   ArrowUpRight,
   ArrowUpDown,
   RefreshCw,
   Database,
-  Sparkles,
   LayoutGrid,
   Table as TableIcon,
-  Layers,
   Flame,
   Globe,
   Shield,
@@ -31,20 +26,60 @@ import { mockAlerts } from '@/lib/mock-data';
 import { api } from '@/lib/api';
 import type { Alert } from '@/types';
 import AlertTelemetryStrip from '@/components/alerts/alert-telemetry-strip';
+import { SeverityBadge, getSeverityMeta, SEVERITY_TOKENS } from '@/components/alerts/severity-badge';
 import { getAiThreatReasoning, parseAlertDescription } from '@/lib/alert-parser';
-
-const severityConfig: Record<string, { color: string; bg: string; border: string; glow: string }> = {
-  CRITICAL: { color: '#f87171', bg: 'rgba(239, 68, 68, 0.14)', border: 'rgba(239, 68, 68, 0.45)', glow: 'rgba(239, 68, 68, 0.16)' },
-  HIGH: { color: '#fb923c', bg: 'rgba(249, 115, 22, 0.14)', border: 'rgba(249, 115, 22, 0.45)', glow: 'rgba(249, 115, 22, 0.16)' },
-  MEDIUM: { color: '#facc15', bg: 'rgba(234, 179, 8, 0.14)', border: 'rgba(234, 179, 8, 0.45)', glow: 'rgba(234, 179, 8, 0.16)' },
-  LOW: { color: '#4ade80', bg: 'rgba(34, 197, 94, 0.14)', border: 'rgba(34, 197, 94, 0.45)', glow: 'rgba(34, 197, 94, 0.16)' },
-};
+import { SearchBar } from '@/components/domain/search-bar';
+import { StatusPill } from '@/components/domain/status-pill';
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from '@/components/ui/table';
+import { cn } from '@/lib/utils';
 
 const statusConfig: Record<string, { icon: React.ReactNode; color: string; label: string }> = {
   NEW: { icon: <Zap className="w-4 h-4" />, color: '#06b6d4', label: 'New Incidents' },
   INVESTIGATING: { icon: <Eye className="w-4 h-4" />, color: '#f59e0b', label: 'Under Investigation' },
   RESOLVED: { icon: <CheckCircle className="w-4 h-4" />, color: '#10b981', label: 'Resolved Alerts' },
   FALSE_POSITIVE: { icon: <XCircle className="w-4 h-4" />, color: '#94a3b8', label: 'False Positives' },
+};
+
+const statusChipConfig: Record<
+  string,
+  { label: string; text: string; bg: string; border: string; dot: string }
+> = {
+  NEW: {
+    label: 'New Incidents',
+    text: '#22d3ee',
+    bg: 'rgba(6, 182, 212, 0.12)',
+    border: 'rgba(6, 182, 212, 0.35)',
+    dot: '#06b6d4',
+  },
+  INVESTIGATING: {
+    label: 'Under Investigation',
+    text: '#fbbf24',
+    bg: 'rgba(245, 158, 11, 0.12)',
+    border: 'rgba(245, 158, 11, 0.35)',
+    dot: '#f59e0b',
+  },
+  RESOLVED: {
+    label: 'Resolved',
+    text: '#4ade80',
+    bg: 'rgba(34, 197, 94, 0.12)',
+    border: 'rgba(34, 197, 94, 0.35)',
+    dot: '#22c55e',
+  },
+  FALSE_POSITIVE: {
+    label: 'False Positive',
+    text: '#94a3b8',
+    bg: 'rgba(148, 163, 184, 0.12)',
+    border: 'rgba(148, 163, 184, 0.35)',
+    dot: '#64748b',
+  },
 };
 
 const alertTypeLabels: Record<string, string> = {
@@ -66,11 +101,13 @@ function formatAlertType(type: string): string {
 }
 
 function getEffectiveSeverity(alert: { severity?: string; threatScore?: number }): string {
+  if (alert.severity && ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].includes(alert.severity.toUpperCase())) {
+    return alert.severity.toUpperCase();
+  }
   const score = Math.round(alert.threatScore || 0);
   if (score >= 80) return 'CRITICAL';
   if (score >= 60) return 'HIGH';
   if (score >= 40) return 'MEDIUM';
-  if (alert.severity && alert.severity !== 'LOW') return alert.severity;
   return 'LOW';
 }
 
@@ -83,20 +120,7 @@ function formatAssignee(assignedTo: Alert['assignedTo']): string | null {
   return String(assignedTo);
 }
 
-function StatusPill({ label, value, online = true }: { label: string; value: string; online?: boolean }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span
-        className="w-1.5 h-1.5 rounded-full shrink-0"
-        style={{
-          background: online ? '#34d399' : '#f87171',
-        }}
-      />
-      <span className="text-[11px] font-mono text-slate-500 tracking-wide">{label}:</span>
-      <span className="text-[11px] font-mono font-medium text-slate-300">{value}</span>
-    </div>
-  );
-}
+const SEVERITY_ORDER = ['ALL', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'] as const;
 
 export default function AlertsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -104,6 +128,7 @@ export default function AlertsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+  const [sortBy, setSortBy] = useState<'priority' | 'time'>('priority');
 
   // Live data state
   const [alerts, setAlerts] = useState<Alert[]>(mockAlerts);
@@ -126,7 +151,7 @@ export default function AlertsPage() {
     setIsLoading(true);
     setFetchError(null);
     try {
-      const res = await api.get<unknown>('/alerts');
+      const res = await api.get<unknown>('/alerts', { limit: 100 });
       let alertList: Alert[] = [];
 
       if (Array.isArray(res)) {
@@ -206,28 +231,56 @@ export default function AlertsPage() {
     }
   };
 
+  // Severity counts ensuring Critical + High + Medium + Low = All exactly
   const severityCounts = useMemo(() => {
+    const crit = alerts.filter((a) => getEffectiveSeverity(a) === 'CRITICAL').length;
+    const high = alerts.filter((a) => getEffectiveSeverity(a) === 'HIGH').length;
+    const med = alerts.filter((a) => getEffectiveSeverity(a) === 'MEDIUM').length;
+    const low = alerts.filter((a) => getEffectiveSeverity(a) === 'LOW').length;
     return {
-      ALL: alerts.length,
-      CRITICAL: alerts.filter((a) => a.severity === 'CRITICAL').length,
-      HIGH: alerts.filter((a) => a.severity === 'HIGH').length,
-      MEDIUM: alerts.filter((a) => a.severity === 'MEDIUM').length,
-      LOW: alerts.filter((a) => a.severity === 'LOW').length,
+      ALL: crit + high + med + low,
+      CRITICAL: crit,
+      HIGH: high,
+      MEDIUM: med,
+      LOW: low,
     };
   }, [alerts]);
 
   const filteredAlerts = useMemo(() => {
-    return alerts.filter((alert) => {
-      const matchesSeverity = severityFilter === 'ALL' || alert.severity === severityFilter;
+    const list = alerts.filter((alert) => {
+      const effectiveSev = getEffectiveSeverity(alert);
+      const matchesSeverity = severityFilter === 'ALL' || effectiveSev === severityFilter;
       const matchesStatus = statusFilter === 'ALL' || alert.status === statusFilter;
       const matchesSearch =
         !searchQuery ||
-        alert.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        alert.sourceIp.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        alert.type.toLowerCase().includes(searchQuery.toLowerCase());
+        (alert.title && alert.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (alert.sourceIp && alert.sourceIp.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (alert.type && alert.type.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (alert.description && alert.description.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchesSeverity && matchesStatus && matchesSearch;
     });
-  }, [alerts, severityFilter, statusFilter, searchQuery]);
+
+    const severityRank: Record<string, number> = {
+      CRITICAL: 4,
+      HIGH: 3,
+      MEDIUM: 2,
+      LOW: 1,
+    };
+
+    return list.sort((a, b) => {
+      if (sortBy === 'priority') {
+        const rankDiff = (severityRank[getEffectiveSeverity(b)] || 0) - (severityRank[getEffectiveSeverity(a)] || 0);
+        if (rankDiff !== 0) return rankDiff;
+
+        const scoreDiff = (b.threatScore || 0) - (a.threatScore || 0);
+        if (scoreDiff !== 0) return scoreDiff;
+
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      } else {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
+  }, [alerts, severityFilter, statusFilter, searchQuery, sortBy]);
 
   const activeIncidents = useMemo(() => {
     return filteredAlerts.filter(
@@ -235,7 +288,8 @@ export default function AlertsPage() {
     );
   }, [filteredAlerts]);
 
-  const formatTime = (iso: string) => {
+  const formatTime = (iso?: string) => {
+    if (!iso) return '—';
     const diff = Date.now() - new Date(iso).getTime();
     const mins = Math.floor(diff / 60000);
     if (mins < 60) return `${mins}m ago`;
@@ -245,7 +299,7 @@ export default function AlertsPage() {
   };
 
   return (
-    <div className="space-y-7 animate-fade-in pb-16">
+    <div className="flex flex-col gap-4 animate-fade-in pb-16 min-w-0 w-full max-w-full">
       {/* ───────────────────────────────────────────────────────────── */}
       {/* 1. SOC Command Banner                                         */}
       {/* ───────────────────────────────────────────────────────────── */}
@@ -257,11 +311,9 @@ export default function AlertsPage() {
           border: '1px solid rgba(255, 255, 255, 0.07)',
         }}
       >
-        {/* Top accent — subtle 1px gradient line */}
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-rose-500/50 via-cyan-500/30 to-transparent" />
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          {/* Left: Brand + Status */}
           <div>
             <div className="flex items-center gap-3">
               <div
@@ -288,49 +340,36 @@ export default function AlertsPage() {
               </div>
             </div>
 
-            {/* System Status Row */}
             <div
               className="flex flex-wrap items-center gap-5 pt-3 mt-2"
               style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
             >
-              <StatusPill label="Defense Posture" value="Active Triage" online={true} />
-              <StatusPill label="Telemetry Stream" value="Connected" online={true} />
-              <StatusPill label="Detection Engine" value="CyberShield AI v2.4" online={true} />
+              <StatusPill label="Defense Posture" value="Active Triage" variant="warning" />
+              <StatusPill label="Telemetry Stream" value="Connected" variant="success" pulse />
+              <StatusPill label="Detection Engine" value="CyberShield AI v2.4" variant="info" />
             </div>
           </div>
 
-          {/* Right: Actions */}
           <div className="flex items-center gap-2.5 self-start md:self-center">
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={fetchAlerts}
               disabled={isLoading}
-              className="inline-flex items-center gap-2 h-9 px-4 rounded-lg text-[12px] font-mono font-semibold transition-all cursor-pointer border"
-              style={{
-                background: 'rgba(255,255,255,0.03)',
-                borderColor: 'rgba(255,255,255,0.08)',
-                color: '#94a3b8',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
-                e.currentTarget.style.color = '#e2e8f0';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                e.currentTarget.style.color = '#94a3b8';
-              }}
+              className="font-mono text-xs gap-2 h-9"
               title="Sync alerts"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={cn('w-3.5 h-3.5 text-cyan-400', isLoading && 'animate-spin')} />
               <span>Sync</span>
-            </button>
+            </Button>
           </div>
         </div>
       </div>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* 2. Key Performance Indicators (Centered layout prevents corner clip) */}
+      {/* 2. Key Performance Indicators (16px gap from Header Card)     */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="space-y-3">
+      <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <Database className="w-3 h-3 text-slate-500" />
           <span className="text-[11px] font-mono font-semibold tracking-[0.14em] uppercase text-slate-400">
@@ -348,14 +387,13 @@ export default function AlertsPage() {
                 onClick={() => setStatusFilter(isSelected ? 'ALL' : key)}
                 className="group relative rounded-xl flex flex-col justify-between overflow-hidden transition-all duration-150 cursor-pointer"
                 style={{
-                  padding: '18px 22px',
-                  minHeight: '150px',
+                  padding: '16px 20px',
+                  minHeight: '136px',
                   background: isSelected ? 'rgba(6, 182, 212, 0.06)' : 'rgba(13, 17, 23, 0.92)',
                   border: isSelected ? '1px solid rgba(6, 182, 212, 0.4)' : '1px solid rgba(255, 255, 255, 0.07)',
                   boxShadow: isSelected ? '0 0 16px rgba(6, 182, 212, 0.12)' : 'none',
                 }}
               >
-                {/* 1. Header: Label + Accent Icon */}
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-[12px] font-medium text-slate-400 truncate tracking-wide">
                     {config.label}
@@ -372,7 +410,6 @@ export default function AlertsPage() {
                   </div>
                 </div>
 
-                {/* 2. Middle: Large Value & Tag in Center */}
                 <div className="flex flex-col items-center justify-center text-center my-auto py-1">
                   <span className="text-[2.2rem] sm:text-[2.4rem] font-bold font-mono text-white tracking-tight leading-none">
                     {count}
@@ -412,7 +449,6 @@ export default function AlertsPage() {
                   </div>
                 </div>
 
-                {/* 3. Footer: Centered Filter Hint without border line */}
                 <div className="text-center mt-auto pt-1">
                   <span className="text-slate-500 text-[10px] font-mono tracking-wide">
                     {isSelected ? '✓ Active Filter' : 'Click to filter'}
@@ -425,197 +461,233 @@ export default function AlertsPage() {
       </div>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* 3. Filter & Search Parameters Toolbar (Matching Reference UI) */}
+      {/* 3. Controls & View Content (20px gap from KPI cards)          */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        {/* Search Input */}
-        <div
-          className="flex items-center gap-3 px-4 py-2.5 rounded-xl flex-1 max-w-lg"
-          style={{
-            background: 'rgba(13, 17, 23, 0.92)',
-            border: '1px solid rgba(255, 255, 255, 0.07)',
-          }}
-        >
-          <Search className="w-4 h-4 text-slate-500 shrink-0" />
-          <input
-            type="text"
+      <div className="flex flex-col gap-3 mt-1 min-w-0 w-full max-w-full">
+        {/* ROW 1: Search (flex-1) + Severity Segmented Control (h-10 each, gap-3) */}
+        <div className="flex flex-col xl:flex-row items-stretch xl:items-center gap-3 w-full">
+          {/* Search Input (height 40px aligned with severity bar) */}
+          <SearchBar
             placeholder="Search alerts by title, IP, signature..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent text-[12px] font-mono text-slate-200 placeholder:text-slate-500 focus:outline-none flex-1"
+            onChange={setSearchQuery}
+            containerClassName="!h-10 flex-1 max-w-none rounded-[10px]"
           />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="text-[11px] font-mono text-slate-500 hover:text-slate-300 cursor-pointer px-1"
+
+          {/* Severity Segmented Control (Container: 40px height, 4px padding, 10px radius) */}
+          <div className="flex items-center gap-3 shrink-0 overflow-x-auto md:overflow-visible py-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex items-center gap-1.5 text-slate-500 shrink-0 select-none">
+              <Shield className="w-3.5 h-3.5 text-slate-500 shrink-0" aria-hidden="true" />
+              <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-slate-500 font-semibold">
+                SEVERITY
+              </span>
+            </div>
+
+            <div
+              role="group"
+              aria-label="Filter alerts by severity"
+              className="inline-flex items-center h-10 p-1 rounded-[10px] gap-1 shrink-0 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+              }}
             >
-              Clear
-            </button>
-          )}
-        </div>
+              {SEVERITY_ORDER.map((id) => {
+                const meta = SEVERITY_TOKENS[id];
+                const count = severityCounts[id] ?? 0;
+                const isActive = severityFilter === id;
+                const [r, g, b] = meta.rgb;
+                const isZero = count === 0;
 
-        {/* Severity Filter Segmented Capsule */}
-        <div className="flex items-center gap-2.5 flex-wrap shrink-0">
-          <div className="flex items-center gap-1.5 text-slate-400 shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shrink-0" />
-            <ShieldAlert className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400">
-              Severity:
-            </span>
-          </div>
-
-          <div
-            className="inline-flex items-center p-1 rounded-xl gap-1.5"
-            style={{
-              background: 'rgba(13, 17, 23, 0.92)',
-              border: '1px solid rgba(255, 255, 255, 0.07)',
-            }}
-          >
-            {[
-              { id: 'ALL', label: 'All', color: '#22d3ee', bg: 'rgba(6, 182, 212, 0.16)', border: 'rgba(6, 182, 212, 0.45)' },
-              { id: 'CRITICAL', label: 'Critical', color: '#f87171', bg: 'rgba(239, 68, 68, 0.16)', border: 'rgba(239, 68, 68, 0.45)' },
-              { id: 'HIGH', label: 'High', color: '#fb923c', bg: 'rgba(249, 115, 22, 0.16)', border: 'rgba(249, 115, 22, 0.45)' },
-              { id: 'MEDIUM', label: 'Medium', color: '#facc15', bg: 'rgba(234, 179, 8, 0.16)', border: 'rgba(234, 179, 8, 0.45)' },
-              { id: 'LOW', label: 'Low', color: '#4ade80', bg: 'rgba(34, 197, 94, 0.16)', border: 'rgba(34, 197, 94, 0.45)' },
-            ].map(({ id, label, color, bg, border }) => {
-              const isActive = severityFilter === id;
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => setSeverityFilter(id)}
-                  className="h-8 min-w-[58px] px-3.5 rounded-lg text-[12px] font-mono font-semibold transition-all duration-150 cursor-pointer flex items-center justify-center gap-1.5"
-                  style={{
-                    background: isActive ? bg : 'transparent',
-                    border: isActive ? `1px solid ${border}` : '1px solid rgba(255, 255, 255, 0.06)',
-                    color: isActive ? color : '#94a3b8',
-                    boxShadow: isActive ? `0 0 10px ${border}` : 'none',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                      e.currentTarget.style.color = '#f1f5f9';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.14)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.color = '#94a3b8';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
-                    }
-                  }}
-                  title={`Filter by ${label} severity`}
-                >
-                  {id !== 'ALL' && (
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setSeverityFilter(id)}
+                    className={cn(
+                      'h-8 min-w-[88px] px-3 rounded-lg text-[12px] font-mono font-semibold uppercase tracking-[0.06em] flex items-center justify-center gap-1.5 cursor-pointer select-none transition-all duration-[120ms]',
+                      'focus:outline-none focus-visible:outline-2 focus-visible:outline-cyan-400 focus-visible:outline-offset-2',
+                      isZero && 'opacity-45'
+                    )}
+                    style={{
+                      background: isActive ? `rgba(${r}, ${g}, ${b}, 0.14)` : 'transparent',
+                      border: isActive
+                        ? `1px solid rgba(${r}, ${g}, ${b}, 0.45)`
+                        : '1px solid transparent',
+                      color: isActive ? meta.hex : '#94a3b8',
+                      boxShadow: isActive
+                        ? `inset 0 0 0 1px rgba(${r}, ${g}, ${b}, 0.45), 0 0 0 3px rgba(${r}, ${g}, ${b}, 0.12)`
+                        : 'none',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                        e.currentTarget.style.color = '#e2e8f0';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = '#94a3b8';
+                      }
+                    }}
+                    title={`Filter by ${meta.label} severity (${count} alerts)`}
+                  >
                     <span
                       className="w-1.5 h-1.5 rounded-full shrink-0"
-                      style={{
-                        background: color,
-                        boxShadow: isActive ? `0 0 6px ${color}` : 'none',
-                      }}
+                      style={{ background: meta.hex }}
+                      aria-hidden="true"
                     />
-                  )}
-                  <span>{label}</span>
-                </button>
-              );
-            })}
+                    <span>{meta.label}</span>
+                    <span
+                      className="text-[11px] font-mono tabular-nums px-[6px] py-[1px] rounded-[6px] transition-colors"
+                      style={{
+                        background: isActive
+                          ? `rgba(${r}, ${g}, ${b}, 0.22)`
+                          : 'rgba(255, 255, 255, 0.06)',
+                        color: isActive ? meta.hex : '#cbd5e1',
+                      }}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Error Alert */}
-      {fetchError && (
-        <div
-          className="p-4 rounded-xl flex items-center justify-between gap-3 text-xs"
-          style={{
-            background: 'rgba(239, 68, 68, 0.08)',
-            border: '1px solid rgba(239, 68, 68, 0.25)',
-            color: '#f87171',
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 shrink-0" />
-            <span>{fetchError}</span>
+        {/* ROW 2: View tabs (36px segmented control) + Sort + Synchronized Ingestion (12px gap) */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* View tabs segmented control */}
+            <div
+              role="tablist"
+              aria-label="Alert views"
+              className="inline-flex items-center h-9 p-0.5 rounded-lg border border-white/[0.08]"
+              style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={viewMode === 'table'}
+                onClick={() => setViewMode('table')}
+                className={cn(
+                  'inline-flex items-center gap-2 h-7 px-3 rounded-[6px] text-[13px] font-mono font-semibold tracking-[0.06em] transition-all cursor-pointer',
+                  viewMode === 'table'
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 border border-transparent'
+                )}
+                title="Queue Table: 100 ingested alerts in current batch (out of 110 total system alerts)"
+              >
+                <TableIcon className="w-3.5 h-3.5" />
+                <span>Queue Table</span>
+                <span
+                  className={cn(
+                    'text-[11px] font-mono tabular-nums px-[6px] py-[1px] rounded-[6px]',
+                    viewMode === 'table'
+                      ? 'bg-cyan-500/30 text-cyan-200'
+                      : 'bg-white/[0.06] text-slate-300'
+                  )}
+                >
+                  {filteredAlerts.length}
+                </span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={viewMode === 'grid'}
+                onClick={() => setViewMode('grid')}
+                className={cn(
+                  'inline-flex items-center gap-2 h-7 px-3 rounded-[6px] text-[13px] font-mono font-semibold tracking-[0.06em] transition-all cursor-pointer',
+                  viewMode === 'grid'
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 border border-transparent'
+                )}
+                title="Incidents Grid: 85 active incidents requiring triage (NEW or INVESTIGATING) out of 100 alerts"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span>Incidents Grid</span>
+                <span
+                  className={cn(
+                    'text-[11px] font-mono tabular-nums px-[6px] py-[1px] rounded-[6px]',
+                    viewMode === 'grid'
+                      ? 'bg-cyan-500/30 text-cyan-200'
+                      : 'bg-white/[0.06] text-slate-300'
+                  )}
+                >
+                  {activeIncidents.length}
+                </span>
+              </button>
+            </div>
+
+            {/* Sort Order Button */}
+            <button
+              type="button"
+              onClick={() => setSortBy((prev) => (prev === 'priority' ? 'time' : 'priority'))}
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-[13px] font-mono transition-all border border-white/[0.08] hover:border-cyan-500/40 text-slate-300 hover:text-cyan-300 bg-white/[0.03] cursor-pointer"
+              title="Toggle between Priority ranking and Most Recent timestamp"
+            >
+              <ArrowUpDown className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Order: <strong className="text-white font-medium">{sortBy === 'priority' ? 'Severity Priority' : 'Most Recent'}</strong></span>
+            </button>
           </div>
-          <button
-            onClick={fetchAlerts}
-            className="px-3.5 py-1.5 rounded-lg text-[11px] font-mono font-medium transition-colors cursor-pointer"
+
+          {/* Right Ingestion Status */}
+          <div
+            className="flex items-center gap-2 text-[11px] font-mono text-slate-400 self-start sm:self-center"
+            title="Ingestion pipeline synchronized: 100 loaded in active queue · 85 requiring triage · 110 total system-wide"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-emerald-400 font-medium">Synchronized Ingestion</span>
+            <span className="text-slate-600">·</span>
+            <span className="text-slate-300 tabular-nums">{filteredAlerts.length} events active</span>
+          </div>
+        </div>
+
+        {/* Error Alert */}
+        {fetchError && (
+          <div
+            className="p-4 rounded-xl flex items-center justify-between gap-3 text-xs"
             style={{
-              background: 'rgba(239, 68, 68, 0.15)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              color: '#fca5a5',
+              background: 'rgba(239, 68, 68, 0.08)',
+              border: '1px solid rgba(239, 68, 68, 0.25)',
+              color: '#f87171',
             }}
           >
-            Retry
-          </button>
-        </div>
-      )}
-
-      {/* ───────────────────────────────────────────────────────────── */}
-      {/* 4. Section View Mode Switcher Toolbar                         */}
-      {/* ───────────────────────────────────────────────────────────── */}
-      {/* ───────────────────────────────────────────────────────────── */}
-      {/* 4. Section View Mode Switcher Toolbar                         */}
-      {/* ───────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 pb-1 border-t border-white/[0.06]">
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="inline-flex items-center p-0.5 rounded-lg bg-black/40 border border-white/[0.12]">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <span>{fetchError}</span>
+            </div>
             <button
-              type="button"
-              onClick={() => setViewMode('table')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-mono font-semibold transition-all cursor-pointer ${
-                viewMode === 'table'
-                  ? 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 shadow-sm'
-                  : 'text-slate-400 hover:text-white border border-transparent'
-              }`}
+              onClick={fetchAlerts}
+              className="px-3.5 py-1.5 rounded-lg text-[11px] font-mono font-medium transition-colors cursor-pointer"
+              style={{
+                background: 'rgba(239, 68, 68, 0.15)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                color: '#fca5a5',
+              }}
             >
-              <TableIcon className="w-3.5 h-3.5" />
-              <span>Queue Table ({filteredAlerts.length})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('grid')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-mono font-semibold transition-all cursor-pointer ${
-                viewMode === 'grid'
-                  ? 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 shadow-sm'
-                  : 'text-slate-400 hover:text-white border border-transparent'
-              }`}
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span>Incidents Grid ({activeIncidents.length})</span>
+              Retry
             </button>
           </div>
+        )}
 
-          <div className="hidden md:flex items-center gap-1.5 text-[11px] font-mono text-slate-500 pl-1 border-l border-white/[0.08]">
-            <span>Ordered by priority</span>
-            <ArrowUpDown className="w-3 h-3 text-slate-500" />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 text-[11px] font-mono text-slate-400 self-start sm:self-center">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-emerald-400 font-medium">Synchronized Ingestion</span>
-          <span className="text-slate-600">·</span>
-          <span className="text-slate-300">{filteredAlerts.length} events active</span>
-        </div>
-      </div>
-
-      {/* ───────────────────────────────────────────────────────────── */}
-      {/* 5. VIEW: Alert Queue (Structured Table with Dark Borders)     */}
-      {/* ───────────────────────────────────────────────────────────── */}
-      {viewMode === 'table' && (
-        <div className="space-y-2 pt-1">
+        {/* ───────────────────────────────────────────────────────────── */}
+        {/* 4. VIEW: Alert Queue Table (12px gap from View Tabs)          */}
+        {/* ───────────────────────────────────────────────────────────── */}
+        {viewMode === 'table' && (
+          <div className="flex flex-col gap-3 min-w-0 w-full max-w-full">
           {/* Loading Skeletons */}
           {isLoading && (
             <div className="space-y-2">
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="h-12 rounded-lg animate-pulse"
+                  className="h-16 rounded-lg animate-pulse"
                   style={{
                     background: 'rgba(13, 17, 23, 0.95)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
                   }}
                 />
               ))}
@@ -625,189 +697,251 @@ export default function AlertsPage() {
           {/* Alert Queue Table */}
           {!isLoading && filteredAlerts.length > 0 && (
             <div
-              className="overflow-x-auto rounded-lg border shadow-lg"
-              style={{
-                background: 'rgba(13, 17, 23, 0.95)',
-                borderColor: 'rgba(255, 255, 255, 0.12)',
-              }}
+              className="overflow-x-auto w-full max-w-full rounded-xl border border-white/[0.08] bg-[rgba(13,17,23,0.95)] shadow-lg"
+              style={{ overflowX: 'auto', width: '100%', maxWidth: '100%' }}
             >
-              <table className="w-full text-left text-sm border-collapse">
-                <thead>
-                  <tr
-                    className="border-b text-[10.5px] font-mono uppercase tracking-wider text-slate-400 bg-white/[0.03]"
-                    style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}
-                  >
-                    <th className="py-3 px-3.5 w-[130px] text-center border-r border-white/[0.08] border-l-4 border-l-transparent">
+              <Table
+                className="w-full text-left text-sm border-collapse min-w-[960px] table-fixed"
+                style={{ tableLayout: 'fixed', width: '100%' }}
+              >
+                <colgroup>
+                  <col style={{ width: '110px' }} />
+                  <col style={{ width: 'auto', minWidth: '280px' }} />
+                  <col style={{ width: '150px' }} />
+                  <col style={{ width: '150px' }} />
+                  <col style={{ width: '120px' }} />
+                  <col style={{ width: '90px' }} />
+                  <col style={{ width: '110px' }} />
+                </colgroup>
+                <TableHeader className="sticky top-0 z-10 backdrop-blur-md bg-[rgba(13,17,23,0.95)] border-b border-white/[0.08]">
+                  <TableRow className="border-b text-[11px] font-mono uppercase tracking-[0.06em] text-slate-400 hover:bg-transparent border-white/[0.08] h-11">
+                    <TableHead
+                      className="text-center border-r border-white/[0.08] font-semibold text-[11px] font-mono uppercase tracking-[0.06em]"
+                      style={{ width: '110px', padding: '0 12px' }}
+                    >
                       Severity
-                    </th>
-                    <th className="py-3 px-3 min-w-[320px]">Incident & Threat Narrative</th>
-                    <th className="py-3 px-3 w-[170px]">Detection Vector</th>
-                    <th className="py-3 px-3 w-[160px]">Source & Origin</th>
-                    <th className="py-3 px-3 w-[130px]">Status</th>
-                    <th className="py-3 px-3 w-[95px] text-right">Risk Score</th>
-                    <th className="py-3 px-3 w-[100px] text-right">Detected</th>
-                    <th className="py-3 pl-2 pr-4 w-[85px] text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y" style={{ borderColor: 'rgba(255, 255, 255, 0.08)' }}>
+                    </TableHead>
+                    <TableHead
+                      className="font-semibold text-[11px] font-mono uppercase tracking-[0.06em]"
+                      style={{ width: 'auto', minWidth: '280px', padding: '0 12px' }}
+                    >
+                      Incident & Threat Narrative
+                    </TableHead>
+                    <TableHead
+                      className="font-semibold text-[11px] font-mono uppercase tracking-[0.06em]"
+                      style={{ width: '150px', padding: '0 12px' }}
+                    >
+                      Detection Vector
+                    </TableHead>
+                    <TableHead
+                      className="font-semibold text-[11px] font-mono uppercase tracking-[0.06em]"
+                      style={{ width: '150px', padding: '0 12px' }}
+                    >
+                      Source & Origin
+                    </TableHead>
+                    <TableHead
+                      className="text-center font-semibold text-[11px] font-mono uppercase tracking-[0.06em]"
+                      style={{ width: '120px', padding: '0 12px' }}
+                    >
+                      Status
+                    </TableHead>
+                    <TableHead
+                      className="text-right font-semibold text-[11px] font-mono uppercase tracking-[0.06em]"
+                      style={{ width: '90px', padding: '0 12px' }}
+                    >
+                      Risk Score
+                    </TableHead>
+                    <TableHead
+                      className="text-center font-semibold text-[11px] font-mono uppercase tracking-[0.06em]"
+                      style={{ width: '110px', padding: '0 12px' }}
+                    >
+                      Actions
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="divide-y divide-white/[0.08]">
                   {filteredAlerts.map((alert) => {
                     const effectiveSev = getEffectiveSeverity(alert);
-                    const sev = severityConfig[effectiveSev] || severityConfig.LOW;
-                    const status = statusConfig[alert.status] || statusConfig.NEW;
+                    const sevMeta = getSeverityMeta(effectiveSev);
+                    const statusChip = statusChipConfig[alert.status] || statusChipConfig.NEW;
                     const isExpanded = expandedId === alert.id;
                     const isSuccess = actionSuccess === alert.id;
                     const isError = actionError === alert.id;
-                    const roundedScore = Math.round(alert.threatScore);
+                    const roundedScore = alert.threatScore != null ? Math.round(alert.threatScore) : null;
                     const parsed = parseAlertDescription(alert.description, alert.title, alert.type, alert.sourceIp);
 
                     return (
                       <Fragment key={alert.id}>
-                        <tr
+                        <TableRow
                           onClick={() => setExpandedId(isExpanded ? null : alert.id)}
-                          className="group cursor-pointer hover:bg-white/[0.04] transition-colors"
+                          className="group cursor-pointer hover:bg-[rgba(34,211,238,0.04)] transition-colors duration-150 h-[64px]"
                           style={{
-                            borderLeft: `4px solid ${sev.color}`,
+                            borderLeft: `3px solid ${sevMeta.hex}`,
                             background: isExpanded ? 'rgba(15, 20, 28, 0.98)' : 'transparent',
                           }}
                         >
-                          {/* 1. Severity Container with proper width and border separation */}
-                          <td className="py-2.5 px-3 align-middle text-center border-r border-white/[0.08]">
+                          {/* 1. Severity Column (110px) */}
+                          <TableCell
+                            className="align-middle text-center border-r border-white/[0.08]"
+                            style={{ width: '110px', padding: '0 12px' }}
+                          >
                             <div className="flex items-center justify-center">
+                              <SeverityBadge
+                                severity={effectiveSev}
+                                threatScore={alert.threatScore}
+                              />
+                            </div>
+                          </TableCell>
+
+                          {/* 2. Incident & Threat Narrative (flexible auto, min 280px) */}
+                          <TableCell
+                            className="align-middle"
+                            style={{ width: 'auto', minWidth: '280px', padding: '0 12px' }}
+                          >
+                            <div className="min-w-0 w-full overflow-hidden">
                               <div
-                                className="inline-flex items-center justify-center gap-1.5 w-[100px] h-7 px-2.5 rounded-md font-mono text-[11px] font-bold uppercase tracking-wider shadow-sm transition-all"
-                                style={{
-                                  background: sev.bg,
-                                  border: `1px solid ${sev.border}`,
-                                  color: sev.color,
-                                  boxShadow: `0 0 10px ${sev.glow}`,
-                                }}
+                                className="font-semibold text-[13px] text-white overflow-hidden text-ellipsis whitespace-nowrap leading-tight"
+                                title={alert.title || '—'}
                               >
-                                <span
-                                  className="w-1.5 h-1.5 rounded-full shrink-0"
-                                  style={{
-                                    background: sev.color,
-                                    boxShadow: `0 0 6px ${sev.color}`,
-                                  }}
-                                />
-                                <span>{effectiveSev}</span>
+                                {alert.title || '—'}
+                              </div>
+                              <div
+                                className="text-[12px] text-slate-400 overflow-hidden text-ellipsis whitespace-nowrap mt-0.5 leading-normal"
+                                title={parsed.narrative || alert.description || '—'}
+                              >
+                                {parsed.narrative || alert.description || '—'}
+                              </div>
+                              <div className="text-[11px] font-mono text-slate-500 mt-0.5 flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
+                                {alert.assignedTo && (
+                                  <span className="flex items-center gap-1 shrink-0">
+                                    <User className="w-2.5 h-2.5 text-slate-500" />
+                                    <span>{formatAssignee(alert.assignedTo) || '—'}</span>
+                                  </span>
+                                )}
+                                {alert.assignedTo && <span className="text-slate-600 shrink-0">·</span>}
+                                <span className="flex items-center gap-1 text-slate-500 shrink-0">
+                                  <Clock className="w-2.5 h-2.5 text-slate-500" />
+                                  <span>{formatTime(alert.createdAt)}</span>
+                                </span>
                               </div>
                             </div>
-                          </td>
+                          </TableCell>
 
-                          {/* 2. Incident & Threat Narrative */}
-                          <td className="py-2.5 px-3 align-middle">
-                            <div className="min-w-0 pr-2">
-                              <div className="font-semibold text-[13px] text-white group-hover:text-cyan-300 transition-colors truncate">
-                                {alert.title}
-                              </div>
-                              <div className="text-[11.5px] text-slate-400 truncate mt-0.5 max-w-xl">
-                                {parsed.narrative}
-                              </div>
-                              {alert.assignedTo && (
-                                <div className="text-[10px] font-mono text-cyan-400/90 mt-1 flex items-center gap-1">
-                                  <User className="w-2.5 h-2.5" />
-                                  <span>Assignee: {formatAssignee(alert.assignedTo)}</span>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-
-                          {/* 3. Detection Vector (Category + Sensor) */}
-                          <td className="py-2.5 px-3 align-middle">
-                            <div className="space-y-1">
-                              <div className="text-[11.5px] font-medium text-slate-200 truncate">
-                                {formatAlertType(alert.type)}
+                          {/* 3. Detection Vector (150px) */}
+                          <TableCell
+                            className="align-middle"
+                            style={{ width: '150px', padding: '0 12px' }}
+                          >
+                            <div className="min-w-0 w-full overflow-hidden space-y-1">
+                              <div
+                                className="text-[12px] font-medium text-slate-200 overflow-hidden text-ellipsis whitespace-nowrap"
+                                title={formatAlertType(alert.type) || '—'}
+                              >
+                                {formatAlertType(alert.type) || '—'}
                               </div>
                               {parsed.detector && (
-                                <span className="inline-flex items-center gap-1 text-[9.5px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/40 text-cyan-300 border border-cyan-800/40">
-                                  <Shield className="w-2.5 h-2.5 text-cyan-400" />
-                                  {parsed.detector}
+                                <span
+                                  className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/40 text-cyan-300 border border-cyan-800/40 max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
+                                  title={parsed.detector}
+                                >
+                                  <Shield className="w-2.5 h-2.5 text-cyan-400 shrink-0" />
+                                  <span className="truncate">{parsed.detector}</span>
                                 </span>
                               )}
                             </div>
-                          </td>
+                          </TableCell>
 
-                          {/* 4. Source & Origin (IP + Country) */}
-                          <td className="py-2.5 px-3 align-middle">
-                            <div className="space-y-1">
-                              <span className="inline-block font-mono text-cyan-300 bg-cyan-950/40 px-1.5 py-0.5 rounded border border-cyan-800/40 text-[11px]">
-                                {alert.sourceIp}
+                          {/* 4. Source & Origin (150px) */}
+                          <TableCell
+                            className="align-middle"
+                            style={{ width: '150px', padding: '0 12px' }}
+                          >
+                            <div className="min-w-0 w-full overflow-hidden space-y-1">
+                              <span
+                                className="inline-block font-mono text-cyan-300 bg-cyan-950/40 px-1.5 py-0.5 rounded border border-cyan-800/40 text-[11px] max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
+                                title={alert.sourceIp || '—'}
+                              >
+                                {alert.sourceIp || '—'}
                               </span>
                               {parsed.country && (
-                                <div className="flex items-center gap-1 text-[11px] text-slate-400">
+                                <div
+                                  className="flex items-center gap-1 text-[11px] text-slate-400 overflow-hidden text-ellipsis whitespace-nowrap"
+                                  title={parsed.country}
+                                >
                                   <Globe className="w-3 h-3 text-emerald-400 shrink-0" />
                                   <span className="truncate">{parsed.country}</span>
                                 </div>
                               )}
                             </div>
-                          </td>
+                          </TableCell>
 
-                          {/* 5. Status */}
-                          <td className="py-2.5 px-3 align-middle">
-                            <span
-                              className="inline-flex items-center gap-1.5 text-[10px] font-mono font-medium px-2 py-0.5 rounded"
-                              style={{
-                                background: `${status.color}15`,
-                                border: `1px solid ${status.color}35`,
-                                color: status.color,
-                              }}
-                            >
-                              <span className="w-1.5 h-1.5 rounded-full" style={{ background: status.color }} />
-                              <span>{status.label}</span>
-                            </span>
-                          </td>
-
-                          {/* 6. Risk Score */}
-                          <td className="py-2.5 px-3 align-middle text-right">
+                          {/* 5. Status (120px) */}
+                          <TableCell
+                            className="align-middle text-center"
+                            style={{ width: '120px', padding: '0 12px' }}
+                          >
                             <div
-                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded border font-mono text-[12px] font-bold"
+                              className="inline-flex items-center justify-center gap-1.5 w-full max-w-full h-[22px] px-2 rounded-[6px] text-[10.5px] font-mono font-medium overflow-hidden text-ellipsis whitespace-nowrap select-none"
                               style={{
-                                background: `${sev.color}10`,
-                                borderColor: `${sev.color}35`,
-                                color: sev.color,
+                                background: statusChip.bg,
+                                border: `1px solid ${statusChip.border}`,
+                                color: statusChip.text,
                               }}
+                              title={statusChip.label}
                             >
-                              <span>{roundedScore}</span>
-                              <span className="text-[9px] text-slate-500 font-normal">/100</span>
-                            </div>
-                          </td>
-
-                          {/* 7. Time */}
-                          <td className="py-2.5 px-3 align-middle text-right text-[11px] font-mono text-slate-400 whitespace-nowrap">
-                            <span className="inline-flex items-center gap-1 text-slate-400">
-                              <Clock className="w-3 h-3 text-slate-500" />
-                              {formatTime(alert.createdAt)}
-                            </span>
-                          </td>
-
-                          {/* 8. Actions / Inspect */}
-                          <td className="py-2.5 pl-2 pr-4 align-middle text-center">
-                            <button
-                              type="button"
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-mono text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 transition-colors cursor-pointer"
-                              title="Expand incident details"
-                            >
-                              <span>{isExpanded ? 'Close' : 'View'}</span>
-                              <ChevronRight
-                                className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                                  isExpanded ? 'rotate-90' : ''
-                                }`}
+                              <span
+                                className="w-1.5 h-1.5 rounded-full shrink-0"
+                                style={{ background: statusChip.dot }}
                               />
-                            </button>
-                          </td>
-                        </tr>
+                              <span className="truncate whitespace-nowrap">{statusChip.label}</span>
+                            </div>
+                          </TableCell>
+
+                          {/* 6. Risk Score (90px) */}
+                          <TableCell
+                            className="align-middle text-right"
+                            style={{ width: '90px', padding: '0 12px' }}
+                          >
+                            <div className="font-mono tabular-nums text-right text-[12px] whitespace-nowrap">
+                              <span className="font-bold" style={{ color: sevMeta.varName }}>
+                                {roundedScore != null ? roundedScore : '—'}
+                              </span>
+                              <span className="text-[10px] text-slate-500 font-normal">/100</span>
+                            </div>
+                          </TableCell>
+
+                          {/* 7. Actions (110px) */}
+                          <TableCell
+                            className="align-middle text-center"
+                            style={{ width: '110px', padding: '0 12px' }}
+                          >
+                            <div className="flex items-center justify-center">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setExpandedId(isExpanded ? null : alert.id);
+                                }}
+                                className="inline-flex items-center justify-center gap-1 h-[28px] px-3 rounded-md text-[11px] font-mono text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none transition-colors cursor-pointer"
+                                title={isExpanded ? 'Collapse incident details' : 'Expand incident details'}
+                              >
+                                <span>{isExpanded ? 'Close' : 'View ›'}</span>
+                              </button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
 
                         {/* Accordion Detail Row */}
                         {isExpanded && (
-                          <tr
+                          <TableRow
+                            className="hover:bg-transparent"
                             style={{
                               background: 'rgba(15, 20, 28, 0.98)',
-                              borderLeft: `3.5px solid ${sev.color}`,
+                              borderLeft: `3px solid ${sevMeta.hex}`,
                             }}
                           >
-                            <td colSpan={8} className="p-4 sm:p-5">
+                            <TableCell colSpan={7} className="p-4 sm:p-5">
                               <div className="space-y-4">
-                                {/* Incident Narrative & Telemetry Details */}
                                 <div className="space-y-1.5">
                                   <span className="text-[10px] font-mono font-semibold tracking-[0.14em] uppercase text-slate-500">
                                     Incident Narrative & Telemetry Details
@@ -821,7 +955,6 @@ export default function AlertsPage() {
                                   />
                                 </div>
 
-                                {/* AI Reasoning */}
                                 <div className="space-y-1.5">
                                   <div className="flex items-center gap-1.5 text-[11px] font-mono font-semibold uppercase tracking-wider text-cyan-400">
                                     <Brain className="w-3.5 h-3.5" />
@@ -832,7 +965,6 @@ export default function AlertsPage() {
                                   </p>
                                 </div>
 
-                                {/* Precursors */}
                                 {Array.isArray(alert.reasons) && alert.reasons.length > 0 && (
                                   <div className="space-y-1.5">
                                     <span className="text-[10px] font-mono font-semibold tracking-[0.14em] uppercase text-slate-500">
@@ -854,7 +986,6 @@ export default function AlertsPage() {
                                   </div>
                                 )}
 
-                                {/* Action Buttons */}
                                 <div className="flex items-center gap-3 pt-2 flex-wrap">
                                   {isSuccess && (
                                     <span className="text-xs font-mono font-semibold text-emerald-400 mr-2">
@@ -912,40 +1043,59 @@ export default function AlertsPage() {
                                   )}
                                 </div>
                               </div>
-                            </td>
-                          </tr>
+                            </TableCell>
+                          </TableRow>
                         )}
                       </Fragment>
                     );
                   })}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           )}
 
           {/* Empty State */}
           {!isLoading && filteredAlerts.length === 0 && (
             <div
-              className="p-10 rounded-lg text-center space-y-3"
+              className="p-10 rounded-xl text-center space-y-3"
               style={{
                 background: 'rgba(13, 17, 23, 0.95)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
               }}
             >
               <ShieldAlert className="w-8 h-8 mx-auto text-slate-500" />
               <h3 className="text-sm font-semibold text-white">
-                No matching alerts in queue
+                {severityFilter !== 'ALL'
+                  ? `No ${severityFilter.toLowerCase()}-severity alerts`
+                  : searchQuery
+                  ? 'No matching alerts found'
+                  : 'No alerts in queue'}
               </h3>
               <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
-                No security alerts currently match your active search and severity filter parameters.
+                {severityFilter !== 'ALL'
+                  ? `There are currently no alerts with ${severityFilter.toLowerCase()} severity level in this view.`
+                  : 'No security alerts currently match your active search and filter parameters.'}
               </p>
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSeverityFilter('ALL');
+                    setSearchQuery('');
+                    setStatusFilter('ALL');
+                  }}
+                  className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-lg text-[12px] font-mono font-semibold text-cyan-300 hover:text-cyan-200 bg-cyan-950/40 hover:bg-cyan-900/50 border border-cyan-800/40 transition-colors cursor-pointer"
+                >
+                  Clear filter
+                </button>
+              </div>
             </div>
           )}
         </div>
       )}
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* 6. VIEW: Active Incidents (Responsive Grid with Dark Borders)  */}
+      {/* 5. VIEW: Active Incidents Grid                                */}
       {/* ───────────────────────────────────────────────────────────── */}
       {viewMode === 'grid' && (
         <div className="space-y-4 pt-1">
@@ -963,12 +1113,14 @@ export default function AlertsPage() {
                 </span>
               </div>
             </div>
-            <span className="text-[11px] font-mono text-slate-400">
+            <span
+              className="text-[11px] font-mono text-slate-400"
+              title="85 active incidents (NEW or INVESTIGATING) out of 100 loaded alerts"
+            >
               High-priority events requiring immediate triage
             </span>
           </div>
 
-          {/* Skeletons */}
           {isLoading && (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {[1, 2, 3].map((i) => (
@@ -984,17 +1136,16 @@ export default function AlertsPage() {
             </div>
           )}
 
-          {/* Active Incidents Grid */}
           {!isLoading && activeIncidents.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {activeIncidents.map((alert) => {
                 const effectiveSev = getEffectiveSeverity(alert);
-                const sev = severityConfig[effectiveSev] || severityConfig.LOW;
-                const status = statusConfig[alert.status] || statusConfig.NEW;
+                const sevMeta = getSeverityMeta(effectiveSev);
+                const statusChip = statusChipConfig[alert.status] || statusChipConfig.NEW;
                 const isExpanded = expandedId === alert.id;
                 const isSuccess = actionSuccess === alert.id;
                 const isError = actionError === alert.id;
-                const roundedScore = Math.round(alert.threatScore);
+                const roundedScore = alert.threatScore != null ? Math.round(alert.threatScore) : null;
 
                 return (
                   <div
@@ -1003,69 +1154,55 @@ export default function AlertsPage() {
                     style={{
                       background: 'rgba(13, 17, 23, 0.96)',
                       borderColor: 'rgba(255, 255, 255, 0.12)',
-                      borderLeft: `4px solid ${sev.color}`,
+                      borderLeft: `3px solid ${sevMeta.hex}`,
                     }}
                   >
                     <div className="space-y-3.5">
-                      {/* Top: Badges & Score */}
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 flex-wrap">
+                          <SeverityBadge
+                            severity={effectiveSev}
+                            threatScore={alert.threatScore}
+                          />
                           <div
-                            className="inline-flex items-center justify-center gap-1.5 min-w-[92px] h-6 px-2.5 rounded-md font-mono text-[10.5px] font-bold uppercase tracking-wider shadow-sm"
+                            className="inline-flex items-center justify-center gap-1.5 h-[22px] px-2.5 rounded-[6px] text-[10px] font-mono font-medium"
                             style={{
-                              background: sev.bg,
-                              border: `1px solid ${sev.border}`,
-                              color: sev.color,
-                              boxShadow: `0 0 10px ${sev.glow}`,
+                              background: statusChip.bg,
+                              border: `1px solid ${statusChip.border}`,
+                              color: statusChip.text,
                             }}
                           >
                             <span
                               className="w-1.5 h-1.5 rounded-full shrink-0"
-                              style={{
-                                background: sev.color,
-                                boxShadow: `0 0 6px ${sev.color}`,
-                              }}
+                              style={{ background: statusChip.dot }}
                             />
-                            <span>{effectiveSev}</span>
+                            {statusChip.label}
                           </div>
-                          <span
-                            className="inline-flex items-center gap-1.5 text-[10px] font-mono font-medium px-2 py-0.5 rounded"
-                            style={{
-                              background: `${status.color}15`,
-                              border: `1px solid ${status.color}35`,
-                              color: status.color,
-                            }}
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full" style={{ background: status.color }} />
-                            {status.label}
-                          </span>
                         </div>
 
-                        {/* Harmonious, clean Risk Badge */}
                         <div
-                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border shrink-0"
+                          className="flex items-center gap-1.5 px-2 py-0.5 rounded-md border shrink-0 font-mono text-[12px]"
                           style={{
-                            background: `${sev.color}10`,
-                            borderColor: `${sev.color}35`,
+                            background: `rgba(${sevMeta.rgb[0]}, ${sevMeta.rgb[1]}, ${sevMeta.rgb[2]}, 0.10)`,
+                            borderColor: `rgba(${sevMeta.rgb[0]}, ${sevMeta.rgb[1]}, ${sevMeta.rgb[2]}, 0.35)`,
                           }}
                         >
-                          <span className="text-[9px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+                          <span className="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">
                             Risk
                           </span>
                           <span
-                            className="text-[13px] font-bold font-mono tracking-tight"
-                            style={{ color: sev.color }}
+                            className="font-bold tabular-nums"
+                            style={{ color: sevMeta.varName }}
                           >
-                            {roundedScore}
+                            {roundedScore != null ? roundedScore : '—'}
                           </span>
-                          <span className="text-[10px] font-mono text-slate-500">/100</span>
+                          <span className="text-[10px] text-slate-500">/100</span>
                         </div>
                       </div>
 
-                      {/* Title & Decluttered Preview */}
                       <div className="space-y-1.5">
-                        <h4 className="text-[14px] font-semibold text-white tracking-tight line-clamp-1 group-hover:text-cyan-300 transition-colors">
-                          {alert.title}
+                        <h4 className="text-[13px] font-semibold text-white tracking-tight line-clamp-1">
+                          {alert.title || '—'}
                         </h4>
                         <AlertTelemetryStrip
                           description={alert.description}
@@ -1076,21 +1213,19 @@ export default function AlertsPage() {
                         />
                       </div>
 
-                      {/* Structured Meta Info Token Bar */}
                       <div className="flex items-center justify-between gap-2 text-[11px] font-mono text-slate-400 py-2 border-t border-white/[0.08]">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <Clock className="w-3 h-3 text-slate-500 shrink-0" />
                           <span className="text-slate-400 whitespace-nowrap">{formatTime(alert.createdAt)}</span>
                           <span className="text-slate-700">•</span>
-                          <span className="text-slate-300 truncate">{formatAlertType(alert.type)}</span>
+                          <span className="text-slate-300 truncate">{formatAlertType(alert.type) || '—'}</span>
                         </div>
                         <div className="flex items-center gap-1 shrink-0 font-mono text-cyan-300 bg-cyan-950/40 px-1.5 py-0.5 rounded border border-cyan-800/40 text-[10.5px]">
-                          <span>{alert.sourceIp}</span>
+                          <span>{alert.sourceIp || '—'}</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Footer Quick Actions */}
                     <div className="pt-3 border-t border-white/[0.08] mt-3">
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-1.5 flex-wrap">
@@ -1143,7 +1278,6 @@ export default function AlertsPage() {
                         </button>
                       </div>
 
-                      {/* Expanded Grid Dossier */}
                       {isExpanded && (
                         <div className="mt-3 pt-3 border-t border-white/[0.08] space-y-2 text-[12px] text-slate-300">
                           <div className="flex items-center gap-1.5 text-cyan-400 font-mono text-[10px] uppercase font-semibold tracking-wider">
@@ -1179,6 +1313,7 @@ export default function AlertsPage() {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }

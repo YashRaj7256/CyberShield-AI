@@ -5,41 +5,98 @@
   /* Layout */
   --sidebar-width: 272px;
 
-  /* Background */
-  --bg-primary: #0a0a0f;
-  --bg-card: #111118;
-  --bg-hover: #1a1a24;
-  --bg-input: #1a1a24;
-  --bg-elevated: #16161f;
+  /* ========================================================================= */
+  /* CyberShield Unified Semantic Design Tokens (Phase A1)                     */
+  /* ========================================================================= */
 
-  /* Borders */
-  --border-subtle: #2a2a3a;
-  --border-hover: #3a3a4a;
-  --border-active: #4a4a5a;
+  /* Surfaces */
+  --background: #0a0a0f;
+  --surface: rgba(13, 17, 23, 0.92);
+  --surface-elevated: rgba(14, 18, 27, 0.96);
+  --surface-control: rgba(255, 255, 255, 0.03);
+
+  /* Backward Compatibility Surface Aliases */
+  --bg-primary: var(--background);
+  --bg-card: var(--surface);
+  --bg-hover: #1a1a24;
+  --bg-input: var(--surface-control);
+  --bg-elevated: var(--surface-elevated);
 
   /* Text */
-  --text-primary: #e4e4e7;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
 
-  /* Accents */
-  --accent-cyan: #06b6d4;
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-hover: rgba(255, 255, 255, 0.14);
+  --border-active: rgba(6, 182, 212, 0.5);
+
+  /* Brand / Interaction */
+  --accent: #06b6d4;
+  --accent-cyan: var(--accent);
   --accent-blue: #3b82f6;
   --accent-purple: #8b5cf6;
   --accent-cyan-muted: rgba(6, 182, 212, 0.15);
   --accent-blue-muted: rgba(59, 130, 246, 0.15);
+  --accent-glow: 0 0 12px rgba(6, 182, 212, 0.2);
+  --focus-ring: 0 0 0 2px rgba(6, 182, 212, 0.4);
 
   /* Severity */
-  --severity-critical: #ef4444;
-  --severity-high: #f97316;
-  --severity-medium: #eab308;
-  --severity-low: #22c55e;
+  --severity-critical: #F43F5E;
+  --severity-high: #F59E0B;
+  --severity-medium: #EAB308;
+  --severity-low: #22C55E;
+  --severity-all: #22D3EE;
 
-  /* Glow */
+  /* Typography tokens */
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-md: 13px;
+
+  /* Spacing tokens */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  /* Glow Effects */
   --glow-cyan: 0 0 20px rgba(6, 182, 212, 0.3), 0 0 40px rgba(6, 182, 212, 0.1);
   --glow-red: 0 0 20px rgba(239, 68, 68, 0.3), 0 0 40px rgba(239, 68, 68, 0.1);
   --glow-blue: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.1);
   --glow-purple: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(139, 92, 246, 0.1);
+
+  /* Radius */
+  --radius-card: 12px;
+  --radius-control: 8px;
+  --radius-badge: 6px;
+  --radius-pill: 9999px;
+
+  /* Spacing Targets (Semantic Targets, not hard layout constraints) */
+  --page-padding: 32px;
+  --section-spacing: 32px;
+  --card-gap: 20px;
+  --control-gap: 12px;
+  --card-padding: 20px;
+
+  /* Settings Redesign Design Tokens */
+  --bg-base: #0a0a0f;
+  --surface-1: rgba(255, 255, 255, 0.03);
+  --surface-2: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --accent: #22D3EE;
+  --danger: #F43F5E;
+  --radius-settings-card: 14px;
+  --radius-settings-input: 10px;
+  --radius-settings-pill: 999px;
+  --z-base: 0;
+  --z-sticky-nav: 10;
+  --z-sticky-action: 20;
+  --z-dropdown: 30;
+  --z-modal: 50;
 }
 
 * {
@@ -50,6 +107,7 @@
 
 html {
   color-scheme: dark;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -58,6 +116,67 @@ body {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.dashboard-shell {
+  min-width: 320px;
+  overflow-x: hidden;
+}
+
+.dashboard-shell button,
+.dashboard-shell input,
+.dashboard-shell select,
+.dashboard-shell textarea {
+  font: inherit;
+}
+
+.dashboard-shell button,
+.dashboard-shell [role="button"] {
+  touch-action: manipulation;
+}
+
+.dashboard-shell :where(a, button, input, select, textarea, [role="button"]):focus-visible {
+  outline: 2px solid rgba(34, 211, 238, 0.85);
+  outline-offset: 2px;
+}
+
+.dashboard-main {
+  margin-left: var(--dashboard-sidebar-width);
+  width: calc(100% - var(--dashboard-sidebar-width));
+}
+
+.dashboard-page-content {
+  padding-inline: 1rem;
+}
+
+@media (min-width: 640px) {
+  .dashboard-page-content { padding-inline: 1.5rem; }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-page-content { padding-inline: 2rem; }
+}
+
+@media (min-width: 1280px) {
+  .dashboard-page-content { padding-inline: 2.5rem; }
+}
+
+@media (max-width: 1023px) {
+  .dashboard-main {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .dashboard-sidebar {
+    width: var(--sidebar-expanded) !important;
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+
+  .dashboard-sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 18px 0 46px rgba(0, 0, 0, 0.4);
+  }
 }
 
 /* =============== SCROLLBAR =============== */
@@ -251,6 +370,23 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 input:focus, select:focus, textarea:focus {
   outline: none;
+}
+
+/* Settings input standardized styling */
+.settings-input {
+  height: 44px;
+  min-height: 44px;
+  padding: 0 14px;
+  line-height: 44px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.settings-input:focus,
+.settings-input:focus-visible {
+  outline: none !important;
+  border-color: rgba(34, 211, 238, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15) !important;
 }
 
 /* Chrome/Safari Autofill Dark Theme Fix */
@@ -587,7 +723,7 @@ input:-webkit-autofill:active {
 /* =============== REDESIGN: SIDEBAR & LAYOUT TOKENS =============== */
 
 :root {
-  --sidebar-expanded: 272px;
+  --sidebar-expanded: 226px;
   --sidebar-collapsed: 72px;
 }
 
@@ -816,5 +952,21 @@ aside ::-webkit-scrollbar-thumb {
 .leaflet-container {
   background: #0a0a0f !important;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+/* Date picker text-centering utilities */
+input[type="date"].text-center {
+  text-align: center;
+}
+input[type="date"].text-center::-webkit-datetime-edit {
+  text-align: center;
+  margin: 0 auto;
+}
+input[type="date"].text-center::-webkit-datetime-edit-fields-wrapper {
+  margin: 0 auto;
+  justify-content: center;
+}
+input[type="date"].text-center::-webkit-date-and-time-value {
+  text-align: center;
 }
 

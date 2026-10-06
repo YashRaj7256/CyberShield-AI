@@ -126,19 +126,19 @@ export default function GeoSidePanel({
 
   return (
     <div
-      className="animate-fade-in"
+      className="geo-side-panel animate-fade-in"
       style={{
         position: 'absolute',
-        top: 0,
-        right: 0,
-        width: 340,
-        height: '100%',
+        top: 8,
+        right: 8,
+        width: 'min(340px, calc(100% - 16px))',
+        height: 'calc(100% - 16px)',
         zIndex: 1000,
         background: 'rgba(11, 15, 25, 0.96)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         borderLeft: '1px solid rgba(30, 41, 59, 0.9)',
-        borderRadius: '0 12px 12px 0',
+        borderRadius: 12,
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',

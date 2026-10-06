@@ -523,6 +523,8 @@ export const mockThreatSummary: ThreatAnalysisSummary = {
   criticalCount: mockThreatEntities.filter(e => e.category === 'CRITICAL').length,
   highRiskCount: mockThreatEntities.filter(e => e.category === 'HIGH_RISK').length,
   mediumRiskCount: mockThreatEntities.filter(e => e.category === 'MEDIUM_RISK').length,
+  lowRiskCount: mockThreatEntities.filter(e => e.category === 'LOW_RISK').length,
+  safeCount: mockThreatEntities.filter(e => e.category === 'SAFE').length,
   avgScore: Math.round(mockThreatEntities.reduce((sum, e) => sum + e.score, 0) / mockThreatEntities.length),
   topThreats: mockThreatEntities.filter(e => e.score >= 80),
 };

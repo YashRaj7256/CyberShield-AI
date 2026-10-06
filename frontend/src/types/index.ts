@@ -229,6 +229,8 @@ export interface ThreatAnalysisSummary {
   criticalCount: number;
   highRiskCount: number;
   mediumRiskCount: number;
+  lowRiskCount?: number;
+  safeCount?: number;
   avgScore: number;
   topThreats: ThreatEntity[];
 }
@@ -380,3 +382,43 @@ export interface ReportsStats {
 }
 
 
+
+// ==================== Settings Types (Phase 4) ====================
+
+export interface NotificationSettings {
+  id: string;
+  userId: string;
+  emailAlerts: boolean;
+  dashboardAlerts: boolean;
+  severityThreshold: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PlatformSettings {
+  key: string;
+  value: unknown;
+  category: string;
+  updatedAt: string;
+}
+
+export interface SystemInfo {
+  version: string;
+  environment: string;
+  uptime: number;
+  stats: {
+    totalUsers: number;
+    totalAlerts: number;
+    totalThreatScores: number;
+  };
+}
+
+export interface UpdateProfileRequest {
+  firstName?: string;
+  lastName?: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}

@@ -202,7 +202,7 @@ export default function ReportsPage() {
   const currentStats = statsData || mockReportsStats;
 
   return (
-    <div className="space-y-8 animate-fade-in pb-20">
+    <div className="flex flex-col gap-4 animate-fade-in pb-20 min-w-0 w-full max-w-full">
       {/* ================================================================= */}
       {/* 1. CLEAN SOC COMMAND HEADER (NO STATUS PILLS UNDER TITLE)          */}
       {/* ================================================================= */}
@@ -306,7 +306,7 @@ export default function ReportsPage() {
       {/* ================================================================= */}
       {/* 2. EXECUTIVE METRICS STRIP (20% LARGER STAT CARDS)                 */}
       {/* ================================================================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Reports */}
         <div
           className="relative rounded-2xl overflow-hidden flex flex-col justify-between"
@@ -497,38 +497,39 @@ export default function ReportsPage() {
       </div>
 
       {/* ================================================================= */}
-      {/* 4. REPOSITORIES TOOLBAR WITH PROPER BUTTON SLIDERS                */}
+      {/* 4. REPOSITORIES TOOLBAR & REPOSITORY TABLE (20px gap, 12px to table) */}
       {/* ================================================================= */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-5">
-        {/* Search bar */}
-        <div
-          className="flex items-center gap-3.5 px-4 py-3 rounded-2xl flex-1 max-w-lg"
-          style={{
-            background: 'rgba(11, 15, 25, 0.94)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-          }}
-        >
-          <Search className="w-5 h-5 text-slate-500 shrink-0" />
-          <input
-            type="text"
-            placeholder="Search reports by title, operator, or ID..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent text-sm font-mono text-slate-200 placeholder:text-slate-500 focus:outline-none flex-1"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery('')}
-              className="text-xs font-mono text-slate-400 hover:text-white cursor-pointer px-2 py-1 rounded bg-slate-800"
-            >
-              Clear
-            </button>
-          )}
-        </div>
+      <div className="flex flex-col gap-3 mt-1 min-w-0 w-full max-w-full">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 w-full">
+          {/* Search bar (h-10) */}
+          <div
+            className="flex items-center h-10 gap-3 px-3.5 rounded-xl flex-1 max-w-lg"
+            style={{
+              background: 'rgba(11, 15, 25, 0.94)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+            }}
+          >
+            <Search className="w-4 h-4 text-slate-500 shrink-0" />
+            <input
+              type="text"
+              placeholder="Search reports by title, operator, or ID..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-transparent text-xs sm:text-[13px] font-mono text-slate-200 placeholder:text-slate-500 focus:outline-none flex-1"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="text-[11px] font-mono text-slate-400 hover:text-white cursor-pointer px-2 py-0.5 rounded bg-slate-800"
+              >
+                Clear
+              </button>
+            )}
+          </div>
 
-        {/* EXACT BUTTON SLIDERS FOR SCOPE & FORMAT (MATCHING SCREENSHOT) */}
-        <div className="flex flex-wrap items-center gap-5">
+          {/* EXACT BUTTON SLIDERS FOR SCOPE & FORMAT (MATCHING SCREENSHOT) */}
+          <div className="flex flex-wrap items-center gap-3">
           {/* Scope Button Slider */}
           <div className="flex items-center gap-2.5">
             <div className="flex items-center gap-1.5 text-slate-400 shrink-0">
@@ -539,7 +540,7 @@ export default function ReportsPage() {
             </div>
 
             <div
-              className="inline-flex items-center p-1 rounded-xl gap-1"
+              className="inline-flex items-center h-10 p-1 rounded-xl gap-1 shrink-0"
               style={{
                 background: 'rgba(0, 0, 0, 0.45)',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -596,7 +597,7 @@ export default function ReportsPage() {
             </div>
 
             <div
-              className="inline-flex items-center p-1 rounded-xl gap-1"
+              className="inline-flex items-center h-10 p-1 rounded-xl gap-1 shrink-0"
               style={{
                 background: 'rgba(0, 0, 0, 0.45)',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -824,6 +825,7 @@ export default function ReportsPage() {
             </tbody>
           </table>
         </div>
+      </div>
       </div>
 
       {/* ================================================================= */}

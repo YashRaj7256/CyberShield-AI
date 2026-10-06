@@ -210,3 +210,14 @@ model NotificationSetting {
 
   @@map("notification_settings")
 }
+
+/// Global platform configuration (singleton per key)
+model PlatformSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     Json
+  category  String   @default("general")
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  @@map("platform_settings")
+}

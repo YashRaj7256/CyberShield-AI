@@ -11,6 +11,8 @@ import { DashboardModule } from './dashboard/dashboard.module.js';
 import { JobsModule } from './jobs/jobs.module.js';
 import { PredictionsModule } from './predictions/predictions.module.js';
 import { ReportsModule } from './reports/reports.module.js';
+import { ThreatsModule } from './threats/threats.module.js';
+import { SettingsModule } from './settings/settings.module.js';
 
 /**
  * Root application module — imports and configures all feature modules,
@@ -21,7 +23,7 @@ import { ReportsModule } from './reports/reports.module.js';
     // ─── Global Configuration ───────────────────────────────────────
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '../.env',
+      envFilePath: ['.env', '../.env'],
     }),
 
     // ─── MongoDB (raw security logs) ────────────────────────────────
@@ -58,6 +60,8 @@ import { ReportsModule } from './reports/reports.module.js';
     JobsModule,
     PredictionsModule,
     ReportsModule,
+    ThreatsModule,
+    SettingsModule,
   ],
 })
 export class AppModule {}
