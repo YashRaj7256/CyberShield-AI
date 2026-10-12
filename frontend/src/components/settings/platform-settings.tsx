@@ -214,7 +214,7 @@ export default function PlatformSettings() {
           subtitle="Tune machine learning threat thresholds, data retention policies, and automated containment."
           tag="Root Level"
           action={
-            <span className="text-[10px] font-mono px-2.5 py-1 rounded-lg bg-rose-500/15 text-rose-300 border border-rose-500/30 flex items-center gap-1.5 shrink-0">
+            <span className="text-[10px] font-mono px-2.5 py-1 rounded-lg bg-rose-500/15 text-rose-300 border border-rose-500/30 flex items-center gap-1.5 shrink-0 mr-1 sm:mr-2">
               <Lock className="w-3 h-3" />
               ADMIN ONLY
             </span>

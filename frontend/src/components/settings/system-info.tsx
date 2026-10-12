@@ -181,39 +181,39 @@ export default function SystemInfo() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="rounded-[10px] border border-[var(--border)] bg-[var(--surface-2)] p-4 flex items-center gap-3.5">
+                <div className="rounded-[10px] border border-[var(--border)] bg-[var(--surface-2)] p-4 flex items-center gap-3.5 min-w-0">
                   <div className="w-10 h-10 rounded-[10px] bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-300 shrink-0">
                     <Users className="w-5 h-5" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <span className="text-[11px] font-mono text-slate-400 block truncate">Active Identities</span>
-                    <div className="text-base font-bold font-mono text-white">
+                    <div className="text-base font-bold font-mono text-white truncate">
                       {systemInfo.stats?.totalUsers.toLocaleString() ?? '0'}
                     </div>
                     <span className="text-[10px] text-slate-500 truncate block">PostgreSQL Users table</span>
                   </div>
                 </div>
 
-                <div className="rounded-[10px] border border-[var(--border)] bg-[var(--surface-2)] p-4 flex items-center gap-3.5">
+                <div className="rounded-[10px] border border-[var(--border)] bg-[var(--surface-2)] p-4 flex items-center gap-3.5 min-w-0">
                   <div className="w-10 h-10 rounded-[10px] bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-300 shrink-0">
                     <ShieldAlert className="w-5 h-5" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <span className="text-[11px] font-mono text-slate-400 block truncate">Catalogued Alerts</span>
-                    <div className="text-base font-bold font-mono text-white">
+                    <div className="text-base font-bold font-mono text-white truncate">
                       {systemInfo.stats?.totalAlerts.toLocaleString() ?? '0'}
                     </div>
                     <span className="text-[10px] text-slate-500 truncate block">Incident escalation registry</span>
                   </div>
                 </div>
 
-                <div className="rounded-[10px] border border-[var(--border)] bg-[var(--surface-2)] p-4 flex items-center gap-3.5">
+                <div className="rounded-[10px] border border-[var(--border)] bg-[var(--surface-2)] p-4 flex items-center gap-3.5 min-w-0">
                   <div className="w-10 h-10 rounded-[10px] bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-300 shrink-0">
                     <Activity className="w-4 h-4" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <span className="text-[11px] font-mono text-slate-400 block truncate">Threat Inferences</span>
-                    <div className="text-base font-bold font-mono text-white">
+                    <div className="text-base font-bold font-mono text-white truncate">
                       {systemInfo.stats?.totalThreatScores.toLocaleString() ?? '0'}
                     </div>
                     <span className="text-[10px] text-slate-500 truncate block">ML Scoring pipeline cache</span>

@@ -84,7 +84,7 @@ interface SectionCardBodyProps {
 
 export function SectionCardBody({ children, className }: SectionCardBodyProps) {
   return (
-    <div className={cn('p-6 min-w-0 overflow-visible', className)}>
+    <div className={cn('px-6 py-5 min-w-0 overflow-visible', className)}>
       {children}
     </div>
   );
@@ -99,7 +99,7 @@ export function SectionCardFooter({ children, className }: SectionCardFooterProp
   return (
     <div
       className={cn(
-        'px-6 py-4 border-t border-[var(--border)] flex items-center justify-end gap-3 bg-white/[0.01]',
+        'px-6 py-5 border-t border-[var(--border)] flex items-center justify-end gap-3 bg-white/[0.01] min-w-0',
         className
       )}
     >
@@ -134,18 +134,20 @@ export function FormField({
     <div className={cn('flex flex-col min-w-0 overflow-visible', className)}>
       <label
         htmlFor={id}
-        className="text-[11px] font-mono uppercase tracking-[0.1em] text-slate-400 mb-2 flex items-center gap-1 select-none"
+        className="text-[11px] font-mono uppercase tracking-[0.1em] text-slate-400 mb-2 flex items-center gap-1 select-none min-w-0"
       >
-        <span>{label}</span>
-        {required && <span className="text-[var(--accent)] font-bold">*</span>}
+        <span className="truncate">{label}</span>
+        {required && <span className="text-[var(--accent)] font-bold shrink-0">*</span>}
       </label>
-      {children}
+      <div className="min-w-0 overflow-visible">
+        {children}
+      </div>
       {error ? (
-        <p className="text-xs text-[var(--danger)] mt-1.5 leading-normal font-sans">
+        <p className="text-xs text-[var(--danger)] mt-1.5 leading-normal font-sans min-w-0">
           {error}
         </p>
       ) : helperText ? (
-        <p className="text-xs text-slate-500 mt-1.5 leading-normal font-sans">
+        <p className="text-xs text-slate-500 mt-1.5 leading-normal font-sans min-w-0">
           {helperText}
         </p>
       ) : null}
@@ -180,11 +182,11 @@ export function InfoTile({
         className
       )}
     >
-      <div className="flex items-center justify-between text-slate-500 text-[11px] font-mono uppercase tracking-wider">
-        <span className="truncate">{label}</span>
+      <div className="flex items-center justify-between text-slate-500 text-[11px] font-mono uppercase tracking-wider min-w-0">
+        <span className="truncate min-w-0 flex-1">{label}</span>
         {icon && <span className="shrink-0 text-slate-400 ml-2">{icon}</span>}
       </div>
-      <div className="text-sm font-medium text-slate-200 truncate">
+      <div className="text-sm font-medium text-slate-200 truncate min-w-0">
         {displayValue}
       </div>
     </div>
@@ -231,13 +233,16 @@ export function StickyActionBar({
   return (
     <div
       className={cn(
-        'sticky bottom-4 z-20 w-full min-w-0 flex items-center justify-between gap-4 p-3 sm:px-4 rounded-xl border border-[var(--border)] bg-[#0d1117]/85 backdrop-blur-xl shadow-lg mt-6',
+        'sticky bottom-4 z-20 w-full min-w-0 flex items-center justify-between gap-4 py-3 px-4 rounded-xl border border-[var(--border)] bg-[#0d1117]/85 backdrop-blur-xl shadow-lg mt-6',
         className
       )}
+      style={{
+        padding: '12px 16px',
+      }}
     >
-      <div className="min-w-0 flex items-center gap-2 text-xs font-mono">
+      <div className="min-w-0 flex-1 flex items-center gap-2 text-xs font-mono">
         {computedStatus ? (
-          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.06]">
+          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.06] min-w-0">
             <span
               className={cn(
                 'w-2 h-2 rounded-full shrink-0',
@@ -249,18 +254,19 @@ export function StickyActionBar({
             </span>
           </div>
         ) : (
-          <span className="text-slate-500 text-xs font-mono">SOC Platform Settings</span>
+          <span className="text-slate-500 text-xs font-mono truncate">SOC Platform Settings</span>
         )}
       </div>
 
-      <div className="flex items-center gap-2.5 shrink-0">
+      <div className="flex items-center gap-2.5 shrink-0 m-0">
         {onDiscard && isDirty && (
           <Button
             type="button"
             variant="ghost"
             onClick={onDiscard}
             disabled={isLoading}
-            className="h-10 px-4 text-xs font-sans font-medium text-slate-400 hover:text-white hover:bg-white/[0.06] rounded-[10px] cursor-pointer transition-colors"
+            className="h-10 px-4 text-xs font-sans font-medium text-slate-400 hover:text-white hover:bg-white/[0.06] rounded-[10px] cursor-pointer transition-colors m-0"
+            style={{ height: '40px', margin: 0 }}
           >
             Discard
           </Button>
@@ -271,7 +277,11 @@ export function StickyActionBar({
           form={formId}
           onClick={onSubmit}
           disabled={submitDisabled || isLoading}
-          className="h-10 px-5 text-[13px] font-sans font-semibold tracking-wide rounded-[10px] bg-gradient-to-r from-cyan-400 to-[#22D3EE] hover:from-cyan-300 hover:to-cyan-400 text-slate-950 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_0_18px_rgba(34,211,238,0.3)] hover:shadow-[0_1px_4px_rgba(0,0,0,0.4),0_0_24px_rgba(34,211,238,0.45)] active:scale-[0.98] flex items-center gap-2 cursor-pointer transition-all antialiased disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+          className="h-10 px-5 text-[13px] font-sans font-semibold tracking-wide rounded-[10px] bg-gradient-to-r from-cyan-400 to-[#22D3EE] hover:from-cyan-300 hover:to-cyan-400 text-slate-950 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_0_18px_rgba(34,211,238,0.3)] hover:shadow-[0_1px_4px_rgba(0,0,0,0.4),0_0_24px_rgba(34,211,238,0.45)] active:scale-[0.98] flex items-center gap-2 cursor-pointer transition-all antialiased disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none m-0"
+          style={{
+            height: '40px',
+            margin: 0,
+          }}
         >
           {isLoading ? (
             <>

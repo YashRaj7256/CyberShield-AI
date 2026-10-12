@@ -18,7 +18,7 @@ export default function DashboardLayout({
   const { collapsed } = useSidebarStore();
   const [mounted, setMounted] = useState(false);
 
-  const sidebarWidth = collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_EXPANDED_WIDTH;
+  const sidebarWidth = collapsed ? 'var(--sb-w-collapsed)' : 'var(--sb-w-expanded)';
 
   useEffect(() => {
     loadFromStorage();
@@ -55,12 +55,12 @@ export default function DashboardLayout({
       className="dashboard-shell min-h-dvh flex"
       style={{
         background: '#0a0a0f',
-        '--dashboard-sidebar-width': `${sidebarWidth}px`,
+        '--dashboard-sidebar-width': sidebarWidth,
       } as React.CSSProperties}
     >
       <Sidebar />
       <div
-        className="dashboard-main flex-1 flex flex-col min-h-dvh transition-[margin,width] duration-300 ease-in-out min-w-0"
+        className="dashboard-main flex-1 flex flex-col min-h-dvh min-w-0"
       >
         <Header />
         <main className="flex-1 overflow-y-auto overflow-x-hidden cyber-grid-bg">

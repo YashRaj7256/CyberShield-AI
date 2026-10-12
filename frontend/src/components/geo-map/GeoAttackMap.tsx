@@ -53,27 +53,64 @@ interface TileConfig {
   url: string;
   attribution: string;
   dark?: boolean; // applies CSS invert filter to create dark tiles
+  maxZoom?: number;
+  maxNativeZoom?: number;
+  subdomains?: string | string[];
 }
+
+const CARTO_API_KEY = process.env.NEXT_PUBLIC_CARTO_API_KEY;
 
 const TILE_LAYERS: TileConfig[] = [
   {
-    name: 'Dark (SOC)',
+    name: 'Cyber Dark (SOC)',
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
     dark: true,
+  },
+  {
+    name: 'Esri Dark Canvas',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    attribution:
+      '&copy; <a href="https://www.esri.com/" target="_blank" rel="noopener noreferrer">Esri</a>, HERE, Garmin',
+    dark: false,
+    maxNativeZoom: 16,
+    maxZoom: 18,
+  },
+  {
+    name: 'Satellite Recon',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution:
+      '&copy; <a href="https://www.esri.com/" target="_blank" rel="noopener noreferrer">Esri</a>, Maxar, Earthstar Geographics',
+    dark: false,
+    maxNativeZoom: 18,
+    maxZoom: 18,
   },
   {
     name: 'OpenStreetMap',
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
     dark: false,
   },
-  {
-    name: 'OSM Humanitarian',
-    url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://hot.openstreetmap.org/">HOT</a>',
-    dark: false,
-  },
+  ...(CARTO_API_KEY
+    ? [
+        {
+          name: 'CartoDB Dark (SOC)',
+          url: `https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png?api_key=${CARTO_API_KEY}`,
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>',
+          dark: false,
+        },
+        {
+          name: 'CartoDB Voyager',
+          url: `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?api_key=${CARTO_API_KEY}`,
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>',
+          dark: false,
+        },
+      ]
+    : []),
 ];
 
 // ---------------------------------------------------------------------------
@@ -99,6 +136,7 @@ function DarkTileHandler({ dark }: { dark: boolean }) {
   useEffect(() => {
     const tilePane = map.getPane('tilePane');
     if (tilePane) {
+      tilePane.style.transition = 'filter 0.25s ease';
       tilePane.style.filter = dark
         ? 'invert(1) hue-rotate(200deg) brightness(0.85) contrast(1.1) saturate(0.25)'
         : 'none';
@@ -313,7 +351,7 @@ const GeoAttackMap = forwardRef<GeoAttackMapHandle, GeoAttackMapProps>(
       [],
     );
 
-    const tile = TILE_LAYERS[activeTile];
+    const tile = TILE_LAYERS[activeTile] || TILE_LAYERS[0];
 
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -331,7 +369,9 @@ const GeoAttackMap = forwardRef<GeoAttackMapHandle, GeoAttackMapProps>(
             key={tile.name}
             url={tile.url}
             attribution={tile.attribution}
-            subdomains="abc"
+            subdomains={tile.subdomains ?? 'abc'}
+            maxZoom={tile.maxZoom ?? 18}
+            maxNativeZoom={tile.maxNativeZoom ?? tile.maxZoom ?? 18}
           />
 
           <DarkTileHandler dark={!!tile.dark} />

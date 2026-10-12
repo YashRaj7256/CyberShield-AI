@@ -113,7 +113,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Height 28px Role Pill */}
-        <div className="shrink-0 self-start sm:self-center">
+        <div className="shrink-0 self-start sm:self-center mr-3 sm:mr-4">
           <div className="h-7 px-3 rounded-full border border-[var(--border)] bg-[var(--surface-2)] text-xs font-mono flex items-center gap-2">
             <span
               className={cn(
@@ -146,7 +146,7 @@ export default function SettingsPage() {
       {/* Mobile / Tablet Horizontal Navigation (< 1024px)              */}
       {/* ───────────────────────────────────────────────────────────── */}
       <div className="lg:hidden w-full min-w-0">
-        <div className="overflow-x-auto no-scrollbar flex items-center gap-2 p-1.5 rounded-[14px] border border-[var(--border)] bg-[var(--surface-1)]">
+        <div className="overflow-x-auto no-scrollbar flex items-center gap-2 p-3 rounded-[14px] border border-[var(--border)] bg-[var(--surface-1)]">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -193,7 +193,7 @@ export default function SettingsPage() {
         {/* Left: Sticky Settings Navigation (top: 88px) */}
         <aside className="hidden lg:block w-full min-w-0 sticky top-[88px] z-10 self-start">
           <SectionCard className="p-3">
-            <div className="text-[11px] font-mono uppercase tracking-wider text-slate-500 font-semibold mb-3 px-1">
+            <div className="text-[11px] font-mono uppercase tracking-wider text-slate-500 font-semibold mb-3 px-2">
               Settings Navigation
             </div>
 
@@ -209,7 +209,7 @@ export default function SettingsPage() {
                     aria-selected={isActive}
                     onClick={() => setActiveTab(tab.id)}
                     className={cn(
-                      'group relative flex items-center justify-between w-full h-14 px-3 rounded-[10px] text-left transition-all duration-150 cursor-pointer min-w-0',
+                      'group relative flex items-center justify-between w-full h-14 pl-3 pr-3.5 rounded-[10px] text-left transition-all duration-150 cursor-pointer min-w-0',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0f]',
                       isActive
                         ? 'bg-[var(--accent)]/10 text-white border border-[var(--accent)]/35 shadow-[0_0_15px_rgba(34,211,238,0.12)]'
@@ -249,11 +249,11 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
-                    {/* Admin lock tag: right-aligned with 8px right padding, never overlapping text */}
+                    {/* Admin lock tag: right-aligned with 12 to 16px right margin/padding */}
                     {tab.requiresAdmin && (
                       <span
                         className={cn(
-                          'shrink-0 text-[10px] font-mono px-1.5 py-0.5 rounded border ml-2 pr-2 flex items-center gap-1',
+                          'shrink-0 text-[10px] font-mono px-2 py-0.5 rounded border ml-2 mr-1 flex items-center gap-1',
                           isAdmin
                             ? 'bg-rose-500/10 text-rose-300 border-rose-500/20'
                             : 'bg-slate-800 text-slate-400 border-white/[0.08]'

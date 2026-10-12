@@ -23,6 +23,9 @@ import {
   Activity,
   Sparkles,
 } from 'lucide-react';
+import { StatusPill } from '@/components/domain/status-pill';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 // ──────────────────────────────────────────────
 // Skeleton Table (loading placeholder)
@@ -627,21 +630,6 @@ function FormField({ label, children }: { label: string; children: React.ReactNo
   );
 }
 
-function StatusPill({ label, value, online = true }: { label: string; value: string; online?: boolean }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span
-        className="w-1.5 h-1.5 rounded-full shrink-0"
-        style={{
-          background: online ? '#34d399' : '#f87171',
-        }}
-      />
-      <span className="text-[11px] font-mono text-slate-500">{label}:</span>
-      <span className="text-[11px] font-mono font-medium text-slate-300">{value}</span>
-    </div>
-  );
-}
-
 // ──────────────────────────────────────────────
 // Main Logs Page
 // ──────────────────────────────────────────────
@@ -840,50 +828,90 @@ export default function LogsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-4 animate-fade-in pt-5 pb-20 min-w-0 w-full max-w-full">
+    <div className="flex flex-col gap-4 animate-fade-in pb-16 min-w-0 w-full max-w-full">
       {/* Toast */}
       {toast && (
         <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
       )}
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* 1. Page Header & Status                                       */}
+      {/* 1. SOC Command Banner                                         */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-lg font-semibold text-white tracking-tight">
-              Security Operations Telemetry &amp; Logs
-            </h1>
-            {isDemo && (
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                Demo Data
-              </span>
-            )}
+      <div
+        className="relative rounded-xl overflow-hidden"
+        style={{
+          padding: '20px 24px',
+          background: 'rgba(13, 17, 23, 0.92)',
+          border: '1px solid rgba(255, 255, 255, 0.07)',
+        }}
+      >
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-cyan-500/50 via-blue-500/30 to-transparent" />
+
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3">
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                style={{
+                  background: 'rgba(6, 182, 212, 0.08)',
+                  border: '1px solid rgba(6, 182, 212, 0.25)',
+                }}
+              >
+                <ScrollText className="w-4 h-4 text-cyan-400" />
+              </div>
+              <div className="flex items-center gap-2.5">
+                <h1 className="text-[16px] font-semibold text-white tracking-tight">
+                  Security Operations Telemetry &amp; Logs
+                </h1>
+                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-cyan-950/40 text-cyan-300 border border-cyan-800/30 tracking-wider">
+                  ENCLAVE-01
+                </span>
+                {isDemo ? (
+                  <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-amber-950/40 text-amber-400 border border-amber-800/30 tracking-wider">
+                    DEMO DATA
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-emerald-950/40 text-emerald-400 border border-emerald-800/30 tracking-wider">
+                    LIVE INGESTION
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* System Status Row */}
+            <div
+              className="flex flex-wrap items-center gap-5 pt-3 mt-2"
+              style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
+            >
+              <StatusPill label="Stream Ingestion" value={data.logs.length > 0 ? "Active Ingestion" : "Idle"} variant="success" pulse />
+              <StatusPill label="Event Pipeline" value={`${data.total >= 1000 ? `${(data.total / 1000).toFixed(1)}K` : data.total} Records`} variant="info" />
+              <StatusPill label="Audit Engine" value="CyberShield AI v2.4" variant="neutral" />
+            </div>
           </div>
-          <p className="text-xs text-slate-400">
-            Real-time event stream ingestion, triage telemetry, and audit monitoring
-          </p>
-        </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-center">
-          <button
-            onClick={() => fetchLogs()}
-            disabled={isLoading}
-            className="h-9 inline-flex items-center justify-center gap-2 px-3.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] transition-colors cursor-pointer"
-            title="Sync telemetry"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${isLoading ? 'animate-spin' : ''}`} />
-            <span>Sync</span>
-          </button>
+          <div className="flex items-center gap-2.5 self-start md:self-center">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => fetchLogs()}
+              disabled={isLoading}
+              className="font-mono text-xs gap-2 h-9"
+              title="Sync telemetry"
+            >
+              <RefreshCw className={cn('w-3.5 h-3.5 text-cyan-400', isLoading && 'animate-spin')} />
+              <span>Sync</span>
+            </Button>
 
-          <button
-            onClick={() => setShowUpload(true)}
-            className="h-9 inline-flex items-center justify-center gap-2 px-3.5 rounded-lg text-xs font-medium text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/15 border border-cyan-500/25 transition-colors cursor-pointer"
-          >
-            <Upload className="w-3.5 h-3.5" />
-            <span>Upload Logs</span>
-          </button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => setShowUpload(true)}
+              className="font-mono text-xs gap-2 h-9"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              <span>Upload Logs</span>
+            </Button>
+          </div>
         </div>
       </div>
 
