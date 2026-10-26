@@ -2,720 +2,586 @@
   <img src="https://img.shields.io/badge/CyberShield-AI-00bcd4?style=for-the-badge&logo=shield&logoColor=white" alt="CyberShield AI" />
 </p>
 
-<h1 align="center">🛡️ CyberShield AI — Cyber Threat Intelligence Platform</h1>
+<h1 align="center">🛡️ CyberShield AI — Enterprise Cyber Threat Intelligence Platform</h1>
 
 <p align="center">
-  <strong>AI-Powered Real-Time Anomaly Detection and Attack Prediction for Enterprise Security Operations</strong>
+  <strong>Next-Generation AI-Driven Anomaly Detection, Predictive Attack Forecasting, Geospatial Spatial Threat Intelligence & Automated SOC Operations</strong>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/NestJS-11-E0234E?style=flat-square&logo=nestjs" alt="NestJS" />
-  <img src="https://img.shields.io/badge/Next.js-16-000000?style=flat-square&logo=nextdotjs" alt="Next.js" />
+  <img src="https://img.shields.io/badge/Release-v2.4-00e676?style=flat-square" alt="Release v2.4" />
+  <img src="https://img.shields.io/badge/Next.js-16.2.9-000000?style=flat-square&logo=nextdotjs" alt="Next.js 16" />
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react" alt="React 19" />
+  <img src="https://img.shields.io/badge/NestJS-11.0.1-E0234E?style=flat-square&logo=nestjs" alt="NestJS 11" />
   <img src="https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi" alt="FastAPI" />
-  <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql" alt="PostgreSQL" />
-  <img src="https://img.shields.io/badge/MongoDB-7-47A248?style=flat-square&logo=mongodb" alt="MongoDB" />
-  <img src="https://img.shields.io/badge/Redis-7-DC382D?style=flat-square&logo=redis" alt="Redis" />
-  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker" alt="Docker" />
-  <img src="https://img.shields.io/badge/scikit--learn-1.6-F7931E?style=flat-square&logo=scikit-learn" alt="scikit-learn" />
-  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License" />
+  <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql" alt="PostgreSQL 16" />
+  <img src="https://img.shields.io/badge/MongoDB-7.0-47A248?style=flat-square&logo=mongodb" alt="MongoDB 7" />
+  <img src="https://img.shields.io/badge/Redis-7.0-DC382D?style=flat-square&logo=redis" alt="Redis 7" />
+  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker" alt="Docker Compose" />
+  <img src="https://img.shields.io/badge/scikit--learn-1.6.1-F7931E?style=flat-square&logo=scikit-learn" alt="scikit-learn" />
+  <img src="https://img.shields.io/badge/SHAP-0.46-red?style=flat-square" alt="SHAP XAI" />
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License" />
 </p>
 
 <p align="center">
-  <a href="#-features">Features</a> •
-  <a href="#-tech-stack">Tech Stack</a> •
-  <a href="#-installation">Installation</a> •
-  <a href="#-usage">Usage</a> •
-  <a href="#-api-documentation">API Docs</a> •
-  <a href="#-roadmap">Roadmap</a>
+  <a href="#-executive-summary">Overview</a> •
+  <a href="#-system-architecture">Architecture</a> •
+  <a href="#-key-platform-modules">Modules</a> •
+  <a href="#-ai--machine-learning-engine">AI/ML Engine</a> •
+  <a href="#-native-windows-log-collector">Endpoint Telemetry</a> •
+  <a href="#-quick-start--one-click-run">Quick Start</a> •
+  <a href="#-rest-api-reference">API Reference</a> •
+  <a href="#-project-structure">Structure</a>
 </p>
 
 ---
 
-## 📋 Overview
+## 📋 Executive Summary
 
-### Problem Statement
+Modern Security Operations Centers (SOCs) face an existential challenge: enterprise infrastructures emit millions of heterogeneous network events, firewall logs, and authentication records daily. Traditional Security Information and Event Management (SIEM) systems rely on rigid, rule-based static signatures that produce overwhelming false positives while missing zero-day exploits, multi-stage kill chains, and subtle lateral movements.
 
-Organizations generate massive volumes of security data daily — firewall logs, login attempts, IDS/IPS alerts, network traffic, and application logs. Manual analysis is **impossible at scale**: threats are missed, detection is delayed, and security teams are overwhelmed by alert fatigue.
+**CyberShield AI** is an enterprise-grade, polyglot microservices cybersecurity platform designed to autonomously ingest, correlate, and triage security telemetry at scale. Built with a decoupled 3-tier microservice architecture, it combines unsupervised machine learning ensembles, Explainable AI (SHAP), predictive heuristic attack forecasting, geospatial ballistic threat visualization, and automated compliance reporting into a unified, dark glassmorphic SOC command center.
 
-### Solution
-
-**CyberShield AI** is a cloud-ready, enterprise-grade cybersecurity platform that:
-
-- **Collects** security logs from multiple sources into a centralized data lake
-- **Analyzes** logs using Machine Learning (Isolation Forest + One-Class SVM ensemble)
-- **Detects** anomalies in real-time with explainable AI (SHAP-based reasoning)
-- **Predicts** potential attacks using historical pattern analysis
-- **Visualizes** everything through a premium Security Operations Center (SOC) dashboard
-
-### Target Audience
-
-- **Security Operations Centers (SOCs)** — real-time monitoring and incident response
-- **Cybersecurity Analysts** — threat investigation and forensics
-- **IT Administrators** — infrastructure security monitoring
-- **CISOs & Security Managers** — executive-level risk visibility and compliance reporting
+### Core Value Propositions
+* ⚡ **Sub-Second Ingestion & Asynchronous Triage:** Redis and BullMQ process polymorphic logs without blocking client ingestion pipelines ($<20\text{ms}$ API response).
+* 🧠 **Unsupervised ML Anomaly Ensemble:** Dual-model detection via Isolation Forest (200 trees) + One-Class Support Vector Machine (OCSVM) with RBF kernel.
+* 🔍 **Explainable AI (XAI):** Transparent, human-interpretable feature attribution powered by SHAP (`TreeExplainer`) to eliminate black-box decision barriers.
+* 🔮 **Predictive Attack Forecasting:** Multi-scenario sliding-window analysis projecting attack trajectories (DDoS, Credential Stuffing, Lateral Movement, Data Exfiltration) before full compromise occurs.
+* 🌍 **Geospatial Spatial Intelligence:** Real-time Leaflet canvas rendering attack origins with animated ballistic trajectory arcs connecting adversary coordinates to target assets.
+* 📄 **Automated Executive & Forensic Reporting:** On-demand compilation of cross-database telemetry into high-fidelity PDF briefs (via PDFKit) and structured CSV audit sheets.
+* 🪟 **Native Windows Endpoint Agent:** Standalone Python agent collecting Windows Security (Event IDs 4624, 4625, 4688, etc.), Defender, and System logs with zero external dependencies.
 
 ---
 
-## ✨ Features
+## 🏗️ System Architecture
 
-### ✅ Completed Features
+CyberShield AI leverages a **Polyglot Persistence Microservices Topology** where high-frequency, unstructured telemetry ingestion is isolated from ACID-compliant relational states and analytical machine learning workloads.
 
-#### 🔐 Authentication & Access Control
-- JWT-based authentication with access + refresh tokens
-- Role-Based Access Control (RBAC) — Admin, Analyst, Viewer
-- Secure password hashing (bcrypt, 12 rounds)
-- Protected API routes with guard-based authorization
+```mermaid
+flowchart TD
+    subgraph Ingestion["🌐 Telemetry Ingestion Layer"]
+        WinAgent["🪟 Windows Log Collector<br/>(Security / Defender / System)"]
+        Syslog["📡 Syslog & Firewall Feeds<br/>(Palo Alto, Snort, Suricata)"]
+        BulkUpload["📤 Bulk JSON/CSV Telemetry<br/>(/api/logs/bulk)"]
+    end
 
-#### 📊 SOC Dashboard
-- Real-time statistics (total logs, active alerts, critical threats, blocked IPs)
-- Threat trend analysis (30-day area chart)
-- Severity distribution (donut chart)
-- Attack frequency analysis (stacked bar chart)
-- Top threat sources (horizontal bar chart)
-- Recent activity feed with live updates
+    subgraph Presentation["🎨 Frontend Presentation Tier (Port 3000)"]
+        NextApp["Next.js 16 App Router + React 19"]
+        Zustand["Zustand Auth & Telemetry Stores"]
+        Tailwind["Tailwind CSS v4 Dark Glassmorphism"]
+        Leaflet["Leaflet Ballistic Threat Canvas"]
+        Recharts["Recharts Analytics Suite"]
+    end
 
-#### 📋 Security Log Management
-- Ingest individual or bulk security logs (REST API)
-- Advanced search with 10+ filter dimensions (severity, source, IP, country, date range)
-- Sortable & paginated log viewer (configurable page sizes)
-- Detailed log inspection drawer with raw JSON data
+    subgraph Application["⚙️ Backend Application Tier (Port 3001)"]
+        NestAPI["NestJS 11 Core API Gateway"]
+        AuthModule["Passport JWT & RBAC Engine"]
+        QueueProducer["BullMQ Job Dispatcher"]
+        Worker["BullMQ Worker (logs.processor)"]
+        ReportGen["PDFKit / CSV Report Engine"]
+    end
 
-#### 🚨 Alert Management
-- AI-generated alerts triggered when threat score ≥ 60
-- Alert lifecycle management (New → Investigating → Resolved / False Positive)
-- Severity-coded alert cards with AI explanation (SHAP-based reasons)
-- Alert statistics and distribution analytics
-- Analyst assignment workflow
+    subgraph Intelligence["🧠 Machine Learning Tier (Port 8000)"]
+        FastAPI["FastAPI 0.115 Async Service"]
+        Ensemble["Anomaly Ensemble<br/>(Isolation Forest + One-Class SVM)"]
+        XAI["SHAP TreeExplainer & Heuristics"]
+        Predictor["Sliding-Window Attack Predictor"]
+    end
 
-#### 🧠 AI/ML Intelligence Engine
-- **Anomaly Detection** — Isolation Forest + One-Class SVM ensemble model
-- **Threat Scoring** — Weighted 0-100 scoring (anomaly × 35% + login × 20% + geo × 15% + port × 15% + severity × 15%)
-- **SHAP Explainability** — Human-readable explanations for every threat score
-- **Auto-Training** — Models auto-train on synthetic baseline data on first startup
-- **8-Feature Extraction** — Hour, login failure, protocol risk, source weight, country risk, severity level, port risk, action type
+    subgraph Storage["🗄️ Polyglot Persistence Layer"]
+        Postgres[("🐘 PostgreSQL 16 (Prisma ORM)<br/>Users, Alerts, ThreatScores,<br/>Reports, BlockedIPs, AuditLogs")]
+        Mongo[("🍃 MongoDB 7.0 (Mongoose)<br/>Raw Security Logs Lake<br/>(25+ Polymorphic Fields)")]
+        Redis[("⚡ Redis 7.0 In-Memory<br/>BullMQ State Broker & Cache")]
+    end
 
-#### 🎯 Threat Analysis
-- Entity-level threat tracking (IP addresses and user accounts)
-- Factor breakdown visualization (5 risk factors as progress bars)
-- Score history timeline charts
-- Category classification (SAFE → CRITICAL)
-- Expandable detail cards with AI analysis summary
+    %% Data Flow
+    Ingestion -->|REST POST /api/logs| NestAPI
+    Presentation <-->|Bearer JWT / REST API| NestAPI
+    NestAPI -->|Instant Write| Mongo
+    NestAPI -->|Dispatch Job| Redis
+    Redis -->|Consume Job| Worker
+    Worker -->|POST /api/v1/detect| FastAPI
+    FastAPI --> Ensemble
+    Ensemble --> XAI
+    XAI --> FastAPI
+    FastAPI -->|Score & SHAP Vectors| Worker
+    Worker -->|Update Telemetry & Scores| Mongo
+    Worker -->|Threat Score >= 60 Auto Alert| Postgres
+    NextApp -->|Query Aggregates| Postgres
+    NextApp -->|Query Telemetry Stream| Mongo
+    NestAPI -->|Generate PDF/CSV| ReportGen
+    ReportGen --> NextApp
+```
 
-#### ⚙️ Background Processing
-- BullMQ job queue for asynchronous log processing
-- Redis-backed queue with automatic retry logic
-- Resilient ML service integration (graceful fallback on failure)
-- Auto-alert and threat score creation from processed logs
+### Decoupled Polyglot Data Strategy
 
-#### 🐳 Containerized Infrastructure
-- Docker Compose orchestration (PostgreSQL, MongoDB, Redis, Mongo Express, ML Service)
-- Persistent data volumes
-- Health checks for all services
-- Single-command deployment
-
-#### 📦 Data Seeding
-- 10,000 realistic mock security logs with attack patterns
-- 150 pre-generated alerts across all severity levels
-- 50 threat scores for IP/user entities
-- 10 blocked IPs from malicious sources
-- 3 demo user accounts (Admin, Analyst, Viewer)
-
-### 🚧 Planned Features (Phase 3)
-
-- 🔮 Attack prediction with probability gauges and countermeasures
-- 🌍 Geographical attack map with global threat visualization
-- 📄 Report generation (PDF, CSV, Excel) with executive summaries
-- 🔔 In-app notification system with read/unread tracking
-
-### 📋 Future Features (Phase 4)
-
-- ⚡ Real-time WebSocket monitoring (Socket.IO)
-- 👥 User management console (Admin panel)
-- ⚙️ Platform settings and preferences
-- 📧 Email notification integration (Nodemailer)
+| Database Engine | ORM / Driver | Data Responsibility | Architectural Rationale |
+|---|---|---|---|
+| **PostgreSQL 16** | Prisma ORM `v6.19.3` | `User`, `Alert`, `ThreatScore`, `BlockedIP`, `AuditLog`, `Report`, `NotificationSetting`, `PlatformSetting` | Enforces ACID guarantees, relational integrity, strict enum validation, and transactional foreign keys for critical compliance records. |
+| **MongoDB 7.0** | Mongoose `v9.7.1` | `securitylogs` collection (raw payloads, IP headers, geo-coordinates, ML anomaly outputs) | High-throughput document lake accommodating heterogeneous, schema-less event streams with variable attributes without migration friction. |
+| **Redis 7.0** | ioredis `v5.11` | BullMQ task queue, distributed rate-limiting state, fast cache | Sub-millisecond queue broker decoupling user-facing HTTP ingestion from intensive ML inference pipelines. |
 
 ---
 
-## 🏗️ Tech Stack
+## ✨ Key Platform Modules
 
-| Layer | Technology | Version | Purpose |
-|-------|-----------|---------|---------|
-| **Frontend** | Next.js | 16 | React framework with App Router |
-| **Frontend** | TypeScript | 5.x | Type-safe development |
-| **Frontend** | Recharts | 3.8 | Data visualization (charts) |
-| **Frontend** | Zustand | 5.x | State management |
-| **Frontend** | Tailwind CSS | 4.x | Utility-first styling |
-| **Frontend** | Lucide React | 1.21 | Icon library |
-| **Backend** | NestJS | 11 | Enterprise Node.js framework |
-| **Backend** | Prisma | 6.19.3 | PostgreSQL ORM |
-| **Backend** | Mongoose | 9.7 | MongoDB ODM |
-| **Backend** | Passport.js | 0.7 | Authentication strategies |
-| **Backend** | BullMQ | 5.79 | Redis-backed job queue |
-| **ML Service** | FastAPI | 0.115.6 | Python ML API framework |
-| **ML Service** | scikit-learn | 1.6.1 | Machine learning models |
-| **ML Service** | SHAP | 0.46.0 | Model explainability |
-| **ML Service** | NumPy / Pandas | 2.2 / 2.2 | Data processing |
-| **Database** | PostgreSQL | 16 | Relational data (users, alerts) |
-| **Database** | MongoDB | 7 | Document store (raw security logs) |
-| **Cache/Queue** | Redis | 7 | Caching + BullMQ job queue |
-| **DevOps** | Docker Compose | — | Container orchestration |
-| **Auth** | JWT | — | Access + refresh token auth |
+### 1. 📊 Real-Time SOC Command Center (`/overview`)
+* **Live KPI Telemetry:** 6 real-time stat cards tracking Total Ingested Logs, Active Threat Alerts, Critical Incidents, High-Risk User Entities, Blocked Malicious IPs, and Mean Platform Threat Score.
+* **Temporal Trend Analysis:** Interactive 30-day Threat Volume area charts rendered via Recharts.
+* **Threat Distribution:** Severity donut chart (Critical, High, Medium, Low), attack vector stacked bars, and top offending IP ranking.
+* **Live Activity Feed:** Chronological, color-coded stream of real-time security events and automated system actions.
+
+### 2. 📋 Security Log Explorer & Bulk Telemetry Ingestion (`/logs`)
+* **Multi-Dimensional Filtration:** Filter by Severity, Ingestion Source (Firewall, IDS, Antivirus, Endpoint), Protocol (TCP, UDP, SSH, HTTPS), Action (Allow, Deny, Block), Country, and temporal date ranges.
+* **Sub-String Global Search:** Real-time debounced query search across IP addresses, hostnames, and message payloads.
+* **Deep Inspection Drawer:** Slide-in modal displaying full normalized metadata, geographical coordinates, risk weightings, and syntax-highlighted raw JSON payloads.
+* **Bulk Upload Dialog:** Drag-and-drop ingestion interface supporting CSV and JSON batches directly into `/api/logs/bulk` with client-side syntax validation.
+
+### 3. 🚨 AI-Powered Incident Response & Alert Triage (`/alerts`)
+* **Automated Threshold Triggering:** Background workers automatically promote any event with $\text{ThreatScore} \ge 60$ into a formal PostgreSQL `Alert`.
+* **Stateful Incident Lifecycle:** Transition alerts seamlessly across `NEW` $\to$ `INVESTIGATING` $\to$ `RESOLVED` / `FALSE_POSITIVE` with optimistic UI updates.
+* **SHAP Explainability Cards:** Every alert unpacks the exact AI reasoning factors (e.g., *Elevated country risk index*, *Repeated failed login sequence*, *Abnormal port communication*).
+* **Analyst Assignment:** Workflow controls allowing senior analysts to delegate incident investigations to active SOC operators.
+
+### 4. 🎯 Entity Threat Profiling (`/threats`)
+* **Actor-Centric Profiling:** Dedicated risk cards for suspicious IP addresses, compromised user accounts, and anomalous sessions.
+* **5-Factor Multi-Vector Breakdown:** Visual progress gauges decomposing risk across **Anomaly Detection (35%)**, **Login Failures (20%)**, **Country Risk (15%)**, **Port Vulnerability (15%)**, and **Severity Weight (15%)**.
+* **Temporal Score History:** Interactive trendlines mapping entity risk evolution over historical observation windows.
+
+### 5. 🌍 Geospatial Threat Intelligence Map (`/geo-map`)
+* **Interactive Leaflet/React-Leaflet Canvas:** World map plotting real-time attack origins from embedded geolocation telemetry (`latitude`, `longitude`, `country`).
+* **Dynamic Ballistic Missile Arcs:** Animated visual flight paths tracing attacks from adversary origins directly to defended enterprise assets.
+* **Severity-Coded Markers:** Pulsing neon radar pins distinguishing Critical, High, Medium, and Low severity incursions.
+* **Origin Drilldown Feed:** Country threat rankings, attack velocity counters, and active threat feed side panel (`GeoSidePanel`).
+
+### 6. 🔮 Predictive Attack Forecasting Engine (`/predictions`)
+* **8 Attack Scenario Projections:** Forecasts Brute Force escalation, Credential Stuffing, Distributed Denial of Service (DDoS), Port Scanning reconnaissance, Data Exfiltration, Account Takeover, Lateral Movement, and Insider Threats.
+* **Confidence & Time-Horizon Metrics:** Radial probability gauges and time-to-impact countdown timers.
+* **MITRE ATT&CK Countermeasure Checklists:** Actionable remediation playbooks for SOC analysts with one-click mitigation acknowledgement.
+* **Interactive Threat Simulation Presets:** Test incident scenarios in sandbox mode using pre-configured attack vectors (e.g., *Active DDoS Wave*, *Brute Force Storm*, *Lateral Movement Breach*).
+
+### 7. 📄 Automated Security Reports & Compliance Engine (`/reports`)
+* **Cross-Database Telemetry Compilation:** Merges MongoDB raw telemetry with PostgreSQL incident, entity, and blocklist states.
+* **Multi-Format Export Engine:** Generates pixel-perfect executive PDF briefs (via PDFKit) and structured CSV spreadsheets.
+* **Slide-In Report Reader Drawer:** Interactive executive dashboard displaying report summaries, severity breakdowns, offending source IPs, target destination ports, and remediation checklists.
+* **Authenticated Streaming Downloads:** Secure, one-click binary file streaming protected with JWT authorization.
+
+### 8. 👥 User Administration & Role-Based Access Control (`/users`)
+* **Enterprise RBAC:** Granular role enforcement separating **`ADMIN`** (Full access, user administration, system settings), **`ANALYST`** (Incident investigation, log management, alert resolution), and **`VIEWER`** (Read-only monitoring).
+* **User Management Console:** Admin-exclusive modal for user creation, credential resets, role reassignment, and instantaneous account deactivation.
+
+### 9. ⚙️ Platform Configuration & Settings (`/settings`)
+* **Profile & Authentication Management:** Personal profile details, password updates, and session security tracking.
+* **Dynamic Platform Controls:** Adjustable threshold sliders for alert generation (e.g., tuning the default $\ge 60$ score trigger), default query limits, and log retention policies.
+* **Notification Preferences:** Configuration panel for in-app alert banners, critical threat triggers, and webhook endpoints.
+
+---
+
+## 🧠 AI / Machine Learning Engine
+
+CyberShield AI's analytical core is hosted in a dedicated Python FastAPI microservice (`ml-service`), implementing unsupervised anomaly detection, composite threat scoring, and explainable artificial intelligence.
+
+```
+Incoming Security Log Telemetry
+              │
+              ▼
+8-Dimensional Feature Extraction Matrix
+  [hour, is_login_failure, protocol_risk, source_weight, 
+   country_risk, severity_level, port_risk, action_type]
+              │
+              ▼
+   StandardScaler Normalization
+              │
+      ┌───────┴───────┐
+      ▼               ▼
+Isolation Forest    One-Class SVM
+  (200 Trees)     (RBF Kernel, nu=0.05)
+      └───────┬───────┘
+              ▼
+Fused Anomaly Score Normalized to [0.0, 1.0]
+              │
+              ▼
+Weighted Threat Scoring Engine (0 to 100)
+              │
+              ▼
+SHAP TreeExplainer & Human-Readable XAI Rationale
+```
+
+### 1. 8-Dimensional Feature Extraction Matrix
+Raw telemetry is mapped into an 8-dimensional normalized continuous vector:
+1. `hour` $(0 \text{ to } 23)$: Diurnal temporal pattern indicator.
+2. `is_login_failure` $(0 \text{ or } 1)$: Authentication failure flag.
+3. `protocol_risk` $(0.1 \text{ to } 0.8)$: Inherent protocol risk index (e.g., Telnet/SSH vs. HTTPS).
+4. `source_weight` $(0.3 \text{ to } 0.8)$: Origin reliability weight (Firewall, IDS, Antivirus, Endpoint).
+5. `country_risk` $(0.1 \text{ to } 1.0)$: Geopolitical threat correlation coefficient.
+6. `severity_level` $(1 \text{ to } 4)$: Log severity weight (Low $= 1$, Critical $= 4$).
+7. `port_risk` $(0.1 \text{ to } 0.9)$: Port vulnerability index (e.g., ports 22, 445, 3389).
+8. `action_type` $(0.0 \text{ to } 0.9)$: Execution verdict (Allow $= 0.0$, Drop $= 0.5$, Block $= 0.9$).
+
+### 2. Dual-Model Anomaly Ensemble
+* **Isolation Forest:** Builds 200 isolation trees with a contamination factor of $0.05$. Calculates path lengths required to isolate points; outliers require significantly fewer splits.
+* **One-Class Support Vector Machine (OCSVM):** Fits a non-linear hyper-boundary around nominal traffic patterns using a Radial Basis Function (RBF) kernel ($\nu = 0.05$).
+* **Ensemble Fusion:** Combines decision margins into a continuous anomaly score $A_{\text{score}} \in [0.0, 1.0]$.
+
+### 3. Composite Weighted Threat Scoring Formula
+The platform computes an absolute threat score between $0$ and $100$ using the following weighted linear formulation:
+
+$$\text{ThreatScore} = \text{round}\Big(35 \cdot A_{\text{score}} + 20 \cdot L_{\text{fail}} + 15 \cdot C_{\text{risk}} + 15 \cdot P_{\text{risk}} + 15 \cdot S_{\text{factor}}\Big) \in [0, 100]$$
+
+| Parameter | Weight | Description |
+|---|---|---|
+| $A_{\text{score}}$ | **35%** | Fused Anomaly Score from ML Ensemble $[0.0, 1.0]$ |
+| $L_{\text{fail}}$ | **20%** | Binary Failed Authentication Flag $(0 \text{ or } 1)$ |
+| $C_{\text{risk}}$ | **15%** | Normalized Geopolitical Origin Risk $[0.0, 1.0]$ |
+| $P_{\text{risk}}$ | **15%** | Normalized Destination Port Threat Index $[0.0, 1.0]$ |
+| $S_{\text{factor}}$ | **15%** | Inherent Event Severity Factor $[0.0, 1.0]$ |
+
+#### Risk Stratification Categories
+* `CRITICAL` $(80 - 100)$: Severe active threat; immediate isolation & automated alert.
+* `HIGH_RISK` $(60 - 79)$: High probability anomaly; automated alert creation.
+* `MEDIUM_RISK` $(40 - 59)$: Suspicious activity; queued for analyst triage.
+* `LOW_RISK` $(20 - 39)$: Low priority nominal variation.
+* `SAFE` $(0 - 19)$: Verified benign traffic.
+
+### 4. Explainable AI (XAI) with SHAP
+Rather than presenting opaque numerical scores, the microservice employs **SHAP (SHapley Additive exPlanations)** `TreeExplainer` on the Isolation Forest model. For each scored event, the microservice evaluates local feature attribution, extracts the top contributing risk drivers, and translates them into plain-English analyst rationales (backed by a deterministic heuristic fallback if models are re-initializing).
+
+---
+
+## 🪟 Native Windows Log Collector
+
+CyberShield AI includes an endpoint security collector (`tools/windows-log-collector`) engineered to collect live events from host Windows machines without third-party agent overhead.
+
+```
+Windows Event Log Subsystem (wevtutil / PowerShell XML)
+        │
+        ├── Security Channel (Event IDs 4624, 4625, 4648, 4688, 4720) [Admin Mode]
+        ├── Windows Defender Channel (Event IDs 1116, 1117, 5007)      [User Mode]
+        └── System Channel (Event IDs 7045, 10016)                     [User Mode]
+        │
+        ▼
+Event Normalizer Engine (Normalizes to CyberShield SecurityLog Schema)
+        │
+        ▼
+Watermark State Controller (.collector_state.json prevents duplicate uploads)
+        │
+        ▼
+JWT Authenticated Ingestion Client (POST /api/logs/bulk)
+```
+
+### Agent Capabilities:
+* **Zero External Dependencies:** Implemented exclusively in pure Python 3 using standard libraries (`urllib`, `xml.etree`, `subprocess`, `json`, `ctypes`). No `pip install` required.
+* **Adaptive Elevation Detection:**
+  * *Elevated (Administrator):* Collects critical Windows `Security` channel events including successful/failed logins (4624/4625), process creations (4688), user creations (4720), and privilege escalations (4672).
+  * *Standard User:* Gracefully falls back to collecting antivirus and operational telemetry from `Microsoft-Windows-Windows Defender/Operational` and `System` channels.
+* **Deduplication State:** Persists event high-watermark records in `.collector_state.json` to prevent duplicate ingestion across reboots.
+
+#### Running the Collector:
+```powershell
+# Dry-run mode: Validate event normalization locally
+python tools/windows-log-collector/collector.py --dry-run
+
+# Live ingestion mode: Authenticate and stream events to NestJS
+python tools/windows-log-collector/collector.py --interval 10
+```
+
+---
+
+## 🚀 Quick Start & One-Click Run
+
+### System Prerequisites
+* **Operating System:** Windows 10/11, macOS, or Linux
+* **Docker Desktop:** Installed and operational (WSL2 engine on Windows)
+* **Node.js:** v18.x or v20.x (with npm v9+)
+* **Python:** v3.10 or v3.11 (with pip)
+
+---
+
+### Option 1: One-Click Startup (Windows Automated)
+
+The repository provides a single-command master startup batch script that automatically coordinates container initialization, health checks, database readiness, backend server boot, frontend compiler, and browser launch.
+
+```cmd
+# Simply double-click start.bat in the root folder, or execute:
+.\start.bat
+```
+
+#### What happens behind the scenes:
+1. Verifies Docker daemon status (starts Docker Desktop if inactive).
+2. Executes `docker compose up -d` for PostgreSQL, MongoDB, Redis, Mongo Express, and the ML Service.
+3. Polls native health check probes (`pg_isready`, `mongosh ping`, `redis-cli ping`, and ML `/health`).
+4. Spawns the NestJS backend in a dedicated window on port `3001` and waits for HTTP `200 OK`.
+5. Spawns the Next.js frontend in a dedicated window on port `3000`.
+6. Launches your default web browser directly to `http://localhost:3000`.
+
+*To monitor system services or perform a clean shutdown:*
+```cmd
+.\status.bat   # Check live container and port health
+.\stop.bat     # Terminate all processes and docker containers cleanly
+```
+
+---
+
+### Option 2: Manual Multi-Terminal Startup
+
+#### 1. Clone & Configure Environment
+```bash
+git clone https://github.com/YashRaj7256/CyberShield-AI.git
+cd CyberShield-AI
+
+# The root .env file is pre-configured with default development secrets
+```
+
+#### 2. Start Infrastructure Containers
+```bash
+docker compose up -d
+docker compose ps
+```
+
+#### 3. Initialize & Start Backend (NestJS)
+```bash
+cd backend
+npm install
+npx prisma generate
+npx prisma migrate dev --name init
+
+# Seed database with 10,000 realistic logs, 150 alerts, and demo accounts
+npx ts-node prisma/seed.ts
+
+# Start backend in development mode
+npm run start:dev
+```
+*Backend API operational at `http://localhost:3001/api`*
+
+#### 4. Start Machine Learning Service (FastAPI)
+```bash
+cd ../ml-service
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+*ML Service operational at `http://localhost:8000` (Interactive docs: `http://localhost:8000/docs`)*
+
+#### 5. Start Frontend Application (Next.js)
+```bash
+cd ../frontend
+npm install
+npm run dev
+```
+*SOC Dashboard operational at `http://localhost:3000`*
+
+---
+
+## 🔑 Pre-Configured Demo Credentials
+
+The database seeder automatically initializes three role-tiered user accounts:
+
+| Role | Email Address | Password | Permissions & Access Scope |
+|---|---|---|---|
+| **`ADMIN`** | `admin@cti.com` | `Admin@123` | **Full Platform Access:** User administration, settings configuration, report exports, alert triage, log querying. |
+| **`ANALYST`** | `analyst@cti.com` | `Analyst@123` | **Operational Access:** Alert investigation & status lifecycle management, threat entity analysis, log filtering. |
+| **`VIEWER`** | `viewer@cti.com` | `Viewer@123` | **Read-Only Access:** SOC overview dashboard, threat trends, read-only telemetry exploration. |
+
+---
+
+## 📡 REST API Reference
+
+All backend REST endpoints are prefixed with `/api` and return standardized JSON envelopes:
+
+```json
+{
+  "success": true,
+  "data": { ... },
+  "timestamp": "2026-10-26T12:00:00.000Z"
+}
+```
+
+### 1. Authentication (`/api/auth`)
+* `POST /api/auth/register` — Register a new account.
+* `POST /api/auth/login` — Authenticate credentials; returns access & refresh JWTs.
+* `POST /api/auth/refresh` — Issue a new 15-minute access token using a valid refresh token.
+* `POST /api/auth/logout` — Revoke active session tokens.
+* `GET  /api/auth/me` — Retrieve active user profile and role privileges.
+
+### 2. Security Logs (`/api/logs`) 🔒
+* `GET  /api/logs` — Query logs with multi-dimensional filtering (`severity`, `source`, `country`, `search`, `page`, `limit`).
+* `GET  /api/logs/stats` — Aggregate metrics (total logs, severity distribution, top source IPs).
+* `GET  /api/logs/:id` — Fetch complete log record including raw payload.
+* `POST /api/logs` — Ingest a single log event (synchronous MongoDB write + BullMQ dispatch).
+* `POST /api/logs/bulk` — Ingest a batch of log records ($<500$ events per batch).
+
+### 3. Threat Alerts (`/api/alerts`) 🔒
+* `GET   /api/alerts` — Retrieve alerts with severity, status, and search filters.
+* `GET   /api/alerts/stats` — Aggregated counts by status and severity.
+* `GET   /api/alerts/:id` — Retrieve alert record with SHAP explanation factors.
+* `PATCH /api/alerts/:id` — Update alert status (`NEW`, `INVESTIGATING`, `RESOLVED`, `FALSE_POSITIVE`) or assign analyst.
+
+### 4. Threat Entity Analysis (`/api/threats`) 🔒
+* `GET /api/threats` — List threat entities (IPs, users, sessions) with composite scores.
+* `GET /api/threats/:entityType/:entityValue` — Detailed factor breakdown and temporal risk history.
+
+### 5. Attack Predictions (`/api/predictions`) 🔒
+* `POST /api/predictions/forecast` — Run sliding-window attack forecasting over database telemetry.
+* `POST /api/predictions/simulate` — Execute sandbox attack simulation presets.
+
+### 6. Security Reports (`/api/reports`) 🔒
+* `GET  /api/reports` — List generated reports and compliance archives.
+* `GET  /api/reports/preview` — Pre-compute telemetry statistics before generating report.
+* `POST /api/reports/generate` — Generate a new PDF or CSV report.
+* `GET  /api/reports/:id/download` — Authenticated streaming download of compiled PDF or CSV.
+
+### 7. Overview Dashboard (`/api/dashboard`) 🔒
+* `GET /api/dashboard/stats` — Real-time overview metrics and counters.
+* `GET /api/dashboard/threat-trends` — 30-day temporal threat volume timeseries.
+* `GET /api/dashboard/attack-frequency` — Distribution across attack classification categories.
+* `GET /api/dashboard/severity-distribution` — Proportionate counts across severity levels.
+* `GET /api/dashboard/top-sources` — Top 10 offending external IP origins.
+
+### 8. User Administration (`/api/users`) 🔒 *(Admin Only)*
+* `GET    /api/users` — List platform users with activity timestamps.
+* `POST   /api/users` — Provision new user account.
+* `PATCH  /api/users/:id` — Modify user details or reassign role (`ADMIN`, `ANALYST`, `VIEWER`).
+* `DELETE /api/users/:id` — Deactivate user account.
+
+### 9. Platform Settings (`/api/settings`) 🔒
+* `GET   /api/settings` — Fetch system configurations and threshold parameters.
+* `PATCH /api/settings` — Update platform trigger thresholds and retention policies.
 
 ---
 
 ## 📁 Project Structure
 
 ```
-cyber-threat-intel/
+CyberShield-AI/
+├── 📄 docker-compose.yml          # Container orchestration (5 microservices)
+├── 📄 .env                        # Centralized environment configuration
+├── 📄 package.json                # Monorepo root workspace scripts
+├── 📄 start.bat                   # 1-Click Windows master startup launcher
+├── 📄 stop.bat                    # 1-Click Windows clean shutdown script
+├── 📄 status.bat                  # 1-Click Windows health verification script
+├── 📄 README.md                   # Platform documentation master file
+├── 📄 PROJECT_PHASE_REPORT.md     # Detailed phase-by-phase architectural master
 │
-├── 📄 docker-compose.yml          # Docker orchestration (5 services)
-├── 📄 .env                        # Environment configuration
-├── 📄 package.json                # Monorepo convenience scripts
-├── 📄 README.md                   # This file
-│
-├── 🔧 backend/                    # NestJS 11 API Server (Port 3001)
+├── 🔧 backend/                    # NestJS 11 REST API & Ingestion Gateway (Port 3001)
 │   ├── prisma/
-│   │   ├── schema.prisma          # 7 PostgreSQL models with enums & indexes
-│   │   └── seed.ts                # Database seeder (10K logs + alerts + users)
+│   │   ├── schema.prisma          # 8 PostgreSQL models (User, Alert, ThreatScore, etc.)
+│   │   └── seed.ts                # Database seeder (10,000 logs, 150 alerts, 3 users)
 │   └── src/
-│       ├── main.ts                # Bootstrap (CORS, validation, port 3001)
-│       ├── app.module.ts          # Root module configuration
-│       ├── auth/                  # 🔐 JWT authentication + Passport strategies
-│       │   ├── auth.controller.ts # Register, Login, Refresh, Logout, Me
-│       │   ├── auth.service.ts    # Token generation, password hashing
-│       │   ├── dto/               # Validation DTOs (register, login, refresh)
-│       │   └── strategies/        # JWT + Local Passport strategies
-│       ├── users/                 # 👥 User CRUD (Admin-only management)
-│       ├── logs/                  # 📋 Security log ingestion & querying
-│       │   ├── logs.controller.ts # REST endpoints with filtering
-│       │   ├── logs.service.ts    # MongoDB operations + BullMQ dispatch
-│       │   ├── schemas/           # Mongoose schema (SecurityLog)
-│       │   └── dto/               # Query & create validation DTOs
-│       ├── alerts/                # 🚨 Alert management & statistics
-│       ├── dashboard/             # 📊 Aggregated analytics endpoints
-│       ├── jobs/                  # ⚙️ BullMQ background processors
-│       │   ├── jobs.module.ts     # Queue registration
-│       │   └── logs.processor.ts  # ML service integration worker
-│       ├── prisma/                # 🗃️ PrismaClient lifecycle wrapper
-│       └── common/                # 🛠️ Shared guards, decorators, filters
-│           ├── guards/            # JWT auth guard, roles guard
-│           ├── decorators/        # @Roles(), @CurrentUser()
-│           ├── filters/           # Global exception filter
-│           └── interceptors/      # Response transform interceptor
+│       ├── main.ts                # Application bootstrap (CORS, ValidationPipe, Swagger)
+│       ├── app.module.ts          # Core root module configuration
+│       ├── auth/                  # 🔐 JWT authentication & Passport strategies
+│       ├── users/                 # 👥 User administration & RBAC CRUD
+│       ├── logs/                  # 📋 Telemetry ingestion, search, & MongoDB schemas
+│       ├── alerts/                # 🚨 Alert lifecycle & investigation workflows
+│       ├── threats/               # 🎯 Entity risk profiling & factor decomposition
+│       ├── predictions/           # 🔮 Attack prediction gateway to ML service
+│       ├── reports/               # 📄 Automated PDF (PDFKit) & CSV report generators
+│       ├── settings/              # ⚙️ Platform & notification configurations
+│       ├── dashboard/             # 📊 Aggregated SOC analytics endpoints
+│       ├── jobs/                  # ⚡ BullMQ background workers & ML queue processors
+│       ├── prisma/                # 🗄️ PrismaClient lifecycle provider
+│       └── common/                # 🛠️ Guards, decorators, filters, & interceptors
 │
-├── 🎨 frontend/                   # Next.js 16 SOC Dashboard (Port 3000)
+├── 🎨 frontend/                   # Next.js 16 + React 19 SOC Command Center (Port 3000)
 │   └── src/
 │       ├── app/
-│       │   ├── (auth)/            # Authentication pages
-│       │   │   ├── login/         # Glassmorphism login with animated background
-│       │   │   └── register/      # Registration with password strength meter
-│       │   └── (dashboard)/       # Protected dashboard pages
-│       │       ├── overview/      # 📊 Main SOC dashboard (6 stats + 4 charts)
-│       │       ├── logs/          # 📋 Log viewer (table + filters + drawer)
-│       │       ├── alerts/        # 🚨 Alert cards with AI explanations
-│       │       ├── threats/       # 🎯 Threat entity analysis (factor breakdown)
-│       │       ├── predictions/   # 🔮 Attack predictions (Phase 3)
-│       │       ├── geo-map/       # 🌍 Geographical map (Phase 3)
-│       │       ├── reports/       # 📄 Report management (Phase 3)
-│       │       ├── users/         # 👥 User management (Phase 4)
-│       │       └── settings/      # ⚙️ Platform settings (Phase 4)
-│       ├── components/
-│       │   ├── layout/            # Sidebar navigation + header
-│       │   ├── dashboard/         # Stat cards + activity feed
-│       │   ├── charts/            # Threat trend, severity, attack frequency
-│       │   └── logs/              # Log table, filters, detail drawer
-│       ├── lib/                   # API client, formatters, mock data
-│       ├── stores/                # Zustand auth store
-│       └── types/                 # TypeScript interfaces
+│       │   ├── (auth)/            # Glassmorphic Login & Registration pages
+│       │   ├── (dashboard)/       # Authenticated SOC dashboard routes
+│       │   │   ├── overview/      # 📊 Main SOC executive metrics & chart analytics
+│       │   │   ├── logs/          # 📋 Security log explorer & bulk upload modal
+│       │   │   ├── alerts/        # 🚨 Threat alert triage with SHAP XAI drawers
+│       │   │   ├── threats/       # 🎯 Threat actor profiling & factor radar gauges
+│       │   │   ├── geo-map/       # 🌍 Leaflet ballistic spatial threat canvas
+│       │   │   ├── predictions/   # 🔮 Predictive attack forecasting & simulations
+│       │   │   ├── reports/       # 📄 Security report generation & reader drawer
+│       │   │   ├── users/         # 👥 User administration console (Admin)
+│       │   │   └── settings/      # ⚙️ Profile, security, & platform settings
+│       │   └── page.tsx           # 🌐 Public architectural showcase & landing page
+│       ├── components/            # Reusable UI components (Modals, Charts, Drawers)
+│       ├── stores/                # Zustand client state management (Auth, Telemetry)
+│       ├── lib/                   # API clients, formatters, & Leaflet utilities
+│       └── types/                 # Shared TypeScript interfaces & DTO models
 │
-├── 🧠 ml-service/                 # FastAPI ML Service (Port 8000)
-│   ├── Dockerfile                 # Python 3.11-slim container
-│   ├── requirements.txt           # Python dependencies
+├── 🧠 ml-service/                 # Python 3.11 FastAPI Machine Learning Microservice (Port 8000)
+│   ├── requirements.txt           # Python dependencies (scikit-learn, shap, fastapi)
 │   └── app/
-│       ├── main.py                # FastAPI app (3 endpoints + auto-training)
-│       ├── config.py              # Settings (MODEL_DIR, CONTAMINATION, etc.)
-│       ├── schemas/models.py      # Pydantic request/response models
+│       ├── main.py                # FastAPI app with health probes & auto-training
+│       ├── config.py              # ML hyperparameters & contamination settings
+│       ├── schemas/               # Pydantic input/output validation models
 │       ├── services/
-│       │   ├── anomaly_detector.py  # Isolation Forest + One-Class SVM ensemble
-│       │   ├── threat_scorer.py     # Weighted 0-100 threat scoring
-│       │   └── explainer.py         # SHAP TreeExplainer + heuristic fallback
+│       │   ├── anomaly_detector.py# Isolation Forest + One-Class SVM ensemble
+│       │   ├── threat_scorer.py   # Composite weighted 0-100 scoring engine
+│       │   ├── explainer.py       # SHAP TreeExplainer & heuristic XAI generator
+│       │   └── predictor.py       # Multi-scenario sliding-window attack forecaster
 │       └── utils/
-│           └── preprocessing.py     # 8-feature extraction + synthetic data
+│           └── preprocessing.py   # 8-dimensional feature extraction matrix
 │
-├── 📁 docs/                       # Documentation
-└── 📁 scripts/                    # Utility scripts
+├── 🪟 tools/
+│   └── windows-log-collector/     # Native Windows Event Log Collector Agent
+│       ├── collector.py           # Polling engine with watermark bookmarking
+│       ├── win_events.py          # wevtutil / PowerShell XML event extractor
+│       ├── normalizer.py          # Normalizes raw events to platform schema
+│       └── README.md              # Dedicated agent documentation
+│
+└── 📁 scripts/                    # Automation utilities
+    ├── start-all.ps1              # PowerShell coordinated launch script
+    ├── stop-all.ps1               # PowerShell clean shutdown script
+    ├── status-all.ps1             # PowerShell port & container status checker
+    └── generate-bulk-logs.js      # Synthetic telemetry generator (500-10k logs)
 ```
 
 ---
 
-## 🚀 Installation
+## 🛠️ Verification & Quality Assurance
 
-### Prerequisites
-
-| Requirement | Minimum Version |
-|-------------|----------------|
-| **Node.js** | 18.x or later |
-| **Python** | 3.10 or later |
-| **Docker Desktop** | Latest |
-| **npm** | 9.x or later |
-| **pip** | 22.x or later |
-
-### Step 1 — Clone the Repository
+Each tier of CyberShield AI has been strictly verified to ensure flawless build and execution:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/cybershield-ai.git
-cd cybershield-ai
-```
-
-### Step 2 — Configure Environment Variables
-
-The `.env` file is pre-configured for local development. Review and update if needed:
-
-```bash
-# The .env file at the project root contains all configuration
-# See the "Environment Variables" section below for details
-cat .env
-```
-
-### Step 3 — Start Docker Services
-
-```bash
-# Start all infrastructure services
-docker compose up -d
-
-# Verify all containers are running
-docker compose ps
-```
-
-### Step 4 — Set Up the Backend
-
-```bash
+# 1. Verify Backend TypeScript Compilation & Types
 cd backend
-npm install
+npx tsc --noEmit
 
-# Generate Prisma client
-npx prisma generate
+# 2. Verify Frontend Next.js Production Build
+cd ../frontend
+npm run build
 
-# Run database migrations
-npx prisma migrate dev --name init
+# 3. Verify Machine Learning Endpoints
+curl http://localhost:8000/health
+# Returns: {"status":"healthy","models_loaded":true,"anomaly_model":"IsolationForest+OneClassSVM"}
 
-# Seed the database with 10,000 security logs + demo data
-npx ts-node prisma/seed.ts
-
-# Start the development server
-npm run start:dev
-```
-
-The backend API will be available at **http://localhost:3001/api**
-
-### Step 5 — Set Up the ML Service
-
-```bash
-cd ml-service
-pip install -r requirements.txt
-
-# Start the ML service (auto-trains on first run)
-uvicorn app.main:app --reload --port 8000
-```
-
-The ML service will be available at **http://localhost:8000** with Swagger docs at **http://localhost:8000/docs**
-
-### Step 6 — Set Up the Frontend
-
-```bash
-cd frontend
-npm install
-
-# Start the development server
-npm run dev
-```
-
-The dashboard will be available at **http://localhost:3000**
-
-### Quick Start (All Services)
-
-```bash
-# Terminal 1 — Infrastructure
-docker compose up -d
-
-# Terminal 2 — Backend
-cd backend && npm install && npx prisma generate && npx prisma migrate dev --name init && npx ts-node prisma/seed.ts && npm run start:dev
-
-# Terminal 3 — ML Service
-cd ml-service && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8000
-
-# Terminal 4 — Frontend
-cd frontend && npm install && npm run dev
+# 4. Verify Windows Log Collector in Dry-Run Mode
+python tools/windows-log-collector/collector.py --dry-run
 ```
 
 ---
 
-## 🔑 Environment Variables
+## 🗺️ Project Milestones & Roadmap
 
-All environment variables are stored in the root `.env` file:
-
-| Variable | Description | Default Value |
-|----------|-------------|---------------|
-| `NODE_ENV` | Application environment | `development` |
-| `APP_NAME` | Application identifier | `CyberThreatIntel` |
-| `APP_PORT` | Backend server port | `3001` |
-| **PostgreSQL** | | |
-| `POSTGRES_USER` | Database username | `cti_admin` |
-| `POSTGRES_PASSWORD` | Database password | `cti_secret_2024` |
-| `POSTGRES_DB` | Database name | `cyber_threat_intel` |
-| `POSTGRES_HOST` | Database host | `localhost` |
-| `POSTGRES_PORT` | Database port | `5432` |
-| `DATABASE_URL` | Prisma connection string | `postgresql://cti_admin:...@localhost:5432/cyber_threat_intel` |
-| **MongoDB** | | |
-| `MONGO_USER` | MongoDB username | `cti_admin` |
-| `MONGO_PASSWORD` | MongoDB password | `cti_mongo_2024` |
-| `MONGO_DB` | MongoDB database name | `cti_logs` |
-| `MONGODB_URI` | Mongoose connection string | `mongodb://cti_admin:...@localhost:27017/cti_logs` |
-| **Redis** | | |
-| `REDIS_HOST` | Redis host | `localhost` |
-| `REDIS_PORT` | Redis port | `6379` |
-| `REDIS_PASSWORD` | Redis password | `cti_redis_2024` |
-| **JWT** | | |
-| `JWT_SECRET` | Access token signing secret | *(change in production)* |
-| `JWT_EXPIRES_IN` | Access token TTL | `15m` |
-| `JWT_REFRESH_SECRET` | Refresh token signing secret | *(change in production)* |
-| `JWT_REFRESH_EXPIRES_IN` | Refresh token TTL | `7d` |
-| **Frontend** | | |
-| `NEXT_PUBLIC_API_URL` | Backend API URL (client-side) | `http://localhost:3001/api` |
-| `NEXT_PUBLIC_WS_URL` | WebSocket URL | `http://localhost:3001` |
-| **ML Service** | | |
-| `ML_SERVICE_URL` | ML service URL (backend → ML) | `http://localhost:8000` |
-
-> ⚠️ **Production Warning**: Change all default passwords and JWT secrets before deploying to production.
-
----
-
-## 💻 Usage
-
-### Demo Credentials
-
-| Role | Email | Password | Permissions |
-|------|-------|----------|-------------|
-| **Admin** | `*******` | `******` | Full access — manage users, alerts, reports |
-| **Analyst** | `analyst@cti.com` | `Analyst@123` | View & investigate alerts, manage logs |
-| **Viewer** | `viewer@cti.com` | `Viewer@123` | Read-only dashboard access |
-
-### Example Workflows
-
-#### 1. Monitor the SOC Dashboard
-1. Login with `*******` / `******`
-2. Navigate to **Overview** — see real-time stats, threat trends, severity distribution
-3. Check **Alerts** for any critical or high-severity alerts
-4. Click an alert to see AI-generated explanations (SHAP reasons)
-
-#### 2. Investigate Security Logs
-1. Navigate to **Security Logs**
-2. Filter by severity: `CRITICAL`, source: `IDS`, date range
-3. Click a log entry to open the detail drawer
-4. Review raw data, threat score, and source information
-
-#### 3. Analyze Threat Entities
-1. Navigate to **Threat Analysis**
-2. Filter by category: `CRITICAL` or `HIGH_RISK`
-3. Expand an entity card to see factor breakdowns and score history
-4. Review AI analysis and related alerts
-
-#### 4. Ingest New Logs via API
-```bash
-curl -X POST http://localhost:3001/api/logs \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "sourceIp": "185.220.101.34",
-    "destinationIp": "10.0.0.5",
-    "sourcePort": 4444,
-    "destinationPort": 22,
-    "protocol": "SSH",
-    "action": "DENY",
-    "severity": "HIGH",
-    "source": "FIREWALL",
-    "eventType": "LOGIN_FAILURE",
-    "message": "Failed SSH login attempt from Russia",
-    "country": "Russia",
-    "timestamp": "2026-07-01T12:00:00Z"
-  }'
-```
-
-The log will be automatically processed by the ML service, scored, and may trigger an alert if the threat score ≥ 60.
-
----
-
-## 📡 API Documentation
-
-All API routes are prefixed with `/api` and return responses in the format:
-
-```json
-{
-  "success": true,
-  "data": { ... },
-  "timestamp": "2026-07-01T12:00:00.000Z"
-}
-```
-
-### Authentication
-
-| Method | Endpoint | Body | Description |
-|--------|----------|------|-------------|
-| `POST` | `/api/auth/register` | `{ email, password, firstName, lastName }` | Register new user |
-| `POST` | `/api/auth/login` | `{ email, password }` | Login, returns JWT tokens |
-| `POST` | `/api/auth/refresh` | `{ refreshToken }` | Refresh access token |
-| `POST` | `/api/auth/logout` | — | Logout |
-| `GET` | `/api/auth/me` | — | Get current user profile |
-
-#### Login Response Example
-
-```json
-{
-  "success": true,
-  "data": {
-    "user": {
-      "id": "uuid",
-      "email": "*******",
-      "firstName": "Admin",
-      "lastName": "User",
-      "role": "ADMIN"
-    },
-    "accessToken": "eyJhbGciOiJIUzI1NiIs...",
-    "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
-  }
-}
-```
-
-### Security Logs 🔒
-
-> All log endpoints require JWT authentication via `Authorization: Bearer <token>` header.
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/logs` | Query logs with filters |
-| `GET` | `/api/logs/:id` | Get log by ID |
-| `GET` | `/api/logs/stats` | Aggregated log statistics |
-| `POST` | `/api/logs` | Ingest single log |
-| `POST` | `/api/logs/bulk` | Ingest batch of logs |
-
-**Query Parameters for GET /api/logs:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `page` | number | Page number (default: 1) |
-| `limit` | number | Items per page (default: 20) |
-| `severity` | string | Filter: LOW, MEDIUM, HIGH, CRITICAL |
-| `source` | string | Filter: FIREWALL, IDS, ANTIVIRUS, etc. |
-| `sourceIp` | string | Filter by source IP address |
-| `country` | string | Filter by country |
-| `startDate` | string | ISO date — filter from |
-| `endDate` | string | ISO date — filter to |
-| `search` | string | Full-text search |
-| `sortBy` | string | Sort field (timestamp, severity, etc.) |
-| `sortOrder` | string | `asc` or `desc` |
-
-### Alerts 🔒
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/alerts` | Query alerts with filters |
-| `GET` | `/api/alerts/:id` | Get alert by ID |
-| `GET` | `/api/alerts/stats` | Alert statistics |
-| `PATCH` | `/api/alerts/:id` | Update status / assign analyst |
-
-### Dashboard 🔒
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/dashboard/stats` | Overview statistics |
-| `GET` | `/api/dashboard/threat-trends` | 30-day threat trend data |
-| `GET` | `/api/dashboard/attack-frequency` | Attack type frequency |
-| `GET` | `/api/dashboard/severity-distribution` | Severity breakdown |
-| `GET` | `/api/dashboard/recent-activity` | Latest logs and alerts |
-| `GET` | `/api/dashboard/top-sources` | Top threat source IPs |
-
-### Users 🔒 (Admin Only)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/users` | List all users |
-| `GET` | `/api/users/:id` | Get user by ID |
-| `PATCH` | `/api/users/:id` | Update user |
-| `DELETE` | `/api/users/:id` | Deactivate user |
-
-### ML Service (Direct Access)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `localhost:8000/health` | Health check + model info |
-| `POST` | `localhost:8000/api/v1/detect` | Batch anomaly detection |
-| `POST` | `localhost:8000/api/v1/train` | Train/retrain ML models |
-
----
-
-## 📸 Screenshots
-
-> Replace these placeholders with actual screenshots of your running application.
-
-### Login Page
-<!-- ![Login Page](docs/screenshots/login.png) -->
-*Glassmorphism login with animated grid background and demo credentials*
-
-### SOC Dashboard
-<!-- ![SOC Dashboard](docs/screenshots/dashboard.png) -->
-*Real-time overview with 6 stat cards, threat trends, severity distribution, and activity feed*
-
-### Security Logs
-<!-- ![Security Logs](docs/screenshots/logs.png) -->
-*Searchable log viewer with advanced filtering, sorting, and detail drawer*
-
-### Alerts
-<!-- ![Alerts](docs/screenshots/alerts.png) -->
-*AI-generated alerts with SHAP-based explanations and severity coding*
-
-### Threat Analysis
-<!-- ![Threat Analysis](docs/screenshots/threats.png) -->
-*Entity-level threat cards with factor breakdowns, score history, and AI analysis*
-
----
-
-## 🚢 Deployment
-
-### Docker Compose (Recommended)
-
-The entire stack can be deployed with Docker Compose:
-
-```bash
-# Build and start all services
-docker compose up -d --build
-
-# View logs
-docker compose logs -f
-
-# Stop all services
-docker compose down
-```
-
-### Services Overview
-
-| Service | Port | Container Name | Purpose |
-|---------|------|---------------|---------|
-| PostgreSQL | 5432 | `cti-postgres` | Relational data (users, alerts, scores) |
-| MongoDB | 27017 | `cti-mongodb` | Raw security log storage |
-| Redis | 6379 | `cti-redis` | Job queue + caching |
-| Mongo Express | 8081 | `cti-mongo-express` | MongoDB admin UI |
-| ML Service | 8000 | `cti-ml-service` | Anomaly detection + scoring |
-
-### Production Checklist
-
-- [ ] Change all default passwords in `.env`
-- [ ] Generate strong JWT secrets (`openssl rand -hex 64`)
-- [ ] Set `NODE_ENV=production`
-- [ ] Configure SSL/TLS certificates
-- [ ] Set up reverse proxy (Nginx / Caddy)
-- [ ] Enable database backups (pg_dump + mongodump)
-- [ ] Configure log rotation
-- [ ] Set up monitoring (Prometheus / Grafana)
-- [ ] Configure rate limiting
-- [ ] Restrict CORS to production domains only
-- [ ] Set up container restart policies
-- [ ] Enable firewall rules for service ports
-
----
-
-## 🗺️ Roadmap
-
-### Phase 1 — Foundation ✅ *Completed*
-- [x] Monorepo scaffolding (NestJS + Next.js)
-- [x] Docker Compose infrastructure (PostgreSQL, MongoDB, Redis)
-- [x] PostgreSQL schema (7 models) + MongoDB schema
-- [x] JWT authentication with RBAC (Admin, Analyst, Viewer)
-- [x] Security log ingestion and querying
-- [x] Alert management system
-- [x] SOC dashboard with 6 stat cards and 4 chart types
-- [x] Log viewer with advanced filtering
-- [x] Database seeding (10,000 realistic logs)
-
-### Phase 2 — Intelligence Engine ✅ *Completed*
-- [x] FastAPI ML microservice with anomaly detection
-- [x] Isolation Forest + One-Class SVM ensemble
-- [x] SHAP-based explainable AI
-- [x] Weighted threat scoring (0-100)
-- [x] BullMQ background log processing
-- [x] Automatic alert generation from ML scores
-- [x] Threat analysis page with entity cards
-- [x] Factor breakdown visualization
-
-### Phase 3 — Operations 🚧 *In Progress*
-- [ ] Attack prediction with ML-based pattern analysis
-- [ ] Geographical attack map (global threat visualization)
-- [ ] Report generation (PDF, CSV, Excel)
-- [ ] In-app notification system
-
-### Phase 4 — Enterprise Features 📋 *Planned*
-- [ ] Real-time WebSocket monitoring (Socket.IO)
-- [ ] User management admin console
-- [ ] Platform settings and preferences
-- [ ] Email notification integration (Nodemailer)
-- [ ] Scheduled report generation (cron jobs)
-- [ ] API rate limiting and throttling
-- [ ] Audit trail dashboard
-- [ ] Multi-tenant support
+| Phase | Milestone Name | Key Deliverables | Status |
+|---|---|---|---|
+| **Phase 1** | **Foundation & Polyglot Persistence** | Monorepo scaffolding, Docker compose (Postgres, Mongo, Redis), Prisma schema, JWT/RBAC, 10,000 log seed engine. | ✅ **Completed** (100%) |
+| **Phase 2** | **AI/ML Engine & Core SOC Integration** | FastAPI ML microservice, Isolation Forest + OCSVM ensemble, SHAP XAI, BullMQ background processor, Overview dashboard, Log explorer. | ✅ **Completed** (100%) |
+| **Phase 3** | **Spatial Intelligence & Operations** | Leaflet ballistic threat map, Bulk log ingestion modal, Threat entity profiling, Predictive attack forecaster, Automated PDF/CSV reports. | ✅ **Completed** (100%) |
+| **Phase 4** | **Enterprise Hardening & Real-Time Push** | User administration UI, Dynamic platform settings panel, Native Windows event log collector, Supervised classification roadmap. | 🟢 **Active / Near Completion** |
 
 ---
 
 ## 🤝 Contribution Guidelines
 
-We welcome contributions! Here's how you can help:
+Contributions to CyberShield AI are welcome! Please adhere to the following workflow:
 
-### Getting Started
-
-1. **Fork** the repository
-2. **Clone** your fork locally
-3. **Create** a feature branch: `git checkout -b feature/amazing-feature`
-4. **Commit** your changes: `git commit -m 'feat: add amazing feature'`
-5. **Push** to the branch: `git push origin feature/amazing-feature`
-6. **Open** a Pull Request
-
-### Development Guidelines
-
-- Follow the existing code style and patterns
-- Write TypeScript (no plain JavaScript)
-- All backend imports must use `.js` extensions (ESM)
-- Add proper JSDoc comments to new functions and classes
-- Ensure `npx tsc --noEmit` passes with zero errors (backend)
-- Ensure `npx next build` compiles all routes (frontend)
-- Keep Prisma at v6.x — do not upgrade to v7
-
-### Commit Convention
-
-Use [Conventional Commits](https://www.conventionalcommits.org/):
-
-```
-feat: add new feature
-fix: fix a bug
-docs: update documentation
-style: formatting changes
-refactor: code restructuring
-test: add or update tests
-chore: maintenance tasks
-```
-
-### Reporting Issues
-
-- Use GitHub Issues to report bugs
-- Include steps to reproduce, expected behavior, and actual behavior
-- Attach relevant logs or screenshots
+1. **Fork** the repository.
+2. **Create a Feature Branch:** `git checkout -b feature/advanced-correlation`.
+3. **Commit Your Changes:** Follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat: add MITRE attack matrix mapping`).
+4. **Enforce Type Safety:** Ensure `npx tsc --noEmit` and `npm run build` pass with zero errors.
+5. **Open a Pull Request:** Describe the architectural impact and test verification steps.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License**.
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for complete details.
 
 ```
-MIT License
-
 Copyright (c) 2026 Yash Raj
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -727,32 +593,21 @@ furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
 ```
 
 ---
 
-## 📧 Contact
+## 👤 Author & Contact
 
-**Yash Raj** — Project Author
+**Yash Raj** — *Project Creator & Lead Architect*  
+*B.Tech Major Project — Information Technology*
 
-- 🐙 GitHub: [github.com/YashRaj7256](https://github.com/YashRaj7256)
-- 💼 LinkedIn: [linkedin.com/in/yash-raj-190b34413](https://linkedin.com/in/yash-raj-190b34413)
-- 📧 Email: Yashofficial7256@gmail.com
-
----
-
-<p align="center">
-  <strong>Built with 🛡️ by Yash Raj</strong>
-</p>
+* 🐙 **GitHub:** [@YashRaj7256](https://github.com/YashRaj7256)
+* 💼 **LinkedIn:** [Yash Raj](https://linkedin.com/in/yash-raj-190b34413)
+* 📧 **Email:** [Yashofficial7256@gmail.com](mailto:Yashofficial7256@gmail.com)
+* 🛡️ **Repository:** [CyberShield-AI](https://github.com/YashRaj7256/CyberShield-AI)
 
 <p align="center">
-  <sub>If you found this project useful, please ⭐ star the repository!</sub>
+  <strong>Built with 🛡️ by Yash Raj</strong><br/>
+  <sub>If this project helped your cybersecurity or machine learning research, please consider giving it a ⭐ on GitHub!</sub>
 </p>

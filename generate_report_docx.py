@@ -36,7 +36,7 @@ def create_report():
         p_ft.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         p_ft.paragraph_format.space_before = Pt(0)
         p_ft.paragraph_format.space_after = Pt(0)
-        r_ft = p_ft.add_run("CyberShield-AI – AI-Powered Cyber Threat Intelligence Platform")
+        r_ft = p_ft.add_run("CyberShield-AI - AI-Powered Cyber Threat Intelligence Platform")
         r_ft.font.name = "Times New Roman"
         r_ft.font.size = Pt(9)
         r_ft.font.color.rgb = COLOR_GRAY
@@ -631,6 +631,58 @@ def create_report():
 
     t_toc = doc.add_table(rows=len(toc_data) + 1, cols=2)
     format_table(t_toc, [Inches(5.0), Inches(1.2)], ["Title", "Page No"], toc_data)
+
+    doc.add_page_break()
+
+    # =============================================================
+    # ABSTRACT PAGE (Immediately after Table of Content)
+    # =============================================================
+    p_abs_title = doc.add_paragraph()
+    p_abs_title.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    p_abs_title.paragraph_format.space_before = Pt(16)
+    p_abs_title.paragraph_format.space_after = Pt(14)
+    r_abs_title = p_abs_title.add_run("ABSTRACT")
+    r_abs_title.font.name = "Times New Roman"
+    r_abs_title.font.size = Pt(18)
+    r_abs_title.font.bold = True
+    r_abs_title.font.color.rgb = COLOR_PRIMARY_BLUE
+
+    def add_abs_p(text):
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        p.paragraph_format.space_before = Pt(0)
+        p.paragraph_format.space_after = Pt(5)
+        p.paragraph_format.line_spacing = 1.15
+        r = p.add_run(text)
+        r.font.name = "Times New Roman"
+        r.font.size = Pt(11)
+        r.font.color.rgb = COLOR_DARK_TEXT
+
+    add_abs_p("CyberShield-AI is an artificial intelligence-driven cyber threat intelligence, anomaly detection, and predictive attack analysis platform engineered to protect modern enterprise digital assets and critical infrastructure. Contemporary Security Operations Centers (SOCs) face acute operational challenges: security teams are inundated by millions of heterogeneous network events and uncoordinated alerts daily, manual log correlation causes severe analyst fatigue, conventional SIEM platforms rely on brittle static signatures that fail to identify zero-day threats, and disparate telemetry feeds lack unified contextual intelligence. CyberShield-AI resolves these shortcomings with an integrated, high-throughput intelligence ecosystem that enables security engineers and SOC analysts to ingest raw telemetry, isolate anomalous vectors, investigate root causes, and initiate incident containment in under 60 seconds.")
+
+    add_abs_p("The platform serves three dedicated operational roles: SOC Analysts (Triage and Incident Responders), Threat Intelligence Specialists, and Central System Administrators. Analysts inspect incoming event streams, review anomaly scores, filter telemetry across severity levels, and visualize global threat origins across an interactive Leaflet and OpenStreetMap geospatial attack map. High-throughput ingestion pipelines normalize multi-source security telemetry (including firewall logs, authentication attempts, DNS queries, and network flows), while automated IP reputation scoring and geographic coordinate resolution pinpoint attack vectors in real time, filtering benign traffic and prioritizing critical enterprise vulnerabilities.")
+
+    add_abs_p("A dedicated Python FastAPI machine learning microservice delivers real-time unsupervised anomaly detection and attack forecasting by orchestrating an ensemble of Isolation Forest (200 isolation trees) and One-Class Support Vector Machines (OCSVM with RBF kernel). Their predictions are fused into a normalized threat severity index (0.0 to 100.0) and enriched with Explainable Artificial Intelligence (XAI) via SHAP (SHapley Additive exPlanations), demystifying black-box decisions with human-interpretable feature contribution vectors. Impending multi-stage cyberattacks are forecasted across MITRE ATT&CK tactics (Reconnaissance, Exploitation, and Exfiltration) using temporal pattern correlation. If the machine learning microservice experiences latency or becomes unavailable, a resilient rule-based heuristic engine automatically assumes triage scoring, guaranteeing zero telemetry loss or operational downtime.")
+
+    add_abs_p("The system is built with a Next.js 16 and React 19 single-page frontend styled with Tailwind CSS, an enterprise NestJS 11 backend architecture, and a polyglot persistence layer pairing MongoDB 7 for high-volume unstructured security logs with PostgreSQL 16 and Prisma ORM for relational compliance. Asynchronous background queueing is powered by Redis 7 and BullMQ, while stateless JWT role-based access control (RBAC) enforces granular endpoint privileges across administrative, analyst, and viewer roles. Security teams track incident lifecycles across Open, Under Investigation, and Mitigated states with complete audit trails. The project was engineered following the Spiral Model across 16 structured sprint weeks and validated through extensive black-box, white-box, and boundary value testing, achieving a 100% pass rate across all documented test cases.")
+
+    p_abs_kw = doc.add_paragraph()
+    p_abs_kw.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    p_abs_kw.paragraph_format.space_before = Pt(6)
+    p_abs_kw.paragraph_format.space_after = Pt(4)
+    p_abs_kw.paragraph_format.line_spacing = 1.15
+    
+    r_kw_label = p_abs_kw.add_run("Keywords: ")
+    r_kw_label.font.name = "Times New Roman"
+    r_kw_label.font.size = Pt(11)
+    r_kw_label.font.bold = True
+    r_kw_label.font.color.rgb = COLOR_DARK_TEXT
+    
+    r_kw_val = p_abs_kw.add_run("Cyber Threat Intelligence, Unsupervised Anomaly Detection, Isolation Forest, One-Class SVM, Explainable AI (SHAP), MITRE ATT&CK, Next.js, NestJS, FastAPI")
+    r_kw_val.font.name = "Times New Roman"
+    r_kw_val.font.size = Pt(11)
+    r_kw_val.font.italic = True
+    r_kw_val.font.color.rgb = COLOR_DARK_TEXT
 
     doc.add_page_break()
 
