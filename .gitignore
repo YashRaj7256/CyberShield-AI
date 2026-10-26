@@ -1,23 +1,38 @@
+# Dependencies & Build Outputs
 node_modules/
 .next/
 dist/
 coverage/
+backend/node_modules/
+backend/dist/
+frontend/node_modules/
+frontend/.next/
+ml-service/venv/
+docker_data/
+backend/storage/
+
+# Environment & Secrets
 .env
 .env.local
 *.log
 
-backend/node_modules/
-backend/dist/
-
-frontend/node_modules/
-frontend/.next/
-
+# Python Cache
 __pycache__/
 *.pyc
-ml-service/venv/
 
+# IDE & Editor Settings
 .vscode/
 .idea/
 
-docker_data/
-backend/storage/
+# Reports & Document Generation
+*.docx
+*.pdf
+generate_report_docx.py
+scratch/
+
+# Test Data & Bulk Payloads
+bulk-*.json
+
+# Endpoint & Agent State
+.agents/
+.collector_state.json

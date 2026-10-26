@@ -458,8 +458,13 @@ CyberShield-AI/
 ├── 📄 start.bat                   # 1-Click Windows master startup launcher
 ├── 📄 stop.bat                    # 1-Click Windows clean shutdown script
 ├── 📄 status.bat                  # 1-Click Windows health verification script
+├── 📄 STARTUP_GUIDE.md            # Windows startup & operation guide
 ├── 📄 README.md                   # Platform documentation master file
-├── 📄 PROJECT_PHASE_REPORT.md     # Detailed phase-by-phase architectural master
+│
+├── 📁 docs/                       # Platform & academic documentation
+│   ├── PROJECT_PHASE_REPORT.md    # Detailed phase-by-phase architectural master
+│   ├── ML_AUDIT_AND_ARCHITECTURE_REPORT.md # ML models & classification audit
+│   └── CYBERSHIELD_AI_FACULTY_GUIDE.md     # Academic project & faculty defense guide
 │
 ├── 🔧 backend/                    # NestJS 11 REST API & Ingestion Gateway (Port 3001)
 │   ├── prisma/
